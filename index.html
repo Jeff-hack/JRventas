@@ -184,6 +184,55 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .card-section-title{font-size:12px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .notif{position:fixed;top:76px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;max-width:90vw}
 .notif.show{opacity:1}
+
+/* ══ PRINT / PDF STYLES ══ */
+@media print {
+  body { background:#fff !important; overflow:auto !important; font-family:Arial,sans-serif !important; }
+  #app, .fab, .bottom-nav, .modal-overlay, .notif { display:none !important; }
+  #rpt-frame { display:block !important; }
+  .rpt-page { page-break-after: always; padding:0 !important; }
+  .rpt-page:last-child { page-break-after: avoid; }
+}
+#rpt-frame { display:none; }
+
+/* Reporte interno */
+.rpt-wrap { font-family:Arial,Helvetica,sans-serif; color:#1a1a1a; background:#fff; max-width:800px; margin:0 auto; padding:32px 28px; }
+.rpt-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #0a3d2e; }
+.rpt-logo-area { display:flex; align-items:center; gap:12px; }
+.rpt-logo-box { width:44px; height:44px; background:#0a3d2e; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:16px; }
+.rpt-biz-name { font-size:18px; font-weight:700; color:#0a3d2e; }
+.rpt-biz-sub { font-size:11px; color:#666; margin-top:2px; }
+.rpt-meta { text-align:right; font-size:11px; color:#666; line-height:1.8; }
+.rpt-title { font-size:22px; font-weight:700; color:#0a3d2e; margin:0 0 4px; }
+.rpt-subtitle { font-size:13px; color:#666; margin:0 0 24px; }
+.rpt-section { margin-bottom:22px; }
+.rpt-section-title { font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#0a3d2e; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e0ddd8; display:flex; align-items:center; gap:6px; }
+.rpt-kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:8px; }
+.rpt-kpi-row-4 { grid-template-columns:repeat(4,1fr); }
+.rpt-kpi { background:#f8f7f3; border-radius:8px; padding:12px; border-left:3px solid #0a3d2e; }
+.rpt-kpi-label { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:#888; margin-bottom:5px; }
+.rpt-kpi-value { font-size:18px; font-weight:700; font-family:'Courier New',monospace; }
+.rpt-kpi-sub { font-size:10px; color:#888; margin-top:3px; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:4px; }
+.rpt-table th { background:#0a3d2e; color:#fff; padding:7px 10px; text-align:left; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; font-weight:600; }
+.rpt-table td { padding:7px 10px; border-bottom:1px solid #eee; vertical-align:top; }
+.rpt-table tr:nth-child(even) td { background:#fafaf8; }
+.rpt-table tr:last-child td { border-bottom:none; }
+.rpt-table .num { text-align:right; font-family:'Courier New',monospace; font-weight:600; }
+.rpt-table .center { text-align:center; }
+.rpt-tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+.rpt-tag-green { background:#e8f7f1; color:#0f6e56; }
+.rpt-tag-red { background:#fdeee9; color:#993c1d; }
+.rpt-tag-yellow { background:#fef9e7; color:#b7791f; }
+.rpt-tag-grey { background:#f0f0f0; color:#666; }
+.rpt-footer { margin-top:28px; padding-top:12px; border-top:1px solid #e0ddd8; display:flex; justify-content:space-between; font-size:10px; color:#aaa; }
+.rpt-day-row { display:grid; grid-template-columns:80px 1fr 1fr 1fr 1fr; gap:0; font-size:12px; border-bottom:1px solid #eee; padding:6px 10px; align-items:center; }
+.rpt-day-row.header { background:#f0ede7; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:#555; }
+.rpt-inv-row { display:grid; grid-template-columns:2fr 0.8fr 0.8fr 0.9fr 0.9fr 0.8fr 0.8fr; gap:0; font-size:11px; border-bottom:1px solid #eee; padding:6px 10px; align-items:center; }
+.rpt-inv-row.header { background:#f0ede7; font-weight:700; font-size:9px; text-transform:uppercase; letter-spacing:0.5px; color:#555; }
+.rpt-prov-block { background:#f8f7f3; border-radius:8px; padding:14px; margin-bottom:10px; border-left:3px solid #e8a020; }
+.rpt-prov-name { font-size:13px; font-weight:700; margin-bottom:8px; color:#0a3d2e; }
+.no-break { page-break-inside:avoid; }
 </style>
 </head>
 <body>
@@ -339,6 +388,55 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <div id="listaInventario"></div>
     </div>
 
+    <!-- ══ REPORTES ══ -->
+    <div class="page" id="page-reportes">
+      <div class="section-title">Reportes PDF</div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📅</div>
+          <div>
+            <div style="font-size:14px;font-weight:600">Reporte Diario</div>
+            <div style="font-size:11px;color:var(--text3)">Ventas, gastos y pedidos del día seleccionado</div>
+          </div>
+          <button onclick="generarReporte('diario')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Generar</button>
+        </div>
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#fef0d9;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📊</div>
+          <div>
+            <div style="font-size:14px;font-weight:600">Reporte Semanal</div>
+            <div style="font-size:11px;color:var(--text3)">Resumen de la semana con pedidos por proveedor</div>
+          </div>
+          <button onclick="generarReporte('semanal')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Generar</button>
+        </div>
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#fdeee9;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📈</div>
+          <div>
+            <div style="font-size:14px;font-weight:600">Reporte Mensual</div>
+            <div style="font-size:11px;color:var(--text3)">Totales y tendencias del mes en curso</div>
+          </div>
+          <button onclick="generarReporte('mensual')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Generar</button>
+        </div>
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:10px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📦</div>
+          <div>
+            <div style="font-size:14px;font-weight:600">Estado de Inventario</div>
+            <div style="font-size:11px;color:var(--text3)">Stock actual con costos, valores y márgenes</div>
+          </div>
+          <button onclick="generarReporte('inventario')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Generar</button>
+        </div>
+      </div>
+
+      <div class="card" style="background:var(--surface2);border-style:dashed">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="font-size:18px">💡</span>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6">
+            Al generar un reporte se abre una vista de impresión. Toca <strong>Guardar como PDF</strong> (en el destino de impresión) para descargarlo. Funciona en Chrome, Safari y cualquier navegador moderno.
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ HISTORIAL ══ -->
     <div class="page" id="page-historial">
       <div class="section-title">Historial completo</div>
@@ -372,6 +470,10 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     <button class="nav-btn" onclick="showPage('historial',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
       <span>Historial</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('reportes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span>Reportes</span>
     </button>
   </div>
 </div>
@@ -1133,10 +1235,440 @@ function toast(msg){
   n._t=setTimeout(function(){n.classList.remove('show');},2600);
 }
 
+// ══════════════════════════════════════════
+//  MOTOR DE REPORTES PDF
+// ══════════════════════════════════════════
+
+function fmtPDF(n){ return '$'+Number(n).toFixed(2); }
+function fmtDate(k){ var p=k.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function fmtDateObj(d){ return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
+
+function rptHeader(titulo, subtitulo){
+  var now = new Date();
+  return '<div class="rpt-wrap">'+
+    '<div class="rpt-header">'+
+      '<div class="rpt-logo-area">'+
+        '<div class="rpt-logo-box">JR</div>'+
+        '<div><div class="rpt-biz-name">Control de Negocio</div><div class="rpt-biz-sub">Ventas Diarias</div></div>'+
+      '</div>'+
+      '<div class="rpt-meta">Generado: '+fmtDateObj(now)+'<br>'+now.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'})+'</div>'+
+    '</div>'+
+    '<div class="rpt-title">'+titulo+'</div>'+
+    '<div class="rpt-subtitle">'+subtitulo+'</div>';
+}
+
+function rptFooter(){
+  return '<div class="rpt-footer"><span>Control de Ventas — Reporte generado automáticamente</span><span>Datos almacenados localmente en este dispositivo</span></div></div>';
+}
+
+function rptKPI(label, value, sub, color){
+  return '<div class="rpt-kpi"><div class="rpt-kpi-label">'+label+'</div><div class="rpt-kpi-value" style="color:'+(color||'#0a3d2e')+'">'+value+'</div>'+(sub?'<div class="rpt-kpi-sub">'+sub+'</div>':'')+'</div>';
+}
+
+// ─── REPORTE DIARIO ───
+function buildReporteDiario(){
+  var day = getDayData(currentDate);
+  var k = dateKey(currentDate);
+  var fechaLabel = currentDate.toLocaleDateString('es-SV',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+
+  var tv = day.ventas.reduce(function(a,x){return a+x.monto;},0);
+  var tg = day.gastos.reduce(function(a,x){return a+x.monto;},0);
+  var tp = day.pedidos.reduce(function(a,x){return a+x.monto;},0);
+  var bal = tv - tg;
+
+  var html = rptHeader('Reporte Diario', fechaLabel);
+
+  // KPIs
+  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen del día</div>';
+  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
+  html += rptKPI('Ventas totales', fmtPDF(tv), day.ventas.length+' transacciones', '#1d9e75');
+  html += rptKPI('Gastos totales', fmtPDF(tg), day.gastos.length+' egresos', '#d44f2e');
+  html += rptKPI('Pedidos especiales', fmtPDF(tp), day.pedidos.length+' pedidos', '#e8a020');
+  html += rptKPI('Balance neto', fmtPDF(bal), bal>=0?'Positivo':'Negativo', bal>=0?'#1d9e75':'#d44f2e');
+  html += '</div></div>';
+
+  // Ventas
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Ventas del día</div>';
+  if(day.ventas.length){
+    html += '<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    day.ventas.forEach(function(v){
+      html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
+    });
+    html += '<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL VENTAS</td><td class="num" style="font-weight:700;color:#1d9e75;background:#f0f0f0">'+fmtPDF(tv)+'</td></tr>';
+    html += '</tbody></table>';
+  } else { html += '<p style="font-size:12px;color:#aaa">Sin ventas registradas.</p>'; }
+  html += '</div>';
+
+  // Gastos
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Gastos del día</div>';
+  if(day.gastos.length){
+    html += '<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    day.gastos.forEach(function(g){
+      html += '<tr><td>'+esc(g.hora)+'</td><td>'+esc(g.desc)+'</td><td class="center">'+g.cant+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(g.monto)+'</td></tr>';
+    });
+    html += '<tr><td colspan="3" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL GASTOS</td><td class="num" style="font-weight:700;color:#d44f2e;background:#f0f0f0">'+fmtPDF(tg)+'</td></tr>';
+    html += '</tbody></table>';
+  } else { html += '<p style="font-size:12px;color:#aaa">Sin gastos registrados.</p>'; }
+  html += '</div>';
+
+  // Pedidos especiales del día
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Pedidos especiales del día</div>';
+  if(day.pedidos.length){
+    html += '<table class="rpt-table"><thead><tr><th>Tipo</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+    day.pedidos.forEach(function(p){
+      var gped=getPedido(p.id);
+      var estado=gped?gped.estado:'pendiente';
+      var estadoClass=estado==='completado'?'rpt-tag-green':estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
+      var estadoTxt=estado==='completado'?'Completado':estado==='cancelado'?'Cancelado':'Pendiente';
+      html += '<tr><td>'+esc(p.tipo)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
+    });
+    html += '<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL PEDIDOS</td><td class="num" style="font-weight:700;color:#e8a020;background:#f0f0f0">'+fmtPDF(tp)+'</td></tr>';
+    html += '</tbody></table>';
+  } else { html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales.</p>'; }
+  html += '</div>';
+
+  // Inventario del día
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Estado del inventario al cierre del día</div>';
+  if(productos.length){
+    html += '<div class="rpt-inv-row header"><div>Producto</div><div>Stock</div><div>Unidad</div><div>Costo unit.</div><div>Venta unit.</div><div>Margen</div><div>Valor stock</div></div>';
+    productos.forEach(function(p){
+      var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
+      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
+      html += '<div class="rpt-inv-row"><div>'+esc(p.nombre)+'</div><div><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></div><div>'+esc(p.unidad)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioCosto)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioVenta)+'</div><div>'+margen+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.cantidad*p.precioCosto)+'</div></div>';
+    });
+    var totalValor=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
+    html += '<div class="rpt-inv-row" style="font-weight:700;background:#f0ede7"><div>TOTAL</div><div></div><div></div><div></div><div></div><div></div><div style="font-family:Courier New">'+fmtPDF(totalValor)+'</div></div>';
+  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
+  html += '</div>';
+
+  html += rptFooter();
+  return html;
+}
+
+// ─── REPORTE SEMANAL ───
+function buildReporteSemanal(){
+  var days = getWeekDays(currentDate);
+  var lun = days[0]; var dom = days[6];
+  var rango = fmtDateObj(lun)+' — '+fmtDateObj(dom);
+  var DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+  var semV=0,semG=0,semP=0;
+  var dayRows=[];
+  days.forEach(function(d,i){
+    var dd=getDayData(d);
+    var v=dd.ventas.reduce(function(a,x){return a+x.monto;},0);
+    var g=dd.gastos.reduce(function(a,x){return a+x.monto;},0);
+    var p=dd.pedidos.reduce(function(a,x){return a+x.monto;},0);
+    semV+=v; semG+=g; semP+=p;
+    dayRows.push({dia:DIAS[i],k:dateKey(d),v:v,g:g,p:p,bal:v-g,nv:dd.ventas.length,ng:dd.gastos.length,np:dd.pedidos.length});
+  });
+
+  var html = rptHeader('Reporte Semanal', 'Semana del '+rango);
+
+  // KPIs semana
+  html += '<div class="rpt-section"><div class="rpt-section-title">Totales de la semana</div>';
+  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
+  html += rptKPI('Ventas semana', fmtPDF(semV), '', '#1d9e75');
+  html += rptKPI('Gastos semana', fmtPDF(semG), '', '#d44f2e');
+  html += rptKPI('Pedidos semana', fmtPDF(semP), '', '#e8a020');
+  html += rptKPI('Balance semana', fmtPDF(semV-semG), (semV-semG)>=0?'Positivo':'Negativo', (semV-semG)>=0?'#1d9e75':'#d44f2e');
+  html += '</div></div>';
+
+  // Tabla por día
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Ventas y gastos por día</div>';
+  html += '<table class="rpt-table"><thead><tr><th>Día</th><th>Fecha</th><th># Ventas</th><th>Ventas $</th><th># Gastos</th><th>Gastos $</th><th>Pedidos $</th><th>Balance</th></tr></thead><tbody>';
+  dayRows.forEach(function(r){
+    html += '<tr><td>'+r.dia+'</td><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="center">'+r.ng+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
+  });
+  html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="3">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(semV)+'</td><td></td><td class="num" style="color:#d44f2e">'+fmtPDF(semG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(semP)+'</td><td class="num" style="color:'+(semV-semG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(semV-semG)+'</td></tr>';
+  html += '</tbody></table></div>';
+
+  // Detalle ventas por día de la semana
+  html += '<div class="rpt-section"><div class="rpt-section-title">Detalle de ventas por día</div>';
+  days.forEach(function(d,i){
+    var dd=getDayData(d);
+    if(!dd.ventas.length) return;
+    html += '<div class="no-break" style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#555;margin-bottom:6px;">'+DIAS[i]+' '+fmtDate(dateKey(d))+'</div>';
+    html += '<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    dd.ventas.forEach(function(v){
+      html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
+    });
+    html += '</tbody></table></div>';
+  });
+  html += '</div>';
+
+  // Pedidos por proveedor
+  html += '<div class="rpt-section"><div class="rpt-section-title">Pedidos especiales — agrupados por proveedor</div>';
+  var semKeys = days.map(function(d){return dateKey(d);});
+  var pedsSem = pedidosGlobal.filter(function(p){ return semKeys.indexOf(p.fecha)!==-1; });
+
+  if(pedsSem.length){
+    // Agrupar por tipo (proveedor)
+    var byProv = {};
+    pedsSem.forEach(function(p){
+      if(!byProv[p.tipo]) byProv[p.tipo]={peds:[],total:0,completados:0,cancelados:0,pendientes:0};
+      byProv[p.tipo].peds.push(p);
+      byProv[p.tipo].total+=p.monto;
+      byProv[p.tipo][p.estado+'s']++;
+    });
+    Object.keys(byProv).forEach(function(prov){
+      var g=byProv[prov];
+      html += '<div class="rpt-prov-block no-break">'+
+        '<div class="rpt-prov-name">'+esc(prov)+' — Total: '+fmtPDF(g.total)+
+        ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+g.completados+'</span>'+
+        ' &nbsp;<span style="color:#e8a020">⏳ '+g.pendientes+'</span>'+
+        ' &nbsp;<span style="color:#d44f2e">✗ '+g.cancelados+'</span></div>'+
+        '<table class="rpt-table"><thead><tr><th>Fecha pedido</th><th>Descripción</th><th>Cant.</th><th>Producto stock</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+      g.peds.forEach(function(p){
+        var prodN=p.productoId?(getProducto(p.productoId)?getProducto(p.productoId).nombre:'—'):'—';
+        var estadoClass=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
+        var estadoTxt=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
+        html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td>'+esc(prodN)+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
+      });
+      html += '</tbody></table></div>';
+    });
+  } else {
+    html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales esta semana.</p>';
+  }
+  html += '</div>';
+
+  // Inventario estado semanal
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Estado del inventario (semana)</div>';
+  if(productos.length){
+    html += '<div class="rpt-inv-row header"><div>Producto</div><div>Stock actual</div><div>Unidad</div><div>Costo unit.</div><div>Precio venta</div><div>Margen %</div><div>Valor en stock</div></div>';
+    var totalV=0;
+    productos.forEach(function(p){
+      var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
+      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
+      var vs=p.cantidad*p.precioCosto; totalV+=vs;
+      html += '<div class="rpt-inv-row"><div>'+esc(p.nombre)+'</div><div><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></div><div>'+esc(p.unidad)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioCosto)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioVenta)+'</div><div>'+margen+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(vs)+'</div></div>';
+    });
+    html += '<div class="rpt-inv-row" style="font-weight:700;background:#f0ede7"><div>TOTAL</div><div></div><div></div><div></div><div></div><div></div><div style="font-family:Courier New">'+fmtPDF(totalV)+'</div></div>';
+  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
+  html += '</div>';
+
+  html += rptFooter();
+  return html;
+}
+
+// ─── REPORTE MENSUAL ───
+function buildReporteMensual(){
+  var year = currentDate.getFullYear();
+  var month = currentDate.getMonth();
+  var mesNombre = currentDate.toLocaleDateString('es-SV',{month:'long',year:'numeric'});
+  var totalDias = new Date(year, month+1, 0).getDate();
+
+  var mV=0,mG=0,mP=0;
+  var dayRows=[];
+  for(var d=1;d<=totalDias;d++){
+    var dd=new Date(year,month,d);
+    var k=dateKey(dd);
+    var dayD=data[k]||{ventas:[],gastos:[],pedidos:[]};
+    var v=dayD.ventas.reduce(function(a,x){return a+x.monto;},0);
+    var g=dayD.gastos.reduce(function(a,x){return a+x.monto;},0);
+    var p=dayD.pedidos.reduce(function(a,x){return a+x.monto;},0);
+    if(v||g||p) dayRows.push({k:k,d:d,v:v,g:g,p:p,bal:v-g,nv:dayD.ventas.length});
+    mV+=v; mG+=g; mP+=p;
+  }
+
+  var diasConVentas = dayRows.filter(function(r){return r.v>0;}).length;
+  var promDiario = diasConVentas>0 ? mV/diasConVentas : 0;
+
+  var html = rptHeader('Reporte Mensual', cap(mesNombre));
+
+  html += '<div class="rpt-section"><div class="rpt-section-title">Totales del mes</div>';
+  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
+  html += rptKPI('Ventas mes', fmtPDF(mV), diasConVentas+' días con ventas', '#1d9e75');
+  html += rptKPI('Gastos mes', fmtPDF(mG), '', '#d44f2e');
+  html += rptKPI('Pedidos mes', fmtPDF(mP), '', '#e8a020');
+  html += rptKPI('Balance mes', fmtPDF(mV-mG), (mV-mG)>=0?'Positivo':'Negativo', (mV-mG)>=0?'#1d9e75':'#d44f2e');
+  html += '</div>';
+  html += '<div class="rpt-kpi-row" style="grid-template-columns:1fr 1fr;margin-top:8px">';
+  html += rptKPI('Promedio diario (días con ventas)', fmtPDF(promDiario), '', '#0a3d2e');
+  html += rptKPI('Meta diaria ($500) — días alcanzados', dayRows.filter(function(r){return r.v>=META;}).length+' / '+diasConVentas, '', '#c4860a');
+  html += '</div></div>';
+
+  // Tabla diaria del mes
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Detalle por día del mes</div>';
+  if(dayRows.length){
+    html += '<table class="rpt-table"><thead><tr><th>Fecha</th><th class="center"># Tx</th><th>Ventas</th><th>Gastos</th><th>Pedidos</th><th>Balance día</th></tr></thead><tbody>';
+    dayRows.forEach(function(r){
+      html += '<tr><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
+    });
+    html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="2">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(mV)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(mG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(mP)+'</td><td class="num" style="color:'+(mV-mG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(mV-mG)+'</td></tr>';
+    html += '</tbody></table>';
+  } else { html += '<p style="font-size:12px;color:#aaa">Sin datos registrados este mes.</p>'; }
+  html += '</div>';
+
+  // Pedidos del mes por proveedor
+  html += '<div class="rpt-section"><div class="rpt-section-title">Pedidos especiales del mes — por proveedor</div>';
+  var monthKeys=[];
+  for(var d2=1;d2<=totalDias;d2++) monthKeys.push(dateKey(new Date(year,month,d2)));
+  var pedsMes=pedidosGlobal.filter(function(p){return monthKeys.indexOf(p.fecha)!==-1;});
+  if(pedsMes.length){
+    var byProvM={};
+    pedsMes.forEach(function(p){
+      if(!byProvM[p.tipo]) byProvM[p.tipo]={peds:[],total:0,completados:0,cancelados:0,pendientes:0};
+      byProvM[p.tipo].peds.push(p);
+      byProvM[p.tipo].total+=p.monto;
+      byProvM[p.tipo][p.estado+'s']++;
+    });
+    Object.keys(byProvM).forEach(function(prov){
+      var g=byProvM[prov];
+      html += '<div class="rpt-prov-block no-break">'+
+        '<div class="rpt-prov-name">'+esc(prov)+' — Total mes: '+fmtPDF(g.total)+
+        ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+g.completados+' completados</span>'+
+        ' &nbsp;<span style="color:#e8a020">⏳ '+g.pendientes+' pendientes</span>'+
+        ' &nbsp;<span style="color:#d44f2e">✗ '+g.cancelados+' cancelados</span></div>'+
+        '<table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+      g.peds.forEach(function(p){
+        var estadoClass=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
+        var estadoTxt=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
+        html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
+      });
+      html += '</tbody></table></div>';
+    });
+  } else { html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales este mes.</p>'; }
+  html += '</div>';
+
+  // Inventario
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Estado del inventario al cierre del mes</div>';
+  if(productos.length){
+    html += '<div class="rpt-inv-row header"><div>Producto</div><div>Stock</div><div>Unidad</div><div>Costo unit.</div><div>Precio venta</div><div>Margen</div><div>Valor stock</div></div>';
+    var totalValM=0;
+    productos.forEach(function(p){
+      var mg=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
+      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
+      var vs=p.cantidad*p.precioCosto; totalValM+=vs;
+      html += '<div class="rpt-inv-row"><div>'+esc(p.nombre)+'</div><div><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></div><div>'+esc(p.unidad)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioCosto)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioVenta)+'</div><div>'+mg+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(vs)+'</div></div>';
+    });
+    html += '<div class="rpt-inv-row" style="font-weight:700;background:#f0ede7"><div>TOTAL VALOR INVENTARIO</div><div></div><div></div><div></div><div></div><div></div><div style="font-family:Courier New">'+fmtPDF(totalValM)+'</div></div>';
+  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
+  html += '</div>';
+
+  html += rptFooter();
+  return html;
+}
+
+// ─── REPORTE INVENTARIO ───
+function buildReporteInventario(){
+  var html = rptHeader('Estado de Inventario', 'Fecha de corte: '+fmtDateObj(currentDate));
+
+  var totalValor=0, totalCosto=0;
+  var sinStock=[], stockBajo=[], stockOk=[];
+  productos.forEach(function(p){
+    if(p.cantidad<=0) sinStock.push(p);
+    else if(p.cantidad<=5) stockBajo.push(p);
+    else stockOk.push(p);
+    totalValor+=p.cantidad*p.precioCosto;
+    totalCosto+=p.precioCosto;
+  });
+
+  // KPIs
+  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen de inventario</div>';
+  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
+  html += rptKPI('Total productos', productos.length+' items', '', '#0a3d2e');
+  html += rptKPI('Valor en stock', fmtPDF(totalValor), 'a precio de costo', '#1d9e75');
+  html += rptKPI('Stock bajo / sin stock', stockBajo.length+' / '+sinStock.length, 'requieren atención', '#d44f2e');
+  html += rptKPI('En stock normal', stockOk.length+' productos', '', '#1d9e75');
+  html += '</div></div>';
+
+  // Tabla completa
+  html += '<div class="rpt-section"><div class="rpt-section-title">Inventario completo</div>';
+  if(productos.length){
+    html += '<table class="rpt-table"><thead><tr><th>Producto</th><th>Fecha ingreso</th><th class="center">Stock</th><th>Unidad</th><th>Costo unit.</th><th>Precio venta</th><th>Margen</th><th>Valor stock</th><th>Estado</th></tr></thead><tbody>';
+    productos.forEach(function(p){
+      var mg=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
+      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
+      var sl=p.cantidad<=0?'Sin stock':p.cantidad<=5?'Stock bajo':'En stock';
+      var fd=''; if(p.fecha){var fp=p.fecha.split('-');fd=fp[2]+'/'+fp[1]+'/'+fp[0];}
+      html += '<tr><td><strong>'+esc(p.nombre)+'</strong>'+(p.notas?'<br><span style="font-size:10px;color:#888">'+esc(p.notas)+'</span>':'')+'</td><td>'+fd+'</td><td class="center"><strong>'+p.cantidad+'</strong></td><td>'+esc(p.unidad)+'</td><td class="num">'+fmtPDF(p.precioCosto)+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(p.precioVenta)+'</td><td class="center">'+mg+'</td><td class="num" style="font-weight:700">'+fmtPDF(p.cantidad*p.precioCosto)+'</td><td><span class="rpt-tag '+sc+'">'+sl+'</span></td></tr>';
+      totalValor+=0; // already counted
+    });
+    var totalV2=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
+    html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="7">VALOR TOTAL EN STOCK</td><td class="num">'+fmtPDF(totalV2)+'</td><td></td></tr>';
+    html += '</tbody></table>';
+  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
+  html += '</div>';
+
+  // Alertas
+  if(sinStock.length||stockBajo.length){
+    html += '<div class="rpt-section no-break"><div class="rpt-section-title">⚠ Alertas de stock</div>';
+    if(sinStock.length){
+      html += '<div style="background:#fdeee9;border-radius:8px;padding:12px;margin-bottom:10px;border-left:3px solid #d44f2e"><div style="font-size:11px;font-weight:700;color:#993c1d;margin-bottom:6px">SIN STOCK — Requieren reposición urgente</div>';
+      sinStock.forEach(function(p){html+='<div style="font-size:12px;padding:3px 0;color:#333">• '+esc(p.nombre)+' — 0 '+esc(p.unidad)+'</div>';});
+      html += '</div>';
+    }
+    if(stockBajo.length){
+      html += '<div style="background:#fef9e7;border-radius:8px;padding:12px;border-left:3px solid #e8a020"><div style="font-size:11px;font-weight:700;color:#b7791f;margin-bottom:6px">STOCK BAJO — Considerar reposición pronto</div>';
+      stockBajo.forEach(function(p){html+='<div style="font-size:12px;padding:3px 0;color:#333">• '+esc(p.nombre)+' — '+p.cantidad+' '+esc(p.unidad)+' disponibles</div>';});
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  // Pedidos pendientes que afectan inventario
+  var pendStk = pedidosGlobal.filter(function(p){return p.estado==='pendiente'&&p.productoId;});
+  if(pendStk.length){
+    html += '<div class="rpt-section no-break"><div class="rpt-section-title">Pedidos pendientes con impacto en inventario</div>';
+    html += '<table class="rpt-table"><thead><tr><th>Proveedor</th><th>Descripción</th><th>Producto a recibir</th><th class="center">Cant. esperada</th><th>Fecha pedido</th></tr></thead><tbody>';
+    pendStk.forEach(function(p){
+      var prod=getProducto(p.productoId);
+      html += '<tr><td>'+esc(p.tipo)+'</td><td>'+esc(p.desc)+'</td><td>'+(prod?esc(prod.nombre):'-')+'</td><td class="center">'+p.cant+'</td><td>'+fmtDate(p.fecha)+'</td></tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+
+  html += rptFooter();
+  return html;
+}
+
+// ─── DISPARAR REPORTE ───
+function generarReporte(tipo){
+  var html='';
+  if(tipo==='diario') html=buildReporteDiario();
+  else if(tipo==='semanal') html=buildReporteSemanal();
+  else if(tipo==='mensual') html=buildReporteMensual();
+  else if(tipo==='inventario') html=buildReporteInventario();
+
+  // Abrir ventana de impresión con el reporte
+  var win = window.open('','_blank');
+  if(!win){ toast('⚠ Permite ventanas emergentes para generar el PDF'); return; }
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte</title><style>');
+  win.document.write('*{margin:0;padding:0;box-sizing:border-box}');
+  win.document.write('body{background:#fff;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a}');
+  // Copiar todos los estilos de reporte
+  var styleSheets = document.styleSheets;
+  for(var i=0;i<styleSheets.length;i++){
+    try{
+      var rules = styleSheets[i].cssRules||styleSheets[i].rules;
+      for(var j=0;j<rules.length;j++){
+        var rule = rules[j].cssText||'';
+        if(rule.indexOf('rpt-')!==-1||rule.indexOf('no-break')!==-1){
+          win.document.write(rule+'\n');
+        }
+      }
+    }catch(e){}
+  }
+  win.document.write('@media print{.no-print{display:none}.no-break{page-break-inside:avoid}}');
+  win.document.write('</style></head><body>');
+  win.document.write('<div class="no-print" style="background:#0a3d2e;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99">');
+  win.document.write('<span style="font-size:14px;font-weight:600">Vista previa del reporte</span>');
+  win.document.write('<button onclick="window.print()" style="background:#e8a020;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">⬇ Guardar como PDF</button>');
+  win.document.write('</div>');
+  win.document.write(html);
+  win.document.write('</body></html>');
+  win.document.close();
+  toast('✓ Reporte generado');
+}
+
 // ── INIT ──
 loadData();
 updateHeaderDate();
 renderAll();
 </script>
+<!-- PRINT FRAME -->
+<div id="rpt-frame"></div>
+
 </body>
 </html>
