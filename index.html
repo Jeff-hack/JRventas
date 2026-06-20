@@ -353,7 +353,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span id="syncIndicator" style="font-size:10px;font-weight:600;color:var(--text3)">⚡ Local</span>
-      <button class="date-btn" onclick="openFondoModal()" title="Efectivo del día">
+      <button class="date-btn" onclick="showSection('inicio',document.getElementById('navInicio'))" title="Caja Actual (acumulada)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         <span id="fondoLabel">$0.00</span>
       </button>
@@ -1441,9 +1441,11 @@ function saveFondo(){
   toast('✓ Efectivo guardado');
 }
 function updateFondoLabel(){
-  var k=dateKey(currentDate);
-  var v=fondos[k]||0;
-  document.getElementById('fondoLabel').textContent=v>0?fmt(v):'$0.00';
+  // El header siempre muestra la Caja Actual acumulada (ventas − gastos de todos los días),
+  // NO un monto fijo. Se actualiza solo cada vez que hay una venta o un gasto.
+  var bal=getCajaAcumulada(currentDate);
+  document.getElementById('fondoLabel').textContent=fmt(bal);
+  document.getElementById('fondoLabel').style.color=bal>=0?'':'#f4a590';
 }
 
 function openFondoInicialModal(){
@@ -2150,6 +2152,7 @@ function saveStockAjuste(){
 // ══════════════════════════════════════════
 function renderAll(){
   renderResumen();
+  updateFondoLabel(); // header: Caja Actual en vivo, se mueve con cada venta/gasto
   // Update dashboard counters
   var pedPend=pedidosGlobal.filter(function(p){return p.estado==='pendiente';}).length;
   var encPend=encargos.filter(function(e){return e.estado==='pendiente';}).length;
@@ -4163,7 +4166,21 @@ _fbLoad(); // carga desde Firebase y sincroniza
 // ── PWA: registrar service worker para permitir instalación con ícono propio ──
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').catch(function(err){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      // Forzar verificación de versión nueva cada vez que se abre la app
+      reg.update();
+      // Si hay un SW nuevo esperando, activarlo y recargar automáticamente
+      reg.addEventListener('updatefound', function(){
+        var nuevoSW = reg.installing;
+        if(nuevoSW){
+          nuevoSW.addEventListener('statechange', function(){
+            if(nuevoSW.state==='activated'){
+              window.location.reload();
+            }
+          });
+        }
+      });
+    }).catch(function(err){
       console.log('Service worker no registrado:', err);
     });
   });
