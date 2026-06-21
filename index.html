@@ -353,7 +353,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span id="syncIndicator" style="font-size:10px;font-weight:600;color:var(--text3)">⚡ Local</span>
-      <button class="date-btn" onclick="openFondoModal()" title="Efectivo con el que inicias el día">
+      <button class="date-btn" onclick="openFondoModal()" title="Caja Actual (acumulada, automática)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         <span id="fondoLabel">$0.00</span>
       </button>
@@ -375,7 +375,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <div class="balance-card" style="position:relative;overflow:hidden">
         <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
         <div style="position:absolute;right:20px;top:-40px;width:80px;height:80px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
-        <div class="balance-label">💵 Caja Actual <span style="font-weight:400;opacity:0.7">(efectivo del día)</span></div>
+        <div class="balance-label">💵 Caja Actual <span style="font-weight:400;opacity:0.7">(acumulada)</span></div>
         <div class="balance-value" id="balanceNeto">$0.00</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:-6px;margin-bottom:8px" id="balanceHoyDesglose">Hoy: +$0.00 ventas − $0.00 gastos</div>
         <div class="balance-meta">
@@ -929,9 +929,9 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="fondoModal" onclick="overlayClose(event,'fondoModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Efectivo del día</div>
+    <div class="modal-title">Efectivo de apertura</div>
     <div class="form-section">
-      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Monto de dinero con el que cuentas hoy. Solo visible en el encabezado.</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Este monto se registra <strong>una sola vez</strong> — el efectivo con el que arrancas tu caja. A partir de ahí, cada venta suma y cada gasto resta automáticamente, y lo que quede al cerrar el día se hereda solo al día siguiente. No necesitas volver a digitarlo.</div>
       <label class="form-label">Monto ($)</label>
       <input class="form-input" type="number" id="fondoInput" placeholder="0.00" step="0.01" min="0">
       <button class="btn-primary" onclick="saveFondo()">✓ Guardar</button>
@@ -1010,14 +1010,25 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <label class="form-label">Teléfono <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
         <input class="form-input" type="text" id="clienteTelefono" placeholder="Ej: 7000-0000">
       </div>
-      <div>
-        <label class="form-label">Precio especial de venta ($) <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(precio al que se le provee)</span></label>
-        <input class="form-input" type="number" id="clientePrecio" placeholder="0.00" step="0.01" min="0">
+
+      <!-- Precios especiales por producto -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;margin-bottom:4px">
+        <label class="form-label" style="margin:0">Precios especiales por producto</label>
       </div>
-      <div>
-        <label class="form-label">Producto / referencia <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
-        <input class="form-input" type="text" id="clienteProductoRef" placeholder="Ej: Pechuga por libra, caja de menudo, etc.">
+      <div class="form-row">
+        <div>
+          <select class="form-input" id="clienteProdSel">
+            <option value="">— Seleccionar producto —</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" type="number" id="clienteProdPrecio" placeholder="Precio $" step="0.01" min="0">
+          <button type="button" onclick="agregarPrecioCliente()" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:0 14px;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0">+</button>
+        </div>
       </div>
+      <div id="clientePreciosList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Selecciona un producto del inventario y el precio que le otorgas a este cliente. Puedes agregar varios.</div>
+
       <div>
         <label class="form-label">Notas <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
         <input class="form-input" type="text" id="clienteNotas" placeholder="Detalles adicionales...">
@@ -1427,18 +1438,24 @@ function updateSyncIndicator(){
 }
 
 function openFondoModal(){
-  var k=dateKey(currentDate);
-  document.getElementById('fondoInput').value=fondos[k]||'';
+  // Si ya existe un efectivo de apertura registrado, no se puede editar desde aquí
+  // (evita romper la caja rodante ya calculada). Si aún no existe, se pide una sola vez.
+  if(fondos['efectivoApertura']!=null){
+    toast('La caja ya está iniciada — el saldo se acumula solo día a día');
+    return;
+  }
+  document.getElementById('fondoInput').value='';
   document.getElementById('fondoModal').classList.add('open');
 }
 function saveFondo(){
-  var k=dateKey(currentDate);
   var v=parseFloat(document.getElementById('fondoInput').value)||0;
-  fondos[k]=v;
+  fondos['efectivoApertura']=v;
+  fondos['efectivoAperturaFecha']=dateKey(currentDate);
   saveFondos();
   closeModal('fondoModal');
   updateFondoLabel();
-  toast('✓ Efectivo guardado');
+  renderResumen();
+  toast('✓ Efectivo de apertura registrado — desde ahora la caja se acumula sola');
 }
 function updateFondoLabel(){
   // El header muestra: efectivo digitado al iniciar el día + ventas del día − gastos del día.
@@ -1470,17 +1487,22 @@ function saveFondoInicial(){
 function dateKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function getDayData(d){ var k=dateKey(d); if(!data[k])data[k]={ventas:[],gastos:[],pedidos:[]}; return data[k]; }
 
-// ── CAJA ACUMULADA (saldo rodante) ──
-// Caja del día = saldo heredado del día anterior + ventas del día − gastos del día
-// Se calcula sumando ventas−gastos de TODOS los días registrados hasta (e incluyendo) la fecha dada.
+// ── CAJA RODANTE (saldo que se hereda automáticamente día a día) ──
+// Caja de un día = efectivo inicial de apertura (digitado UNA sola vez, el primer día)
+//                 + suma de (ventas − gastos) de TODOS los días hasta la fecha indicada (inclusive)
+// Así, lo que queda al cerrar hoy es automáticamente el punto de partida de mañana,
+// sin que el usuario tenga que volver a digitar nada cada día.
 function getCajaAcumulada(hastaFecha){
-  // Caja del día = efectivo que digitaste al iniciar ESE día + ventas del día − gastos del día
-  var k=dateKey(hastaFecha);
-  var d=data[k]||{ventas:[],gastos:[]};
-  var v=(d.ventas||[]).reduce(function(a,x){return a+x.monto;},0);
-  var g=(d.gastos||[]).reduce(function(a,x){return a+x.monto;},0);
-  var efectivoInicialDia=fondos[k]||0;
-  return efectivoInicialDia+v-g;
+  var hastaKey=dateKey(hastaFecha);
+  var total=fondos['efectivoApertura']||0;
+  Object.keys(data).forEach(function(k){
+    if(k>hastaKey) return; // solo días hasta la fecha indicada (inclusive)
+    var d=data[k];
+    var v=(d.ventas||[]).reduce(function(a,x){return a+x.monto;},0);
+    var g=(d.gastos||[]).reduce(function(a,x){return a+x.monto;},0);
+    total+=(v-g);
+  });
+  return total;
 }
 function fmt(n){ return '$'+Number(n).toFixed(2); }
 function fmtShort(n){ return n>=1000?'$'+(n/1000).toFixed(1)+'k':fmt(n); }
@@ -2202,8 +2224,8 @@ function renderResumen(){
   document.getElementById('balanceNeto').textContent=fmt(bal);
   document.getElementById('balanceNeto').style.color=bal>=0?'#a8e6cf':'#f4a590';
   var desgloseEl=document.getElementById('balanceHoyDesglose');
-  var efectivoHoy=fondos[dateKey(currentDate)]||0;
-  if(desgloseEl) desgloseEl.textContent=fmt(efectivoHoy)+' inicial + '+fmt(tv)+' ventas − '+fmt(tg)+' gastos';
+  var cajaAyer=getCajaAcumulada(new Date(currentDate.getFullYear(),currentDate.getMonth(),currentDate.getDate()-1));
+  if(desgloseEl) desgloseEl.textContent=fmt(cajaAyer)+' anterior + '+fmt(tv)+' ventas − '+fmt(tg)+' gastos';
   document.getElementById('balanceTag').textContent=bal>0?'Positivo':bal<0?'Negativo':'Neutro';
   document.getElementById('metaText').textContent=Math.round(pct)+'% de meta ('+fmt(META)+')';
   document.getElementById('progressFill').style.width=pct+'%';
@@ -2891,42 +2913,99 @@ function eliminarEncargo(id){
 
 function getCliente(id){ return clientes.find(function(c){return c.id===id;}); }
 
+// Buffer temporal de precios mientras se edita el modal de cliente
+var clientePreciosBuffer=[];
+
 function openClienteModal(id){
   document.getElementById('clienteId').value=id||'';
+  poblarSelectProductos('clienteProdSel');
+  document.getElementById('clienteProdPrecio').value='';
   if(id){
     var c=getCliente(id);
     if(!c) return;
     document.getElementById('clienteModalTitle').textContent='Editar cliente';
     document.getElementById('clienteNombre').value=c.nombre;
     document.getElementById('clienteTelefono').value=c.telefono||'';
-    document.getElementById('clientePrecio').value=c.precio||'';
-    document.getElementById('clienteProductoRef').value=c.productoRef||'';
     document.getElementById('clienteNotas').value=c.notas||'';
+    // Migración: si el cliente viene del modelo viejo (precio único), convertirlo a lista
+    if(c.precios && c.precios.length){
+      clientePreciosBuffer=c.precios.map(function(p){return Object.assign({},p);});
+    } else if(c.precio && c.productoRef){
+      clientePreciosBuffer=[{productoId:null,productoNombre:c.productoRef,precio:c.precio}];
+    } else {
+      clientePreciosBuffer=[];
+    }
   } else {
     document.getElementById('clienteModalTitle').textContent='Nuevo cliente';
     document.getElementById('clienteNombre').value='';
     document.getElementById('clienteTelefono').value='';
-    document.getElementById('clientePrecio').value='';
-    document.getElementById('clienteProductoRef').value='';
     document.getElementById('clienteNotas').value='';
+    clientePreciosBuffer=[];
   }
+  renderPreciosCliente();
   document.getElementById('clienteModal').classList.add('open');
+}
+
+function agregarPrecioCliente(){
+  var sel=document.getElementById('clienteProdSel');
+  var pid=parseInt(sel.value)||null;
+  var precio=parseFloat(document.getElementById('clienteProdPrecio').value)||0;
+  if(!pid){toast('⚠ Selecciona un producto');return;}
+  if(precio<=0){toast('⚠ Ingresa un precio válido');return;}
+  var prod=getProducto(pid);
+  if(!prod){toast('⚠ Producto no encontrado');return;}
+
+  // Si ya existe ese producto en la lista, actualiza el precio en vez de duplicar
+  var existente=clientePreciosBuffer.find(function(p){return p.productoId===pid;});
+  if(existente){
+    existente.precio=precio;
+  } else {
+    clientePreciosBuffer.push({productoId:pid,productoNombre:prod.nombre,precio:precio});
+  }
+  sel.value='';
+  document.getElementById('clienteProdPrecio').value='';
+  renderPreciosCliente();
+}
+
+function removePrecioCliente(idx){
+  clientePreciosBuffer.splice(idx,1);
+  renderPreciosCliente();
+}
+
+function renderPreciosCliente(){
+  var el=document.getElementById('clientePreciosList');
+  if(!el) return;
+  if(!clientePreciosBuffer.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px;background:var(--surface2);border-radius:var(--radius-sm)">Aún no hay precios especiales agregados.</div>';
+    return;
+  }
+  var html='';
+  clientePreciosBuffer.forEach(function(p,i){
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">'+
+      '<div style="flex:1;min-width:0;font-size:13px;font-weight:500">📦 '+esc(p.productoNombre)+'</div>'+
+      '<div style="font-family:\'DM Mono\',monospace;font-size:13px;color:var(--primary);font-weight:600">'+fmt(p.precio)+'</div>'+
+      '<button onclick="removePrecioCliente('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0">×</button>'+
+    '</div>';
+  });
+  el.innerHTML=html;
 }
 
 function saveCliente(){
   var nombre=document.getElementById('clienteNombre').value.trim();
   var telefono=document.getElementById('clienteTelefono').value.trim();
-  var precio=parseFloat(document.getElementById('clientePrecio').value)||0;
-  var productoRef=document.getElementById('clienteProductoRef').value.trim();
   var notas=document.getElementById('clienteNotas').value.trim();
   var idExist=document.getElementById('clienteId').value;
   if(!nombre){toast('⚠ Ingresa el nombre del cliente');return;}
 
   if(idExist){
     var c=getCliente(parseInt(idExist));
-    if(c){c.nombre=nombre;c.telefono=telefono;c.precio=precio;c.productoRef=productoRef;c.notas=notas;}
+    if(c){
+      c.nombre=nombre;c.telefono=telefono;c.notas=notas;
+      c.precios=clientePreciosBuffer.slice();
+      delete c.precio; delete c.productoRef; // limpia campos del modelo viejo
+    }
   } else {
-    clientes.push({id:Date.now(),nombre:nombre,telefono:telefono,precio:precio,productoRef:productoRef,notas:notas,adeudos:[]});
+    clientes.push({id:Date.now(),nombre:nombre,telefono:telefono,notas:notas,precios:clientePreciosBuffer.slice(),adeudos:[]});
   }
   saveClientes();
   closeModal('clienteModal');
@@ -3085,13 +3164,28 @@ function renderClientes(){
           '<div class="ped-card-name">👤 '+esc(c.nombre)+'</div>'+
           '<div class="ped-card-meta">'+
             (c.telefono?'📞 '+esc(c.telefono)+'<br>':'')+
-            (c.precio?'Precio especial: <strong>'+fmt(c.precio)+'</strong>'+(c.productoRef?' · '+esc(c.productoRef):'')+'<br>':'')+
             (c.notas?esc(c.notas):'')+
           '</div>'+
           '<span class="ped-status '+(saldo>0?'ped-status-pending':'ped-status-done')+'">'+(saldo>0?'⚠ Debe '+fmt(saldo):'✓ Al día')+'</span>'+
         '</div>'+
-        '<button onclick="eliminarCliente('+c.id+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 6px;line-height:1;flex-shrink:0">×</button>'+
+        '<div style="display:flex;gap:4px;flex-shrink:0">'+
+          '<button onclick="openClienteModal('+c.id+')" style="background:#e8f0fe;border:1px solid #93c5fd;color:#1e4fb7;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer">✏</button>'+
+          '<button onclick="eliminarCliente('+c.id+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 6px;line-height:1">×</button>'+
+        '</div>'+
       '</div>';
+
+    // Precios especiales por producto
+    if(c.precios && c.precios.length){
+      html+='<div style="margin-top:6px;padding:6px 0;border-top:1px solid var(--border)">'+
+        '<div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Precios especiales</div>';
+      c.precios.forEach(function(p){
+        html+='<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px">'+
+          '<span style="color:var(--text2)">📦 '+esc(p.productoNombre)+'</span>'+
+          '<span style="font-family:\'DM Mono\',monospace;font-weight:600;color:var(--primary)">'+fmt(p.precio)+'</span>'+
+        '</div>';
+      });
+      html+='</div>';
+    }
 
     // Lista de adeudos
     if(adeudosOrdenados.length){
