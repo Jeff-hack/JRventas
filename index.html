@@ -632,6 +632,16 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
               <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="pedDiaSO">$0.00</div>
             </div>
           </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px;margin-top:8px">
+            <div style="text-align:center">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#6366f1;margin-bottom:3px">Superior</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#6366f1" id="pedDiaSup">$0.00</div>
+            </div>
+            <div style="text-align:center;border-left:1px solid var(--border)">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f6e56;margin-bottom:3px">Abuela</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#0f6e56" id="pedDiaAb">$0.00</div>
+            </div>
+          </div>
         </div>
         <div class="tabs">
           <button class="tab-btn active" id="tabPend" onclick="setPedidoTab('pendiente')">⏳ Pendientes</button>
@@ -2243,7 +2253,9 @@ function renderResumen(){
   var tpr=day.pedidos.filter(function(x){return x.tipo==='Pollo Rico'&&pedActivo(x);}).reduce(function(a,x){return a+x.monto;},0);
   var tpi=day.pedidos.filter(function(x){return x.tipo==='Pollo Indio'&&pedActivo(x);}).reduce(function(a,x){return a+x.monto;},0);
   var tso=day.pedidos.filter(function(x){return x.tipo==='Sello de Oro'&&pedActivo(x);}).reduce(function(a,x){return a+x.monto;},0);
-  var tpTotalDia=tpr+tpi+tso;
+  var tsup=day.pedidos.filter(function(x){return x.tipo==='Superior'&&pedActivo(x);}).reduce(function(a,x){return a+x.monto;},0);
+  var tab=day.pedidos.filter(function(x){return x.tipo==='Abuela'&&pedActivo(x);}).reduce(function(a,x){return a+x.monto;},0);
+  var tpTotalDia=tpr+tpi+tso+tsup+tab;
   var bal=getCajaAcumulada(currentDate);
   var pct=Math.min(100,(tv/META)*100);
 
@@ -2569,7 +2581,7 @@ function verDetalle(tipo, id){
   // ── GASTOS por pedido completado ──
   if(!isV&&it.pedidoId){
     var pedOrig=getPedido(it.pedidoId);
-    var provColor={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a'};
+    var provColor={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'};
     if(pedOrig){
       var pcolor=provColor[pedOrig.tipo]||'var(--orange)';
       html+='<div style="background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:12px;border-left:3px solid '+pcolor+'">'+
@@ -2643,10 +2655,16 @@ function renderPedidos(){
   if(totalHoyEl) totalHoyEl.textContent=fmt(totalHoy);
   if(cntHoyEl) cntHoyEl.textContent=pedidosHoy.length+' pedido'+(pedidosHoy.length!==1?'s':'')+' activo'+(pedidosHoy.length!==1?'s':'');
   // Totales por proveedor del día
-  ['Pollo Rico','Pollo Indio','Sello de Oro'].forEach(function(t,i){
-    var ids=['pedDiaPR','pedDiaPI','pedDiaSO'];
-    var tot=pedidosHoy.filter(function(p){return p.tipo===t;}).reduce(function(a,p){return a+p.monto;},0);
-    var el2=document.getElementById(ids[i]); if(el2) el2.textContent=fmt(tot);
+  var provConfig=[
+    {tipo:'Pollo Rico',id:'pedDiaPR'},
+    {tipo:'Pollo Indio',id:'pedDiaPI'},
+    {tipo:'Sello de Oro',id:'pedDiaSO'},
+    {tipo:'Superior',id:'pedDiaSup'},
+    {tipo:'Abuela',id:'pedDiaAb'}
+  ];
+  provConfig.forEach(function(pv){
+    var tot=pedidosHoy.filter(function(p){return p.tipo===pv.tipo;}).reduce(function(a,p){return a+p.monto;},0);
+    var el2=document.getElementById(pv.id); if(el2) el2.textContent=fmt(tot);
   });
 
   // Filtrar pedidos globales por tab
@@ -2660,7 +2678,7 @@ function renderPedidos(){
     return;
   }
 
-  var colores={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a'};
+  var colores={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'};
   var html='';
   items.forEach(function(it){
     var color=colores[it.tipo]||'#888';
@@ -2719,7 +2737,7 @@ function renderPedidos(){
 function verDetallePedido(id){
   var ped=getPedido(id);
   if(!ped) return;
-  var color={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a'}[ped.tipo]||'#888';
+  var color={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'}[ped.tipo]||'#888';
   var html='<div style="padding:4px 0">';
   html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Proveedor</span><strong style="color:'+color+'">'+esc(ped.tipo)+'</strong></div>';
   html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Fecha pedido</span><strong>'+(ped.fecha?ped.fecha.split('-').reverse().join('/'):'—')+'</strong></div>';
@@ -2834,7 +2852,7 @@ function renderHistorial(){
       html+='<div class="tx-item"><div class="tx-icon" style="background:#fdeee9">📋</div><div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+esc(it.hora)+'</div></div><div class="tx-amount" style="color:var(--red)">-'+fmt(it.monto)+'</div></div>';
     });
     d.pedidos.forEach(function(it){
-      var c2={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a'}[it.tipo]||'#888';
+      var c2={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'}[it.tipo]||'#888';
       // buscar estado en pedidosGlobal
       var gped=getPedido(it.id);
       var estadoLabel=gped?(gped.estado==='completado'?' ✅':gped.estado==='cancelado'?' ❌':' ⏳'):'';
