@@ -161,7 +161,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .tab-btn.active{background:var(--surface);color:var(--primary);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
 
 /* FORM */
-.form-section{display:flex;flex-direction:column;gap:12px}
+.form-section{display:flex;flex-direction:column;gap:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
 .form-label{font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;display:block}
 .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;background:var(--surface);color:var(--text);outline:none;transition:border-color 0.2s;-webkit-appearance:none;appearance:none}
 .form-input:focus{border-color:var(--primary)}
@@ -215,7 +215,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 /* MODALS */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg);border-radius:20px 20px 0 0;padding:24px 20px max(28px,env(safe-area-inset-bottom));width:100%;max-width:430px;max-height:92vh;overflow-y:auto}
+.modal{background:var(--bg);border-radius:20px 20px 0 0;padding:0;width:100%;max-width:430px;max-height:92vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;gap:10px;padding:16px 20px 0;position:sticky;top:0;background:var(--bg);z-index:2;border-bottom:1px solid var(--border);margin-bottom:0;padding-bottom:14px}
+.modal-back{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:16px;color:var(--text2)}
+.modal-title{font-size:16px;font-weight:700;flex:1;min-width:0}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
 .modal::-webkit-scrollbar{display:none}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
 .modal-title{font-size:18px;font-weight:600;margin-bottom:20px}
@@ -516,6 +520,13 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <div class="stat-value" id="dashAdeudoTotal" style="color:var(--red)">$0.00</div>
           <div class="stat-sub" id="dashAdeudoCnt">0 clientes con saldo</div>
         </div>
+      </div>
+
+      <!-- Banner alertas de stock bajo -->
+      <div id="stockAlertaBanner" onclick="verAlertasStock()" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:#fdeee9;border:1px solid #f3c4b3;border-radius:var(--radius);cursor:pointer">
+        <span style="font-size:20px">⚠️</span>
+        <span id="stockAlertaBannerTxt" style="flex:1;font-size:13px;font-weight:600;color:var(--red)"></span>
+        <span style="font-size:12px;color:var(--red);font-weight:700">Ver →</span>
       </div>
 
       <!-- Resumen semanal -->
@@ -938,7 +949,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="fondoInicialModal" onclick="overlayClose(event,'fondoInicialModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Capital inicial del negocio</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('fondoInicialModal')">‹</button><div class="modal-title">Capital inicial del negocio</div></div>
     <div class="form-section">
       <div style="font-size:12px;color:var(--text2);margin-bottom:12px">⚠ Este dato es histórico y no se podrá modificar después de guardarlo. Registra el monto exacto con el que abriste el negocio.</div>
       <div>
@@ -960,7 +971,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="fondoModal" onclick="overlayClose(event,'fondoModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Efectivo de apertura</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('fondoModal')">‹</button><div class="modal-title">Efectivo de apertura</div></div>
     <div class="form-section">
       <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Este monto se registra <strong>una sola vez</strong> — el efectivo con el que arrancas tu caja. A partir de ahí, cada venta suma y cada gasto resta automáticamente, y lo que quede al cerrar el día se hereda solo al día siguiente. No necesitas volver a digitarlo.</div>
       <label class="form-label">Monto ($)</label>
@@ -974,7 +985,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="detalleVentaModal" onclick="overlayClose(event,'detalleVentaModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="detalleVentaTitle">Detalle</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('detalleVentaModal')">‹</button><div class="modal-title" id="detalleVentaTitle">Detalle</div></div>
     <div class="form-section" id="detalleVentaBody"></div>
   </div>
 </div>
@@ -983,7 +994,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="encargoModal" onclick="overlayClose(event,'encargoModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="encargoModalTitle">Nuevo encargo</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('encargoModal')">‹</button><div class="modal-title" id="encargoModalTitle">Nuevo encargo</div></div>
     <div class="form-section">
       <input type="hidden" id="encargoId">
       <div>
@@ -1047,7 +1058,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="clienteModal" onclick="overlayClose(event,'clienteModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="clienteModalTitle">Nuevo cliente</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('clienteModal')">‹</button><div class="modal-title" id="clienteModalTitle">Nuevo cliente</div></div>
     <div class="form-section">
       <input type="hidden" id="clienteId">
       <div>
@@ -1095,7 +1106,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="adeudoModal" onclick="overlayClose(event,'adeudoModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="adeudoModalTitle">Nuevo adeudo</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('adeudoModal')">‹</button><div class="modal-title" id="adeudoModalTitle">Nuevo adeudo</div></div>
     <div class="form-section">
       <input type="hidden" id="adeudoId">
       <input type="hidden" id="adeudoClienteId">
@@ -1150,7 +1161,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="addModal" onclick="overlayClose(event,'addModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="addModalTitle">Nuevo registro</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('addModal')">‹</button><div class="modal-title" id="addModalTitle">Nuevo registro</div></div>
     <div class="form-section">
       <div>
         <label class="form-label">Tipo</label>
@@ -1262,7 +1273,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="productoModal" onclick="overlayClose(event,'productoModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="productoModalTitle">Nuevo producto</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('productoModal')">‹</button><div class="modal-title" id="productoModalTitle">Nuevo producto</div></div>
     <div class="form-section">
       <input type="hidden" id="pId">
       <div>
@@ -1309,6 +1320,17 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         </select>
         <div style="font-size:11px;color:var(--text3);margin-top:4px">Puedes cambiarlo en cualquier momento si fue asignado por error.</div>
       </div>
+      <div class="form-row">
+        <div>
+          <label class="form-label">⚠ Stock mínimo <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(alerta de pedido)</span></label>
+          <input class="form-input" type="number" id="pStockMinimo" placeholder="Ej: 5" min="0" step="0.01">
+        </div>
+        <div>
+          <label class="form-label">📦 Cantidad a pedir</label>
+          <input class="form-input" type="number" id="pCantidadReorden" placeholder="Ej: 20" min="0" step="0.01">
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:-4px;margin-bottom:4px">Cuando el stock baje del mínimo, el sistema sugerirá un pedido con la cantidad a pedir.</div>
       <div>
         <label class="form-label">Fecha de ingreso</label>
         <input class="form-input" type="date" id="pFecha">
@@ -1326,7 +1348,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="stockModal" onclick="overlayClose(event,'stockModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="stockModalTitle">Ajustar stock</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('stockModal')">‹</button><div class="modal-title" id="stockModalTitle">Ajustar stock</div></div>
     <div class="form-section">
       <input type="hidden" id="sId">
       <div class="info-box">Stock actual: <strong id="sActual" style="font-family:'DM Mono',monospace"></strong></div>
@@ -1350,7 +1372,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="dateModal" onclick="overlayClose(event,'dateModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Seleccionar fecha</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('dateModal')">‹</button><div class="modal-title">Seleccionar fecha</div></div>
     <div class="form-section">
       <input class="form-input" type="date" id="dateInput" style="font-size:16px;text-align:center">
       <button class="btn-primary" onclick="applyDate()">Aplicar</button>
@@ -1703,7 +1725,13 @@ function applyDate(){
 // ══════════════════════════════════════════
 //  MODALES
 // ══════════════════════════════════════════
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModal(id){
+  var m=document.getElementById(id);
+  if(m) m.classList.remove('open');
+  // Reset scroll position for next open
+  var inner=m?m.querySelector('.modal'):null;
+  if(inner) inner.scrollTop=0;
+}
 function overlayClose(e,id){if(e.target===document.getElementById(id))closeModal(id);}
 
 // ─ Modal registro ─
@@ -2151,6 +2179,8 @@ function openProductoModal(id){
     document.getElementById('pFecha').value=p.fecha;
     document.getElementById('pNotas').value=p.notas||'';
     document.getElementById('pProveedor').value=p.proveedor||'';
+    document.getElementById('pStockMinimo').value=p.stockMinimo!=null?p.stockMinimo:'';
+    document.getElementById('pCantidadReorden').value=p.cantidadReorden!=null?p.cantidadReorden:'';
   } else {
     document.getElementById('productoModalTitle').textContent='Nuevo producto';
     ['pNombre','pNotas'].forEach(function(f){document.getElementById(f).value='';});
@@ -2160,6 +2190,8 @@ function openProductoModal(id){
     document.getElementById('pPrecioVenta').value='';
     document.getElementById('pFecha').value=dateKey(new Date());
     document.getElementById('pProveedor').value='';
+    document.getElementById('pStockMinimo').value='';
+    document.getElementById('pCantidadReorden').value='';
   }
   document.getElementById('productoModal').classList.add('open');
 }
@@ -2173,18 +2205,21 @@ function saveProducto(){
   var fecha=document.getElementById('pFecha').value;
   var notas=document.getElementById('pNotas').value.trim();
   var proveedor=document.getElementById('pProveedor').value;
+  var stockMinimo=document.getElementById('pStockMinimo').value!==''?parseFloat(document.getElementById('pStockMinimo').value):null;
+  var cantidadReorden=document.getElementById('pCantidadReorden').value!==''?parseFloat(document.getElementById('pCantidadReorden').value):null;
   var idExist=document.getElementById('pId').value;
   if(!nombre){toast('⚠ Ingresa el nombre del producto');return;}
   if(!fecha){toast('⚠ Selecciona la fecha de ingreso');return;}
   if(idExist){
     var p=getProducto(parseInt(idExist));
-    if(p){p.nombre=nombre;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;p.proveedor=proveedor;}
+    if(p){p.nombre=nombre;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;p.proveedor=proveedor;p.stockMinimo=stockMinimo;p.cantidadReorden=cantidadReorden;}
   } else {
-    productos.push({id:Date.now(),nombre:nombre,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas,proveedor:proveedor});
+    productos.push({id:Date.now(),nombre:nombre,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas,proveedor:proveedor,stockMinimo:stockMinimo,cantidadReorden:cantidadReorden});
   }
   saveProductos();
   closeModal('productoModal');
   renderInventario();
+  checkStockAlertas(); // revisar si hay nuevas alertas tras guardar
   toast('✓ Producto guardado');
 }
 
@@ -2194,6 +2229,127 @@ function eliminarProducto(id){
   saveProductos();
   renderInventario();
   toast('Producto eliminado');
+}
+
+// ── ALERTAS DE STOCK BAJO ──
+function getProductosBajoStock(){
+  return productos.filter(function(p){
+    return p.stockMinimo!=null && p.cantidad<=p.stockMinimo;
+  });
+}
+
+function checkStockAlertas(){
+  var bajos=getProductosBajoStock();
+  // Actualizar badge en el nav de Inventario
+  var navInv=document.getElementById('navInv');
+  var badge=document.getElementById('invAlertaBadge');
+  if(!badge&&navInv&&bajos.length>0){
+    badge=document.createElement('span');
+    badge.id='invAlertaBadge';
+    badge.style.cssText='position:absolute;top:2px;right:2px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1';
+    navInv.style.position='relative';
+    navInv.appendChild(badge);
+  }
+  if(badge){
+    badge.textContent=bajos.length>0?bajos.length:'';
+    badge.style.display=bajos.length>0?'flex':'none';
+  }
+  // Banner en dashboard
+  var bannerEl=document.getElementById('stockAlertaBanner');
+  if(bannerEl){
+    if(bajos.length>0){
+      bannerEl.style.display='flex';
+      bannerEl.querySelector('#stockAlertaBannerTxt').textContent=
+        bajos.length+' producto'+(bajos.length!==1?'s tienen':'tiene')+' stock bajo — pedidos sugeridos';
+    } else {
+      bannerEl.style.display='none';
+    }
+  }
+}
+
+function verAlertasStock(){
+  var bajos=getProductosBajoStock();
+  if(!bajos.length){ toast('✓ Todo el stock está en niveles normales'); return; }
+
+  // Agrupar por proveedor
+  var byProv={};
+  bajos.forEach(function(p){
+    var prov=p.proveedor||'Sin proveedor';
+    if(!byProv[prov]) byProv[prov]=[];
+    byProv[prov].push(p);
+  });
+
+  var PROV_COLORS={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'};
+  var html='<div style="font-size:12px;color:var(--text3);padding:12px 0 8px">'+
+    'Estos productos están en o por debajo del mínimo definido. Toca <strong>Crear pedido</strong> para enviarlo directamente.</div>';
+
+  Object.keys(byProv).forEach(function(prov){
+    var color=PROV_COLORS[prov]||'var(--text2)';
+    html+='<div style="margin-bottom:14px">'+
+      '<div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:'+color+';padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">'+
+        '<span>'+esc(prov)+'</span>'+
+        '<button onclick="crearPedidoDesdeAlerta(\''+prov+'\')" style="background:'+color+';color:#fff;border:none;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">Crear pedido</button>'+
+      '</div>';
+    byProv[prov].forEach(function(p){
+      var pct=p.stockMinimo>0?Math.round((p.cantidad/p.stockMinimo)*100):0;
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:13px;font-weight:600">'+esc(p.nombre)+'</div>'+
+          '<div style="display:flex;align-items:center;gap:6px;margin-top:4px">'+
+            '<div style="flex:1;height:5px;background:var(--surface2);border-radius:3px">'+
+              '<div style="height:5px;border-radius:3px;background:var(--red);width:'+Math.min(100,pct)+'%"></div>'+
+            '</div>'+
+            '<span style="font-size:10px;color:var(--text3);white-space:nowrap">'+p.cantidad+' / '+p.stockMinimo+' '+p.unidad+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<div style="text-align:right;flex-shrink:0">'+
+          '<div style="font-size:11px;color:var(--text3)">Pedir</div>'+
+          '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:700;color:'+color+'">'+
+            (p.cantidadReorden!=null?p.cantidadReorden+' '+p.unidad:'—')+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    });
+    html+='</div>';
+  });
+
+  document.getElementById('stockAlertaBody').innerHTML=html;
+  document.getElementById('stockAlertaModal').classList.add('open');
+}
+
+// Crea un pedido borrador con todos los productos de stock bajo de ese proveedor
+function crearPedidoDesdeAlerta(proveedor){
+  var bajos=getProductosBajoStock().filter(function(p){
+    var prov=p.proveedor||'Sin proveedor';
+    return prov===proveedor;
+  });
+  if(!bajos.length) return;
+  closeModal('stockAlertaModal');
+  // Cambiar a sección Inventario > Pedidos y abrir el modal pre-llenado
+  showSection('inventario',document.getElementById('navInv'));
+  setInvMainTab('pedidos');
+  setTimeout(function(){
+    ventaItems=[];
+    pedidoItems=bajos.map(function(p){
+      return {
+        productoId:p.id,
+        productoNombre:p.nombre,
+        desc:p.nombre,
+        cant:p.cantidadReorden||1,
+        monto:(p.cantidadReorden||1)*p.precioCosto,
+        unidad:p.unidad
+      };
+    });
+    editingPedidoId=null;
+    setTipo('pedido');
+    var tipoSel=document.getElementById('pedidoTipo');
+    if(tipoSel) tipoSel.value=proveedor;
+    poblarSelectProductos('pedidoProdSel',proveedor);
+    document.getElementById('addModalTitle').textContent='Pedido sugerido — '+proveedor;
+    document.getElementById('addModalSaveBtn').textContent='✓ Confirmar pedido';
+    renderPedidoItems();
+    document.getElementById('addModal').classList.add('open');
+  },300);
 }
 
 function openStockModal(id){
@@ -2232,7 +2388,8 @@ function saveStockAjuste(){
 // ══════════════════════════════════════════
 function renderAll(){
   renderResumen();
-  updateFondoLabel(); // header: Caja Actual en vivo, se mueve con cada venta/gasto
+  updateFondoLabel();
+  checkStockAlertas(); // verificar stock bajo en cada actualización
   // Update dashboard counters
   var pedPend=pedidosGlobal.filter(function(p){return p.estado==='pendiente';}).length;
   var encPend=encargos.filter(function(e){return e.estado==='pendiente';}).length;
@@ -2864,9 +3021,11 @@ function renderInventario(){
   if(totalInvEl) totalInvEl.textContent=fmt(totalInv);
   if(cntEl) cntEl.textContent=productos.length+' productos';
 
-  // Filtro
+  // Filtro — "bajo" ahora usa stockMinimo si está definido, sino el umbral fijo 5
   var filtrados=productos.filter(function(p){
-    if(invFiltroActual==='bajo') return p.cantidad<=5;
+    if(invFiltroActual==='bajo'){
+      return p.stockMinimo!=null ? p.cantidad<=p.stockMinimo : p.cantidad<=5;
+    }
     if(invFiltroActual==='medio') return p.cantidad>5&&p.cantidad<=20;
     if(invFiltroActual==='alto') return p.cantidad>20;
     return true;
@@ -2877,13 +3036,20 @@ function renderInventario(){
   }
   var html='';
   filtrados.forEach(function(p){
-    var sc=p.cantidad<=0?'stock-out':p.cantidad<=5?'stock-low':'stock-ok';
-    var sl=p.cantidad<=0?'Sin stock':p.cantidad<=5?'Stock bajo':'En stock';
+    var bajoPorMinimo=p.stockMinimo!=null&&p.cantidad<=p.stockMinimo;
+    var sc=p.cantidad<=0?'stock-out':(bajoPorMinimo||p.cantidad<=5)?'stock-low':'stock-ok';
+    var sl=p.cantidad<=0?'Sin stock':(bajoPorMinimo||p.cantidad<=5)?'Stock bajo':'En stock';
     var fd='';if(p.fecha){var fp=p.fecha.split('-');fd=fp[2]+'/'+fp[1]+'/'+fp[0];}
     var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0):'--';
+    var alertaBadge=bajoPorMinimo?
+      '<span onclick="verAlertasStock()" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--red);background:#fdeee9;border:1px solid #f3c4b3;border-radius:6px;padding:2px 6px;margin-left:6px">⚠ Pedir '+(p.cantidadReorden||'?')+' '+p.unidad+'</span>':
+      (p.stockMinimo!=null?'<span style="font-size:10px;color:var(--text3);margin-left:6px">Mín: '+p.stockMinimo+' '+p.unidad+'</span>':'');
     html+='<div class="inv-card">'+
       '<div class="inv-card-header">'+
-        '<div><div class="inv-card-name">'+esc(p.nombre)+'</div><div class="inv-card-date">Ingreso: '+esc(fd)+(p.notas?' &middot; '+esc(p.notas):'')+'</div></div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div class="inv-card-name" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+esc(p.nombre)+alertaBadge+'</div>'+
+          '<div class="inv-card-date">Ingreso: '+esc(fd)+(p.notas?' &middot; '+esc(p.notas):'')+'</div>'+
+        '</div>'+
         '<span class="stock-badge '+sc+'">'+sl+'</span>'+
       '</div>'+
       '<div class="inv-card-body">'+
@@ -4686,11 +4852,22 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<!-- ═══ MODAL: ALERTAS DE STOCK BAJO ═══ -->
+<div class="modal-overlay" id="stockAlertaModal" onclick="overlayClose(event,'stockAlertaModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('stockAlertaModal')">‹</button><div class="modal-title" style="color:var(--red)">⚠️ Stock bajo — Pedidos sugeridos</div></div>
+    <div class="form-section" style="padding:0">
+      <div id="stockAlertaBody" style="padding:0 16px 16px"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ MODAL: PEDIDOS POR PROVEEDOR ═══ -->
 <div class="modal-overlay" id="proveedorModal" onclick="overlayClose(event,'proveedorModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="proveedorModalTitle">Pedidos</div>
+    <div class="modal-header"><button class="modal-back" onclick="closeModal('proveedorModal')">‹</button><div class="modal-title" id="proveedorModalTitle">Pedidos</div></div>
     <div class="form-section" style="padding:0">
       <div id="proveedorModalBody" style="padding:0 16px 16px"></div>
     </div>
