@@ -191,6 +191,27 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .fab:active{transform:scale(0.92)}
 @media(max-width:430px){.fab{right:16px}}
 
+/* ══ RESPONSIVE: tablet (768px+) y laptop (1024px+) ══ */
+@media (min-width: 768px){
+  body { background: #d6ddd7; }
+  #app { max-width: 820px; margin: 0 auto; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.18); height: 100vh; }
+  .bottom-nav { padding: 8px 24px 12px; }
+  .v2-section .page { padding: 20px 24px 80px; }
+  .modal { max-width: 580px; border-radius: 16px; }
+  #page-resumen .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  #listaInventario { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  #listaEncargos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+}
+
+@media (min-width: 1024px){
+  #app { max-width: 1080px; }
+  #listaInventario { grid-template-columns: 1fr 1fr 1fr; }
+  #listaEncargos { grid-template-columns: 1fr 1fr 1fr; }
+  #listaClientes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .form-row { gap: 14px; }
+}
+
+
 /* MODALS */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
@@ -619,26 +640,26 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
             <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:600;color:var(--primary)" id="pedidosDiaTotal">$0.00</div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px">
-            <div style="text-align:center">
-              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#e8a020;margin-bottom:3px">Pollo Rico</div>
+            <div style="text-align:center;cursor:pointer" onclick="verPedidosPorProveedor('Pollo Rico','#e8a020')">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#e8a020;margin-bottom:3px">Pollo Rico ›</div>
               <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#e8a020" id="pedDiaPR">$0.00</div>
             </div>
-            <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border)">
-              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--red);margin-bottom:3px">Pollo Indio</div>
+            <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);cursor:pointer" onclick="verPedidosPorProveedor('Pollo Indio','#d44f2e')">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--red);margin-bottom:3px">Pollo Indio ›</div>
               <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--red)" id="pedDiaPI">$0.00</div>
             </div>
-            <div style="text-align:center">
-              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:3px">Sello de Oro</div>
+            <div style="text-align:center;cursor:pointer" onclick="verPedidosPorProveedor('Sello de Oro','#c4860a')">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:3px">Sello de Oro ›</div>
               <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="pedDiaSO">$0.00</div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px;margin-top:8px">
-            <div style="text-align:center">
-              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#6366f1;margin-bottom:3px">Superior</div>
+            <div style="text-align:center;cursor:pointer" onclick="verPedidosPorProveedor('Superior','#6366f1')">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#6366f1;margin-bottom:3px">Superior ›</div>
               <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#6366f1" id="pedDiaSup">$0.00</div>
             </div>
-            <div style="text-align:center;border-left:1px solid var(--border)">
-              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f6e56;margin-bottom:3px">Abuela</div>
+            <div style="text-align:center;border-left:1px solid var(--border);cursor:pointer" onclick="verPedidosPorProveedor('Abuela','#0f6e56')">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f6e56;margin-bottom:3px">Abuela ›</div>
               <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#0f6e56" id="pedDiaAb">$0.00</div>
             </div>
           </div>
@@ -2643,6 +2664,60 @@ function verDetalle(tipo, id){
   document.getElementById('detalleVentaModal').classList.add('open');
 }
 
+function verPedidosPorProveedor(proveedor, color){
+  var lista=pedidosGlobal
+    .filter(function(p){return p.tipo===proveedor;})
+    .slice().sort(function(a,b){return a.fecha<b.fecha?1:-1;}); // más reciente primero
+
+  document.getElementById('proveedorModalTitle').textContent=proveedor;
+  document.getElementById('proveedorModalTitle').style.color=color;
+
+  var total=lista.filter(function(p){return p.estado!=='cancelado';}).reduce(function(s,p){return s+p.monto;},0);
+
+  if(!lista.length){
+    document.getElementById('proveedorModalBody').innerHTML=
+      '<div style="text-align:center;padding:24px;color:var(--text3)">Sin pedidos registrados para '+esc(proveedor)+'</div>';
+    document.getElementById('proveedorModal').classList.add('open');
+    return;
+  }
+
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px">'+
+    '<span style="font-size:11px;color:var(--text3)">'+lista.length+' pedido'+(lista.length!==1?'s':'')+' registrados</span>'+
+    '<span style="font-family:\'DM Mono\',monospace;font-size:15px;font-weight:700;color:'+color+'">'+fmt(total)+'</span>'+
+  '</div>';
+
+  lista.forEach(function(p){
+    var fechaD=p.fecha?p.fecha.split('-').reverse().join('/'):'';
+    var sc=p.estado==='completado'?'#e8f7f1':p.estado==='cancelado'?'#fdeee9':'#fef9e7';
+    var tc=p.estado==='completado'?'var(--green)':p.estado==='cancelado'?'var(--red)':'var(--orange)';
+    var et=p.estado==='completado'?'✓ Completado':p.estado==='cancelado'?'✗ Cancelado':'⏳ Pendiente';
+    var desc=p.desc||'';
+    if(p.items&&p.items.length){
+      var f=p.items[0].desc||p.items[0].productoNombre||'';
+      desc=p.items.length===1?f:f+' +'+(p.items.length-1)+' más';
+    }
+    html+='<div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:8px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:13px;font-weight:600;color:var(--text1)">'+esc(desc)+'</div>'+
+          '<div style="font-size:11px;color:var(--text3);margin-top:2px">📅 '+fechaD+'</div>'+
+          // Desglose de items si hay varios
+          (p.items&&p.items.length>1?'<div style="margin-top:6px">'+p.items.map(function(it){
+            return '<div style="font-size:11px;color:var(--text2);padding:1px 0">↳ '+esc(it.desc||it.productoNombre||'')+' · '+fmt(it.monto)+'</div>';
+          }).join('')+'</div>':'')+
+        '</div>'+
+        '<div style="text-align:right;flex-shrink:0">'+
+          '<div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:700;color:'+color+'">'+fmt(p.monto)+'</div>'+
+          '<div style="display:inline-block;margin-top:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:'+sc+';color:'+tc+'">'+et+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  });
+
+  document.getElementById('proveedorModalBody').innerHTML=html;
+  document.getElementById('proveedorModal').classList.add('open');
+}
+
 function renderPedidos(){
   var el=document.getElementById('listaPedidos');
 
@@ -3328,10 +3403,32 @@ function saveAdeudo(){
     c.adeudos.push(registro);
   }
 
+  // Calcular cuánto se pagó nuevo (diferencia con lo que había antes)
+  var pagosPrevios=0;
+  if(idExist){
+    var aAnterior=c.adeudos.find(function(x){return x.id===parseInt(idExist);});
+    if(aAnterior) pagosPrevios=(aAnterior.pagos||[]).reduce(function(s,p){return s+p.monto;},0);
+  }
+  var nuevoPago=totalPagado-pagosPrevios;
+  if(nuevoPago>0){
+    var hoy=new Date();
+    var hora=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
+    var dayData=getDayData(hoy);
+    dayData.ventas.push({
+      id:Date.now()+2,
+      monto:nuevoPago,
+      desc:'Abono adeudo: '+desc+' ('+c.nombre+')',
+      cant:1,
+      hora:hora,
+      esCobroAdeudo:true
+    });
+    saveData();
+  }
+
   saveClientes();
   closeModal('adeudoModal');
-  renderClientes();
-  toast(saldo<=0?'✓ Adeudo registrado — saldado por completo':'✓ Adeudo guardado, saldo: '+fmt(saldo));
+  renderAll();
+  toast(saldo<=0?'✓ Adeudo saldado por completo'+(nuevoPago>0?' — '+fmt(nuevoPago)+' sumados a la caja':''):'✓ Adeudo guardado'+(nuevoPago>0?', abono de '+fmt(nuevoPago)+' en caja':''));
 }
 
 function eliminarAdeudo(clienteId, adeudoId){
@@ -3360,9 +3457,26 @@ function marcarAdeudoPagado(clienteId, adeudoId){
   a.abonado=a.monto;
   a.estado='pagado';
   a.fechaPago=dateKey(new Date());
+
+  // Registrar el pago como ingreso del día para que sume a la Caja Actual
+  if(saldoRestante>0){
+    var hoy=new Date();
+    var hora=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
+    var dayData=getDayData(hoy);
+    dayData.ventas.push({
+      id:Date.now()+1,
+      monto:saldoRestante,
+      desc:'Cobro adeudo: '+esc(a.desc)+' ('+esc(c.nombre)+')',
+      cant:1,
+      hora:hora,
+      esCobroAdeudo:true
+    });
+    saveData();
+  }
+
   saveClientes();
-  renderClientes();
-  toast('✓ Adeudo saldado — el cliente queda sin adeudos pendientes');
+  renderAll();
+  toast('✓ Adeudo saldado — $'+fmt(saldoRestante)+' sumados a la caja');
 }
 
 function renderClientes(){
@@ -4572,6 +4686,17 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<!-- ═══ MODAL: PEDIDOS POR PROVEEDOR ═══ -->
+<div class="modal-overlay" id="proveedorModal" onclick="overlayClose(event,'proveedorModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="proveedorModalTitle">Pedidos</div>
+    <div class="form-section" style="padding:0">
+      <div id="proveedorModalBody" style="padding:0 16px 16px"></div>
+    </div>
+  </div>
+</div>
+
 <!-- PRINT FRAME -->
 <div id="rpt-frame"></div>
 
