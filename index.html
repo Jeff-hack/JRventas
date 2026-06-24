@@ -396,6 +396,13 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
     <!-- ══ RESUMEN ══ -->
     <div class="page active" id="page-resumen">
 
+      <!-- Banner alertas de stock bajo — ARRIBA para visibilidad inmediata -->
+      <div id="stockAlertaBanner" onclick="verAlertasStock()" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:#fdeee9;border:1px solid #f3c4b3;border-radius:var(--radius);cursor:pointer">
+        <span style="font-size:20px">⚠️</span>
+        <span id="stockAlertaBannerTxt" style="flex:1;font-size:13px;font-weight:600;color:var(--red)"></span>
+        <span style="font-size:12px;color:var(--red);font-weight:700">Ver →</span>
+      </div>
+
       <!-- HERO: Caja Actual -->
       <div class="balance-card" style="position:relative;overflow:hidden">
         <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
@@ -520,13 +527,6 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <div class="stat-value" id="dashAdeudoTotal" style="color:var(--red)">$0.00</div>
           <div class="stat-sub" id="dashAdeudoCnt">0 clientes con saldo</div>
         </div>
-      </div>
-
-      <!-- Banner alertas de stock bajo -->
-      <div id="stockAlertaBanner" onclick="verAlertasStock()" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:#fdeee9;border:1px solid #f3c4b3;border-radius:var(--radius);cursor:pointer">
-        <span style="font-size:20px">⚠️</span>
-        <span id="stockAlertaBannerTxt" style="flex:1;font-size:13px;font-weight:600;color:var(--red)"></span>
-        <span style="font-size:12px;color:var(--red);font-weight:700">Ver →</span>
       </div>
 
       <!-- Resumen semanal -->
