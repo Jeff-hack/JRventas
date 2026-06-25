@@ -161,7 +161,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .tab-btn.active{background:var(--surface);color:var(--primary);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
 
 /* FORM */
-.form-section{display:flex;flex-direction:column;gap:12px;padding:16px 20px max(28px,env(safe-area-inset-bottom))}
+.form-section{display:flex;flex-direction:column;gap:12px;padding:16px 20px max(32px,env(safe-area-inset-bottom));box-sizing:border-box}
 .form-label{font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;display:block}
 .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;background:var(--surface);color:var(--text);outline:none;transition:border-color 0.2s;-webkit-appearance:none;appearance:none}
 .form-input:focus{border-color:var(--primary)}
@@ -215,9 +215,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 /* MODALS */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg);border-radius:20px 20px 0 0;padding:0;width:100%;max-width:430px;max-height:92vh;overflow-y:auto}
-.modal-header{display:flex;align-items:center;gap:10px;padding:16px 20px 0;position:sticky;top:0;background:var(--bg);z-index:2;border-bottom:1px solid var(--border);margin-bottom:0;padding-bottom:14px}
-.modal-back{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:16px;color:var(--text2)}
+.modal{background:var(--bg);border-radius:20px 20px 0 0;padding:0;width:100%;max-width:430px;max-height:92vh;overflow-y:auto;box-sizing:border-box}
+.modal-header{display:flex;align-items:center;gap:10px;padding:14px 20px;position:sticky;top:0;background:var(--bg);z-index:2;border-bottom:1px solid var(--border)}
+.modal-back{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;font-weight:300;color:var(--text2);line-height:1}
 .modal-title{font-size:16px;font-weight:700;flex:1;min-width:0}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
 .modal::-webkit-scrollbar{display:none}
@@ -635,6 +635,10 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <button class="tab-btn" id="invFiltroAlto" onclick="setInvFiltro('alto')" style="color:var(--green)">↑ Alto</button>
           <button class="tab-btn" id="invFiltroMedio" onclick="setInvFiltro('medio')" style="color:var(--orange)">~ Medio</button>
           <button class="tab-btn" id="invFiltroBajo" onclick="setInvFiltro('bajo')" style="color:var(--red)">↓ Bajo</button>
+        </div>
+        <div style="position:relative;margin-bottom:8px">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none">🔍</span>
+          <input type="text" id="invBuscador" placeholder="Buscar producto..." oninput="renderInventario()" style="width:100%;padding:10px 14px 10px 36px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;box-sizing:border-box">
         </div>
         <div id="listaInventario"></div>
       </div>
@@ -3021,6 +3025,9 @@ function renderInventario(){
   if(totalInvEl) totalInvEl.textContent=fmt(totalInv);
   if(cntEl) cntEl.textContent=productos.length+' productos';
 
+  // Filtro de búsqueda por texto
+  var busq=(document.getElementById('invBuscador')||{value:''}).value.trim().toLowerCase();
+
   // Filtro — "bajo" ahora usa stockMinimo si está definido, sino el umbral fijo 5
   var filtrados=productos.filter(function(p){
     if(invFiltroActual==='bajo'){
@@ -3030,8 +3037,17 @@ function renderInventario(){
     if(invFiltroActual==='alto') return p.cantidad>20;
     return true;
   });
+
+  // Aplicar búsqueda por nombre
+  if(busq){
+    filtrados=filtrados.filter(function(p){
+      return p.nombre.toLowerCase().indexOf(busq)!==-1 ||
+             (p.proveedor&&p.proveedor.toLowerCase().indexOf(busq)!==-1) ||
+             (p.notas&&p.notas.toLowerCase().indexOf(busq)!==-1);
+    });
+  }
   if(!filtrados.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Sin productos en este rango de stock.</div></div>';
+    el.innerHTML='<div class="empty"><div class="empty-icon">'+(busq?'🔍':'📦')+'</div><div class="empty-text">'+(busq?'Sin productos que coincidan con <strong>"'+esc(busq)+'"</strong>':'Sin productos en este rango de stock.')+'</div></div>';
     return;
   }
   var html='';
