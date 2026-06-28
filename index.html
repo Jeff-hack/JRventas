@@ -1236,10 +1236,22 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <!-- VENTA: selector producto del inventario -->
       <div id="ventaProductoWrap">
         <label class="form-label">Producto del inventario <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
-        <select class="form-input" id="ventaProductoSel" onchange="onProductoSelChange()">
-          <option value="">— Seleccionar producto —</option>
-        </select>
-        <div id="ventaStockInfo" style="font-size:12px;color:var(--text3);margin-top:4px;display:none"></div>
+        <!-- Buscador arriba -->
+        <div style="position:relative;margin-bottom:8px">
+          <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none">🔍</span>
+          <input type="text" id="ventaProdBuscador" placeholder="Buscar producto..." oninput="renderVentaProdResultados()" autocomplete="off"
+            style="width:100%;padding:10px 14px 10px 34px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;box-sizing:border-box">
+        </div>
+        <!-- Resultados de búsqueda (aparece al escribir) -->
+        <div id="ventaProdResultados" style="display:none;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;margin-bottom:8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)"></div>
+        <!-- Top 10 más vendidos (visible cuando buscador está vacío) -->
+        <div id="ventaProdTop">
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px">🏆 Más vendidos</div>
+          <div id="ventaProdTopList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <!-- Campo oculto para mantener compatibilidad con el resto del código -->
+        <input type="hidden" id="ventaProductoSel">
+        <div id="ventaStockInfo" style="font-size:12px;color:var(--text3);margin-top:6px;padding:6px 10px;background:var(--surface2);border-radius:6px;display:none"></div>
       </div>
 
       <!-- GASTO: categoría -->
@@ -1250,6 +1262,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <option value="alimentacion">🍽 Alimentación</option>
           <option value="alcaldia">🏛 Impuesto Alcaldía</option>
           <option value="electricidad">⚡ Energía Eléctrica</option>
+          <option value="personal">👤 Gasto personal</option>
           <option value="otro">📋 Otro gasto operativo</option>
         </select>
       </div>
@@ -1809,6 +1822,14 @@ function openAddModal(){
   document.getElementById('ventaProductoSel').value='';
   document.getElementById('ventaStockInfo').style.display='none';
   poblarSelectProductos('ventaProductoSel');
+  // Inicializar buscador y top 10
+  var busEl=document.getElementById('ventaProdBuscador');
+  if(busEl) busEl.value='';
+  var resEl=document.getElementById('ventaProdResultados');
+  if(resEl) resEl.style.display='none';
+  var topEl=document.getElementById('ventaProdTop');
+  if(topEl) topEl.style.display='block';
+  renderVentaProdTop();
   var pedidoTipoSel=document.getElementById('pedidoTipo');
   if(pedidoTipoSel) pedidoTipoSel.selectedIndex=0;
   poblarSelectProductos('pedidoProdSel', pedidoTipoSel?pedidoTipoSel.value:null);
@@ -1867,17 +1888,106 @@ function setTipo(t){
   if(t==='pedido') renderPedidoItems();
 }
 
+// Seleccionar producto desde buscador o top 10
+function seleccionarProductoVenta(pid){
+  pid=parseInt(pid);
+  var p=getProducto(pid);
+  if(!p) return;
+  // Guardar en el campo oculto para compatibilidad
+  document.getElementById('ventaProductoSel').value=pid;
+  // Mostrar info
+  var info=document.getElementById('ventaStockInfo');
+  info.style.display='block';
+  info.innerHTML='Precio: <strong>'+fmt(p.precioVenta)+'</strong> &nbsp;·&nbsp; Stock: <strong>'+p.cantidad+' '+p.unidad+'</strong>';
+  // Prellenar campos
+  document.getElementById('fDesc').value=p.nombre;
+  document.getElementById('fMonto').value=p.precioVenta>0?p.precioVenta.toFixed(2):'';
+  // Limpiar buscador y ocultar resultados
+  document.getElementById('ventaProdBuscador').value='';
+  document.getElementById('ventaProdResultados').style.display='none';
+  document.getElementById('ventaProdTop').style.display='block';
+  onCantChange();
+}
+
 function onProductoSelChange(){
   var pid=parseInt(document.getElementById('ventaProductoSel').value);
-  var info=document.getElementById('ventaStockInfo');
-  if(!pid){info.style.display='none';return;}
-  var p=getProducto(pid);
-  if(!p){info.style.display='none';return;}
-  info.style.display='block';
-  info.innerHTML='Precio venta: <strong>'+fmt(p.precioVenta)+'</strong> &nbsp;|&nbsp; Stock: <strong>'+p.cantidad+' '+p.unidad+'</strong>';
-  document.getElementById('fMonto').value=p.precioVenta>0?p.precioVenta:'';
-  document.getElementById('fDesc').value=p.nombre;
-  onCantChange();
+  if(pid) seleccionarProductoVenta(pid);
+}
+
+// Calcular top 10 más vendidos desde historial
+function getTop10Vendidos(){
+  var conteo={};
+  Object.values(data).forEach(function(dayD){
+    (dayD.ventas||[]).forEach(function(v){
+      var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant||1}];
+      items.forEach(function(it){
+        if(it.productoId){
+          if(!conteo[it.productoId]) conteo[it.productoId]=0;
+          conteo[it.productoId]+=(parseFloat(it.cant)||1);
+        }
+      });
+    });
+  });
+  // Ordenar por cantidad vendida desc, tomar top 10 que estén en inventario
+  return Object.keys(conteo)
+    .filter(function(pid){return getProducto(parseInt(pid));})
+    .sort(function(a,b){return conteo[b]-conteo[a];})
+    .slice(0,10)
+    .map(function(pid){return getProducto(parseInt(pid));});
+}
+
+// Render top 10 botones
+function renderVentaProdTop(){
+  var el=document.getElementById('ventaProdTopList');
+  if(!el) return;
+  var top=getTop10Vendidos();
+  if(!top.length){
+    // Si no hay historial, mostrar todos los productos como botones
+    top=productos.slice(0,10);
+  }
+  el.innerHTML=top.map(function(p){
+    return '<button type="button" onclick="seleccionarProductoVenta('+p.id+')" '+
+      'style="background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;white-space:nowrap;transition:all 0.15s" '+
+      'onmousedown="this.style.background=\'var(--primary)\';this.style.color=\'#fff\'" '+
+      'onmouseup="this.style.background=\'var(--surface)\';this.style.color=\'var(--text)\'">'+
+      esc(p.nombre)+'</button>';
+  }).join('');
+}
+
+// Render resultados de búsqueda en tiempo real
+function renderVentaProdResultados(){
+  var busq=document.getElementById('ventaProdBuscador').value.trim().toLowerCase();
+  var resEl=document.getElementById('ventaProdResultados');
+  var topEl=document.getElementById('ventaProdTop');
+  if(!busq){
+    resEl.style.display='none';
+    topEl.style.display='block';
+    document.getElementById('ventaProductoSel').value='';
+    document.getElementById('ventaStockInfo').style.display='none';
+    return;
+  }
+  topEl.style.display='none';
+  var resultados=productos.filter(function(p){
+    return p.nombre.toLowerCase().indexOf(busq)!==-1 ||
+           (p.proveedor&&p.proveedor.toLowerCase().indexOf(busq)!==-1);
+  }).slice(0,8);
+  if(!resultados.length){
+    resEl.innerHTML='<div style="padding:10px 14px;font-size:12px;color:var(--text3)">Sin resultados para "'+esc(busq)+'"</div>';
+    resEl.style.display='flex';
+    return;
+  }
+  resEl.innerHTML=resultados.map(function(p){
+    return '<button type="button" onclick="seleccionarProductoVenta('+p.id+')" '+
+      'style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:transparent;border:none;border-bottom:1px solid var(--border);cursor:pointer;text-align:left;width:100%">'+
+      '<div>'+
+        '<div style="font-size:13px;font-weight:500;color:var(--text)">'+esc(p.nombre)+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">Stock: '+p.cantidad+' '+esc(p.unidad)+'</div>'+
+      '</div>'+
+      '<span style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:var(--green);flex-shrink:0">'+fmt(p.precioVenta)+'</span>'+
+    '</button>';
+  }).join('');
+  resEl.style.display='flex';
+  resEl.style.flexDirection='column';
 }
 
 function onCantChange(){
@@ -1910,6 +2020,13 @@ function agregarItemVenta(){
   // reset campos
   document.getElementById('ventaProductoSel').value='';
   document.getElementById('ventaStockInfo').style.display='none';
+  var busEl=document.getElementById('ventaProdBuscador');
+  if(busEl) busEl.value='';
+  var resEl=document.getElementById('ventaProdResultados');
+  if(resEl) resEl.style.display='none';
+  var topEl=document.getElementById('ventaProdTop');
+  if(topEl) topEl.style.display='block';
+  renderVentaProdTop();
   document.getElementById('fDesc').value='';
   document.getElementById('fCant').value='1';
   document.getElementById('fMonto').value='';
@@ -2780,7 +2897,7 @@ function renderList(tipo){
   var el=document.getElementById('lista'+cap(tipo));
   var badge=document.getElementById('badge'+cap(tipo));
   if(badge) badge.textContent=items.length;
-  var CATS={pasaje:{label:'Transporte',icon:'🚌',color:'#2563eb'},alimentacion:{label:'Alimentación',icon:'🍽',color:'#c4860a'},alcaldia:{label:'Alcaldía',icon:'🏛',color:'#7c3aed'},electricidad:{label:'Electricidad',icon:'⚡',color:'#d44f2e'},otro:{label:'Operativo',icon:'📋',color:'#666'},pedido:{label:'Pedido',icon:'📦',color:'#e8a020'},merma:{label:'Merma',icon:'🗑',color:'#d44f2e'}};
+  var CATS={pasaje:{label:'Transporte',icon:'🚌',color:'#2563eb'},alimentacion:{label:'Alimentación',icon:'🍽',color:'#c4860a'},alcaldia:{label:'Alcaldía',icon:'🏛',color:'#7c3aed'},electricidad:{label:'Electricidad',icon:'⚡',color:'#d44f2e'},personal:{label:'Personal',icon:'👤',color:'#7c3aed'},otro:{label:'Operativo',icon:'📋',color:'#666'},pedido:{label:'Pedido',icon:'📦',color:'#e8a020'},merma:{label:'Merma',icon:'🗑',color:'#d44f2e'}};
 
   // Resumen por categoría (solo gastos)
   if(tipo==='gastos'){
@@ -2861,7 +2978,7 @@ function verDetalle(tipo, id){
   var it=day[tipo].find(function(x){return x.id===id;});
   if(!it) return;
   var isV=tipo==='ventas';
-  var CATS2={pasaje:'🚌 Pasajes/Transporte',alimentacion:'🍽 Alimentación',alcaldia:'🏛 Impuesto Alcaldía',electricidad:'⚡ Energía Eléctrica',otro:'📋 Gasto operativo',pedido:'📦 Pedido de proveedor',merma:'🗑 Merma / Producto dañado'};
+  var CATS2={pasaje:'🚌 Pasajes/Transporte',alimentacion:'🍽 Alimentación',alcaldia:'🏛 Impuesto Alcaldía',electricidad:'⚡ Energía Eléctrica',personal:'👤 Gasto personal',otro:'📋 Gasto operativo',pedido:'📦 Pedido de proveedor',merma:'🗑 Merma / Producto dañado'};
 
   // Dynamic modal title
   var titleEl=document.getElementById('detalleVentaTitle');
