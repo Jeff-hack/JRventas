@@ -455,6 +455,13 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <span style="font-size:12px;color:var(--red);font-weight:700">Ver →</span>
       </div>
 
+      <!-- Banner encargos próximos a entregar -->
+      <div id="encargosBanner" onclick="showSection('ordenes',document.getElementById('navOrd'));setOrdMainTab('encargos')" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:#e8f0fe;border:1px solid #93c5fd;border-radius:var(--radius);cursor:pointer">
+        <span style="font-size:20px">📦</span>
+        <span id="encargosBannerTxt" style="flex:1;font-size:13px;font-weight:600;color:#1e4fb7"></span>
+        <span style="font-size:12px;color:#1e4fb7;font-weight:700">Ver →</span>
+      </div>
+
       <!-- HERO: Caja Actual -->
       <div class="balance-card" style="position:relative;overflow:hidden">
         <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
@@ -469,7 +476,10 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
         <div class="balance-meta" style="margin-top:6px">
           <span id="metaText">0% de meta ($500.00)</span>
+          <button onclick="openCierreModal()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🔒 Cerrar caja</button>
         </div>
+        <!-- Estado cierre del día -->
+        <div id="cierreBadge" style="display:none;margin-top:6px;font-size:11px;color:rgba(255,255,255,0.7);text-align:center"></div>
       </div>
 
       <!-- Fila: Patrimonio + Ganancia Neta Mes -->
@@ -594,14 +604,17 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <div class="semana-stat">
             <div class="semana-stat-label">Ventas</div>
             <div class="semana-stat-value" id="semVentas" style="color:var(--green)">$0</div>
+            <div id="semVentasDiff" style="font-size:10px;margin-top:2px"></div>
           </div>
           <div class="semana-stat">
             <div class="semana-stat-label">Gastos</div>
             <div class="semana-stat-value" id="semGastos" style="color:var(--red)">$0</div>
+            <div id="semGastosDiff" style="font-size:10px;margin-top:2px"></div>
           </div>
           <div class="semana-stat">
             <div class="semana-stat-label">Balance</div>
             <div class="semana-stat-value" id="semBalance">$0</div>
+            <div id="semBalanceDiff" style="font-size:10px;margin-top:2px"></div>
           </div>
         </div>
         <div class="semana-days" id="semanaDays"></div>
@@ -1410,6 +1423,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <label class="form-label">Notas <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
         <input class="form-input" type="text" id="pNotas" placeholder="Proveedor, lote, etc.">
       </div>
+      <div id="pPrecioHistorial" style="display:none;background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px"></div>
       <button class="btn-primary" onclick="saveProducto()">✓ Guardar producto</button>
     </div>
   </div>
@@ -2357,6 +2371,22 @@ function openProductoModal(id){
     document.getElementById('pProveedor').value=p.proveedor||'';
     document.getElementById('pStockMinimo').value=p.stockMinimo!=null?p.stockMinimo:'';
     document.getElementById('pCantidadReorden').value=p.cantidadReorden!=null?p.cantidadReorden:'';
+    // Mostrar historial de precios
+    var histEl=document.getElementById('pPrecioHistorial');
+    if(histEl && p.precioHistorial && p.precioHistorial.length){
+      var histHtml='<div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Historial de precios</div>';
+      p.precioHistorial.slice().reverse().slice(0,5).forEach(function(h){
+        var fd=h.fecha?h.fecha.split('-').reverse().join('/'):'';
+        histHtml+='<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px">'+
+          '<span style="color:var(--text3)">'+fd+'</span>'+
+          '<span>Costo: <strong>'+fmt(h.precioCosto)+'</strong> · Venta: <strong>'+fmt(h.precioVenta)+'</strong></span>'+
+        '</div>';
+      });
+      histEl.innerHTML=histHtml;
+      histEl.style.display='block';
+    } else if(histEl){
+      histEl.style.display='none';
+    }
   } else {
     document.getElementById('productoModalTitle').textContent='Nuevo producto';
     ['pNombre','pNotas'].forEach(function(f){document.getElementById(f).value='';});
@@ -2388,9 +2418,21 @@ function saveProducto(){
   if(!fecha){toast('⚠ Selecciona la fecha de ingreso');return;}
   if(idExist){
     var p=getProducto(parseInt(idExist));
-    if(p){p.nombre=nombre;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;p.proveedor=proveedor;p.stockMinimo=stockMinimo;p.cantidadReorden=cantidadReorden;}
+    if(p){
+      // Registrar historial de precio si cambió
+      if(!p.precioHistorial) p.precioHistorial=[];
+      if(p.precioCosto!==precioCosto||p.precioVenta!==precioVenta){
+        p.precioHistorial.push({
+          fecha:dateKey(new Date()),
+          precioCosto:p.precioCosto,
+          precioVenta:p.precioVenta
+        });
+        if(p.precioHistorial.length>20) p.precioHistorial=p.precioHistorial.slice(-20); // máximo 20 registros
+      }
+      p.nombre=nombre;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;p.proveedor=proveedor;p.stockMinimo=stockMinimo;p.cantidadReorden=cantidadReorden;
+    }
   } else {
-    productos.push({id:Date.now(),nombre:nombre,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas,proveedor:proveedor,stockMinimo:stockMinimo,cantidadReorden:cantidadReorden});
+    productos.push({id:Date.now(),nombre:nombre,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas,proveedor:proveedor,stockMinimo:stockMinimo,cantidadReorden:cantidadReorden,precioHistorial:[]});
   }
   saveProductos();
   closeModal('productoModal');
@@ -2623,7 +2665,9 @@ function saveStockAjuste(){
 function renderAll(){
   renderResumen();
   updateFondoLabel();
-  checkStockAlertas(); // verificar stock bajo en cada actualización
+  checkStockAlertas();
+  checkEncargosBanner();
+  updateCierreBadge();
   // Update dashboard counters
   var pedPend=pedidosGlobal.filter(function(p){return p.estado==='pendiente';}).length;
   var encPend=encargos.filter(function(e){return e.estado==='pendiente';}).length;
@@ -2711,29 +2755,32 @@ function renderResumen(){
     if(k.substring(0,7)!==mesActual) return;
     var d=data[k];
     (d.ventas||[]).forEach(function(v){
-      // Venta múltiple: tiene items[]
+      // Ignorar cobros de adeudo (ya se contabilizan en caja pero no son venta real de producto)
+      if(v.esCobroAdeudo) return;
       if(v.items&&v.items.length){
         v.items.forEach(function(it){
-          if(it.productoId){
-            var prod=getProducto(it.productoId);
-            if(prod&&prod.precioCosto>0) ganancia+=it.monto-(prod.precioCosto*it.cant);
-            else ganancia+=it.monto; // sin costo registrado = suma completo
+          var prod=it.productoId?getProducto(it.productoId):null;
+          if(prod&&prod.precioCosto>0){
+            ganancia+=it.monto-(prod.precioCosto*(parseFloat(it.cant)||1));
           } else {
-            ganancia+=it.monto; // item sin producto = suma completo
+            // Sin producto vinculado o costo=0: la venta suma completa a ganancia
+            ganancia+=it.monto;
           }
         });
       } else {
-        // Venta simple
-        if(v.productoId){
-          var prod=getProducto(v.productoId);
-          if(prod&&prod.precioCosto>0) ganancia+=v.monto-(prod.precioCosto*v.cant);
-          else ganancia+=v.monto;
+        var prod=v.productoId?getProducto(v.productoId):null;
+        if(v.productoId&&prod&&prod.precioCosto>0){
+          ganancia+=v.monto-(prod.precioCosto*(parseFloat(v.cant)||1));
         } else {
-          ganancia+=v.monto; // venta manual sin producto = suma completo
+          // Venta manual sin producto, o producto eliminado: suma completa
+          ganancia+=v.monto;
         }
       }
     });
-    // Solo gastos operativos (NO de pedidos)
+    // Gastos operativos que restan ganancia:
+    // - Excluir gastos de pedidos (ya se restan al completar)
+    // - Excluir cobros de adeudo que aparezcan en gastos
+    // - Incluir merma, personal, transporte, etc.
     (d.gastos||[]).forEach(function(g){
       var esDePedido=g.pedidoId||(g.desc&&g.desc.indexOf('Pedido:')===0);
       if(!esDePedido) gastosTotal+=g.monto;
@@ -2785,6 +2832,27 @@ function renderSemana(){
   var balEl=document.getElementById('semBalance');
   balEl.textContent=fmtShort(Math.abs(semBal));
   balEl.style.color=semBal>=0?'var(--green)':'var(--red)';
+
+  // Comparativo semana anterior
+  var prevDays=getWeekDays(new Date(days[0].getTime()-7*86400000));
+  var prevV=0,prevG=0;
+  prevDays.forEach(function(d){
+    var dd=data[dateKey(d)]||{ventas:[],gastos:[]};
+    prevV+=dd.ventas.reduce(function(a,x){return a+x.monto;},0);
+    prevG+=dd.gastos.reduce(function(a,x){return a+x.monto;},0);
+  });
+  function diffBadge(curr, prev, elId, positiveIsGood){
+    var el=document.getElementById(elId);
+    if(!el) return;
+    if(prev===0){el.textContent='';return;}
+    var pct=Math.round(((curr-prev)/prev)*100);
+    var up=pct>=0;
+    var good=(positiveIsGood?up:!up);
+    el.innerHTML='<span style="color:'+(good?'var(--green)':'var(--red)')+'">'+(up?'↑':'↓')+Math.abs(pct)+'% vs sem. ant.</span>';
+  }
+  diffBadge(semV,prevV,'semVentasDiff',true);
+  diffBadge(semG,prevG,'semGastosDiff',false);
+  diffBadge(semBal,prevV-prevG,'semBalanceDiff',true);
 
   // Tarjetas grandes de semana
   document.getElementById('semVentasCard').textContent=fmt(semV);
@@ -3582,6 +3650,92 @@ function eliminarEncargo(id){
   saveEncargos();
   renderEncargos();
   toast('Encargo eliminado');
+}
+
+// ════════════════════════════════
+//  CIERRE DE CAJA DIARIO
+// ════════════════════════════════
+function openCierreModal(){
+  var hoy=dateKey(currentDate);
+  var cajaCalculada=getCajaAcumulada(currentDate);
+  var cierreAnterior=fondos['cierre_'+hoy];
+  var day=getDayData(currentDate);
+  var tv=day.ventas.reduce(function(a,x){return a+x.monto;},0);
+  var tg=day.gastos.reduce(function(a,x){return a+x.monto;},0);
+  var html='<div style="display:flex;flex-direction:column;gap:8px">'+
+    '<div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text3)">Ventas del día</span><span style="font-family:\'DM Mono\',monospace;font-weight:600;color:var(--green)">'+fmt(tv)+'</span></div>'+
+    '<div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text3)">Gastos del día</span><span style="font-family:\'DM Mono\',monospace;font-weight:600;color:var(--red)">'+fmt(tg)+'</span></div>'+
+    '<div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center">'+
+      '<span style="font-size:13px;font-weight:700">Caja según sistema</span>'+
+      '<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:var(--primary)">'+fmt(cajaCalculada)+'</span>'+
+    '</div>'+
+    (cierreAnterior!=null?'<div style="font-size:11px;color:var(--green)">✓ Ya cerraste hoy con '+fmt(cierreAnterior.efectivo)+' en físico</div>':'')+
+  '</div>';
+  document.getElementById('cierreResumen').innerHTML=html;
+  document.getElementById('cierreEfectivo').value=cierreAnterior!=null?cierreAnterior.efectivo:'';
+  document.getElementById('cierre_diferencia').style.display='none';
+  document.getElementById('cierreModal').classList.add('open');
+}
+
+function updateCierre(){
+  var efectivo=parseFloat(document.getElementById('cierreEfectivo').value)||0;
+  var cajaCalculada=getCajaAcumulada(currentDate);
+  var diff=efectivo-cajaCalculada;
+  var el=document.getElementById('cierre_diferencia');
+  if(document.getElementById('cierreEfectivo').value===''){el.style.display='none';return;}
+  el.style.display='block';
+  if(Math.abs(diff)<0.01){
+    el.style.background='#e8f7f1';el.style.color='var(--green)';el.textContent='✓ Cuadra perfectamente';
+  } else if(diff>0){
+    el.style.background='#e8f7f1';el.style.color='var(--green)';el.textContent='Sobran '+fmt(diff)+' (más de lo esperado)';
+  } else {
+    el.style.background='#fdeee9';el.style.color='var(--red)';el.textContent='Faltan '+fmt(Math.abs(diff))+' (menos de lo esperado)';
+  }
+}
+
+function saveCierre(){
+  var efectivo=parseFloat(document.getElementById('cierreEfectivo').value);
+  if(isNaN(efectivo)||efectivo<0){toast('⚠ Ingresa el efectivo físico en caja');return;}
+  var hoy=dateKey(currentDate);
+  var cajaCalculada=getCajaAcumulada(currentDate);
+  fondos['cierre_'+hoy]={efectivo:efectivo,calculado:cajaCalculada,diferencia:efectivo-cajaCalculada,hora:new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'})};
+  fondos['efectivoApertura']=efectivo;
+  saveFondos();
+  closeModal('cierreModal');
+  renderAll();
+  toast('✓ Caja cerrada — mañana inicia con '+fmt(efectivo));
+}
+
+function updateCierreBadge(){
+  var hoy=dateKey(currentDate);
+  var cierre=fondos['cierre_'+hoy];
+  var el=document.getElementById('cierreBadge');
+  if(!el) return;
+  if(cierre){el.style.display='block';el.textContent='🔒 Cerrada a las '+cierre.hora+' · Físico: '+fmt(cierre.efectivo);}
+  else{el.style.display='none';}
+}
+
+// ════════════════════════════════
+//  ENCARGOS PRÓXIMOS A ENTREGAR
+// ════════════════════════════════
+function checkEncargosBanner(){
+  var hoy=dateKey(new Date());
+  var manana=dateKey(new Date(new Date().getTime()+86400000));
+  var proximos=encargos.filter(function(e){
+    return (e.estado==='pendiente'||e.estado==='listo')&&(e.fecha===hoy||e.fecha===manana);
+  });
+  var banner=document.getElementById('encargosBanner');
+  var txt=document.getElementById('encargosBannerTxt');
+  if(!banner||!txt) return;
+  if(proximos.length){
+    var hoyC=proximos.filter(function(e){return e.fecha===hoy;}).length;
+    var manC=proximos.filter(function(e){return e.fecha===manana;}).length;
+    var msg='';
+    if(hoyC) msg+='📦 '+hoyC+' encargo'+(hoyC>1?'s':'')+' para entregar HOY';
+    if(manC) msg+=(msg?' · ':'')+manC+' para mañana';
+    txt.textContent=msg;
+    banner.style.display='flex';
+  } else {banner.style.display='none';}
 }
 
 // ═══════════════════════════════════════════
@@ -4389,7 +4543,7 @@ function buildReporteDiario(){
     var dd=data[dk];
     (dd.ventas||[]).forEach(function(v){
       var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant,monto:v.monto}];
-      items.forEach(function(it){if(it.productoId){var p=getProducto(it.productoId);if(p&&p.precioCosto>0) ganMes+=it.monto-(p.precioCosto*it.cant);}});
+      items.forEach(function(it){var pp=it.productoId?getProducto(it.productoId):null;if(pp&&pp.precioCosto>0){ganMes+=it.monto-(pp.precioCosto*(parseFloat(it.cant)||1));}else{ganMes+=it.monto;}});
     });
     (dd.gastos||[]).forEach(function(g){if(!g.pedidoId&&!(g.desc&&g.desc.indexOf('Pedido:')===0)) gastosMes+=g.monto;});
   });
@@ -4594,7 +4748,7 @@ function buildReporteMensual(){
     // Ganancia
     (dayD.ventas||[]).forEach(function(vx){
       var items=vx.items&&vx.items.length?vx.items:[{productoId:vx.productoId,cant:vx.cant,monto:vx.monto}];
-      items.forEach(function(it){if(it.productoId){var pr=getProducto(it.productoId);if(pr&&pr.precioCosto>0) ganMesRpt+=it.monto-(pr.precioCosto*it.cant);}});
+      items.forEach(function(it){var pr=it.productoId?getProducto(it.productoId):null;if(pr&&pr.precioCosto>0){ganMesRpt+=it.monto-(pr.precioCosto*(parseFloat(it.cant)||1));}else{ganMesRpt+=it.monto;}});
     });
     (dayD.gastos||[]).forEach(function(gx){if(!gx.pedidoId&&!(gx.desc&&gx.desc.indexOf("Pedido:")===0)) gastosMesRpt+=gx.monto;});
   }
@@ -5118,6 +5272,27 @@ if('serviceWorker' in navigator){
     <div class="modal-header"><button class="modal-back" onclick="closeModal('stockAlertaModal')">‹</button><div class="modal-title" style="color:var(--red)">⚠️ Stock bajo — Pedidos sugeridos</div></div>
     <div class="form-section" style="padding:0">
       <div id="stockAlertaBody" style="padding:0 16px 16px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: CIERRE DE CAJA ═══ -->
+<div class="modal-overlay" id="cierreModal" onclick="overlayClose(event,'cierreModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <button class="modal-back" onclick="closeModal('cierreModal')">‹</button>
+      <div class="modal-title">🔒 Cierre de caja</div>
+    </div>
+    <div class="form-section">
+      <div id="cierreResumen" style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px"></div>
+      <div>
+        <label class="form-label">Efectivo físico en caja al cerrar ($)</label>
+        <input class="form-input" type="number" id="cierreEfectivo" placeholder="0.00" step="0.01" min="0" oninput="updateCierre()">
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Cuenta el dinero físico que tienes. Este monto será la apertura de mañana.</div>
+      </div>
+      <div id="cierre_diferencia" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:600"></div>
+      <button class="btn-primary" onclick="saveCierre()">🔒 Confirmar cierre del día</button>
     </div>
   </div>
 </div>
