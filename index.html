@@ -589,6 +589,16 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <div class="stat-value" id="dashAdeudoTotal" style="color:var(--red)">$0.00</div>
           <div class="stat-sub" id="dashAdeudoCnt">0 clientes con saldo</div>
         </div>
+        <div class="stat-card" style="cursor:pointer" onclick="generarReporte('deudaProveedores')">
+          <div class="stat-label">
+            <div class="stat-icon" style="background:#fef0d9">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e8a020" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            Deuda proveedores
+          </div>
+          <div class="stat-value" id="dashDeudaProv" style="color:var(--orange)">$0.00</div>
+          <div class="stat-sub" id="dashDeudaProvCnt">0 pedidos pendientes</div>
+        </div>
       </div>
 
       <!-- Resumen semanal -->
@@ -618,6 +628,8 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           </div>
         </div>
         <div class="semana-days" id="semanaDays"></div>
+        <!-- Proyección del mes -->
+        <div id="proyeccionMes" style="padding:10px 16px;border-top:1px solid var(--border);font-size:12px"></div>
       </div>
 
       <!-- Gráfico distribución -->
@@ -820,6 +832,16 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <div id="masPanelReportes" style="display:none">
     <div class="page" id="page-reportes" style="position:static;overflow:visible;padding:0;display:flex;flex-direction:column;gap:0">
 
+      <!-- ANÁLISIS RÁPIDO -->
+      <div id="analisisProductos" style="margin:8px 16px 4px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">📊 Análisis de productos</div>
+        <div class="card" style="padding:12px 14px;cursor:pointer" onclick="renderAnalisisProductos()">
+          <div id="analisisBody">
+            <div style="font-size:12px;color:var(--text3);text-align:center;padding:8px">Toca para ver análisis de rentabilidad y ventas →</div>
+          </div>
+        </div>
+      </div>
+
       <!-- VENTAS -->
       <div class="rpt-section-header" style="--c:#1d9e75">
         <span class="rpt-section-icon">💰</span>
@@ -908,6 +930,21 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <button class="rpt-btn rpt-btn-dark" onclick="generarReporte('mensual')" style="--c:#0a3d2e">
           <span class="rpt-btn-period">Mes</span>
           <span class="rpt-btn-label">General</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+      </div>
+
+      <!-- Clientes y Deudas -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:12px 0 6px;padding-left:2px">👤 Clientes</div>
+      <div class="rpt-grid">
+        <button class="rpt-btn" onclick="generarReporte('clientesAdeudos')" style="--c:#7c3aed;grid-column:span 2">
+          <span class="rpt-btn-period">📋</span>
+          <span class="rpt-btn-label">Lista de cobros</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+        <button class="rpt-btn" onclick="generarReporte('deudaProveedores')" style="--c:#e8a020">
+          <span class="rpt-btn-period">🚚</span>
+          <span class="rpt-btn-label">Deuda proveedores</span>
           <span class="rpt-btn-arrow">→</span>
         </button>
       </div>
@@ -2681,6 +2718,11 @@ function renderAll(){
   });
   var dashAT=document.getElementById('dashAdeudoTotal'); if(dashAT) dashAT.textContent=fmt(totalAdeudoDash);
   var dashAC=document.getElementById('dashAdeudoCnt'); if(dashAC) dashAC.textContent=cntAdeudoDash+' cliente'+(cntAdeudoDash!==1?'s':'')+' con saldo';
+  // Deuda proveedores
+  var pedsPend=pedidosGlobal.filter(function(p){return p.estado==='pendiente';});
+  var totalDeudaProv=pedsPend.reduce(function(s,p){return s+p.monto;},0);
+  var dashDP=document.getElementById('dashDeudaProv'); if(dashDP) dashDP.textContent=fmt(totalDeudaProv);
+  var dashDPC=document.getElementById('dashDeudaProvCnt'); if(dashDPC) dashDPC.textContent=pedsPend.length+' pedido'+(pedsPend.length!==1?'s':'')+' pendientes';
   // Inventory dash
   var totalInv=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
   var invDash=document.getElementById('invTotalInvertidoDash'); if(invDash) invDash.textContent=fmt(totalInv);
@@ -2880,6 +2922,24 @@ function renderSemana(){
     '</div>';
   });
   document.getElementById('semanaDays').innerHTML=html;
+
+  // Proyección del mes
+  var proy=getProyeccionMes();
+  var proyEl=document.getElementById('proyeccionMes');
+  if(proyEl&&proy.promDiario>0){
+    var pct=Math.min(100,Math.round((proy.ventasMes/proy.proyeccion)*100));
+    proyEl.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+        '<span style="color:var(--text3)">📈 Proyección del mes</span>'+
+        '<span style="font-family:\'DM Mono\',monospace;font-weight:700;color:var(--primary)">'+fmt(proy.proyeccion)+'</span>'+
+      '</div>'+
+      '<div style="height:5px;background:var(--surface2);border-radius:3px;margin-bottom:4px">'+
+        '<div style="height:5px;border-radius:3px;background:var(--primary);width:'+pct+'%"></div>'+
+      '</div>'+
+      '<div style="color:var(--text3);font-size:11px">Día '+proy.diaActual+'/'+proy.totalDias+' · Promedio diario: '+fmt(proy.promDiario)+' · Quedan '+proy.diasRestantes+' días</div>';
+  } else if(proyEl){
+    proyEl.innerHTML='';
+  }
 }
 
 var ventaFiltroActual='lista';
@@ -3613,7 +3673,7 @@ function saveEncargo(){
     encargos.push({id:Date.now(),clienteId:clienteId,cliente:clienteNombre,items:encargoItemsBuffer.slice(),productos:productosDesc,fecha:fecha,costo:costo,anticipo:anticipo,estado:estado,notas:notas});
   }
 
-  // Si cambió a "entregado" → registrar automáticamente como venta del día
+  // Si cambió a "entregado" → registrar venta + descontar inventario
   if(estado==='entregado' && estadoAnterior && estadoAnterior!=='entregado'){
     var hoy=new Date();
     var hora=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
@@ -3629,7 +3689,23 @@ function saveEncargo(){
       notas:notas
     });
     saveData();
-    toast('✓ Encargo entregado — venta de '+fmt(costo)+' registrada automáticamente');
+
+    // Descontar del inventario los productos del encargo
+    var stockMsg='';
+    encargoItemsBuffer.forEach(function(it){
+      if(it.productoId){
+        var prod=getProducto(it.productoId);
+        if(prod){
+          var cant=parseFloat(it.cant)||1;
+          prod.cantidad=Math.max(0,parseFloat((prod.cantidad-cant).toFixed(4)));
+          stockMsg+=' −'+cant+' '+prod.unidad+' '+prod.nombre+';';
+        }
+      }
+    });
+    if(stockMsg) saveProductos();
+    checkStockAlertas();
+
+    toast('✓ Encargo entregado — venta de '+fmt(costo)+' registrada'+(stockMsg?' · Stock:'+stockMsg:''));
   } else {
     toast('✓ Encargo guardado');
   }
@@ -5189,6 +5265,226 @@ function buildReporteInventarioMensual(){
 
 
 // ─── DISPARAR REPORTE ───
+// ─── ANÁLISIS: MÁS RENTABLE vs MÁS VENDIDO ───
+function renderAnalisisProductos(){
+  // Calcular ventas e ingresos por producto desde todo el historial
+  var stats={};
+  Object.values(data).forEach(function(dayD){
+    (dayD.ventas||[]).forEach(function(v){
+      var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant||1,monto:v.monto}];
+      items.forEach(function(it){
+        if(!it.productoId) return;
+        var prod=getProducto(it.productoId);
+        if(!prod) return;
+        if(!stats[it.productoId]) stats[it.productoId]={nombre:prod.nombre,cant:0,ingreso:0,ganancia:0};
+        var cant=parseFloat(it.cant)||1;
+        var ganancia=prod.precioCosto>0?it.monto-(prod.precioCosto*cant):it.monto;
+        stats[it.productoId].cant+=cant;
+        stats[it.productoId].ingreso+=it.monto;
+        stats[it.productoId].ganancia+=ganancia;
+      });
+    });
+  });
+
+  var lista=Object.values(stats).filter(function(s){return s.cant>0;});
+  if(!lista.length){
+    document.getElementById('analisisBody').innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px">Sin datos de ventas con productos vinculados.</div>';
+    return;
+  }
+
+  var masVendido=lista.slice().sort(function(a,b){return b.cant-a.cant;})[0];
+  var masRentable=lista.slice().sort(function(a,b){return b.ganancia-a.ganancia;})[0];
+  var menosRentable=lista.slice().sort(function(a,b){return a.ganancia-b.ganancia;})[0];
+  var topVentas=lista.slice().sort(function(a,b){return b.cant-a.cant;}).slice(0,5);
+  var topGanancia=lista.slice().sort(function(a,b){return b.ganancia-a.ganancia;}).slice(0,5);
+
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+
+    '<div style="background:#e8f7f1;border-radius:8px;padding:10px">'+
+      '<div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f6e56;margin-bottom:4px">🏆 Más vendido</div>'+
+      '<div style="font-size:13px;font-weight:700">'+esc(masVendido.nombre)+'</div>'+
+      '<div style="font-size:11px;color:var(--text3)">'+masVendido.cant.toFixed(1)+' uds · '+fmt(masVendido.ingreso)+'</div>'+
+    '</div>'+
+    '<div style="background:#fef0d9;border-radius:8px;padding:10px">'+
+      '<div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#c4860a;margin-bottom:4px">💰 Más rentable</div>'+
+      '<div style="font-size:13px;font-weight:700">'+esc(masRentable.nombre)+'</div>'+
+      '<div style="font-size:11px;color:var(--text3)">Ganancia: '+fmt(masRentable.ganancia)+'</div>'+
+    '</div>'+
+  '</div>';
+
+  // Top 5 por cantidad
+  html+='<div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Top 5 por volumen de ventas</div>';
+  var maxCant=topVentas[0].cant;
+  topVentas.forEach(function(p,i){
+    var pct=Math.round((p.cant/maxCant)*100);
+    html+='<div style="margin-bottom:8px">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:3px">'+
+        '<span style="font-size:12px;font-weight:500">#'+(i+1)+' '+esc(p.nombre)+'</span>'+
+        '<span style="font-size:12px;color:var(--text3)">'+p.cant.toFixed(1)+' uds</span>'+
+      '</div>'+
+      '<div style="height:5px;background:var(--surface2);border-radius:3px">'+
+        '<div style="height:5px;border-radius:3px;background:var(--green);width:'+pct+'%"></div>'+
+      '</div>'+
+    '</div>';
+  });
+
+  // Top 5 por ganancia
+  html+='<div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin:12px 0 6px">Top 5 por ganancia generada</div>';
+  var maxGan=topGanancia[0].ganancia;
+  topGanancia.forEach(function(p,i){
+    var pct=Math.round((p.ganancia/maxGan)*100);
+    html+='<div style="margin-bottom:8px">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:3px">'+
+        '<span style="font-size:12px;font-weight:500">#'+(i+1)+' '+esc(p.nombre)+'</span>'+
+        '<span style="font-size:12px;color:var(--orange)">'+fmt(p.ganancia)+'</span>'+
+      '</div>'+
+      '<div style="height:5px;background:var(--surface2);border-radius:3px">'+
+        '<div style="height:5px;border-radius:3px;background:var(--orange);width:'+pct+'%"></div>'+
+      '</div>'+
+    '</div>';
+  });
+
+  if(masRentable.nombre!==masVendido.nombre){
+    html+='<div style="background:#e8f0fe;border-radius:8px;padding:10px;font-size:12px;color:#1e4fb7;margin-top:8px">'+
+      '💡 <strong>'+esc(masRentable.nombre)+'</strong> genera más ganancia pero <strong>'+esc(masVendido.nombre)+'</strong> se vende más. '+
+      'Considera promover más el producto rentable.'+
+    '</div>';
+  }
+
+  document.getElementById('analisisBody').innerHTML=html;
+}
+
+// ─── PROYECCIÓN DEL MES ───
+function getProyeccionMes(){
+  var year=new Date().getFullYear(), month=new Date().getMonth();
+  var hoy=new Date();
+  var diaActual=hoy.getDate();
+  var totalDias=new Date(year,month+1,0).getDate();
+  var diasRestantes=totalDias-diaActual;
+
+  var ventasMes=0, diasConVentas=0;
+  for(var d=1;d<=diaActual;d++){
+    var k=dateKey(new Date(year,month,d));
+    var dd=data[k]||{ventas:[]};
+    var v=dd.ventas.reduce(function(a,x){return a+x.monto;},0);
+    if(v>0){ventasMes+=v;diasConVentas++;}
+  }
+  var promDiario=diasConVentas>0?ventasMes/diasConVentas:0;
+  var proyeccion=ventasMes+(promDiario*diasRestantes);
+  return {ventasMes:ventasMes,promDiario:promDiario,proyeccion:proyeccion,diasRestantes:diasRestantes,diaActual:diaActual,totalDias:totalDias};
+}
+
+
+function buildReporteClientesAdeudos(){
+  var hoy=new Date();
+  var fechaLabel=hoy.toLocaleDateString('es-SV',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  var conDeuda=clientes.filter(function(c){
+    var saldo=(c.adeudos||[]).filter(function(a){return a.estado!=='pagado';}).reduce(function(s,a){return s+(a.monto-(a.abonado||0));},0);
+    return saldo>0;
+  });
+  var totalGeneral=0;
+  var html=rptHeader('Lista de Cobros — Clientes con Adeudo',fechaLabel);
+
+  if(!conDeuda.length){
+    html+='<p style="text-align:center;color:#aaa;padding:24px">✓ No hay clientes con adeudos pendientes.</p>';
+    html+=rptFooter(); return html;
+  }
+
+  conDeuda.sort(function(a,b){
+    var sa=(a.adeudos||[]).filter(function(x){return x.estado!=='pagado';}).reduce(function(s,x){return s+(x.monto-(x.abonado||0));},0);
+    var sb=(b.adeudos||[]).filter(function(x){return x.estado!=='pagado';}).reduce(function(s,x){return s+(x.monto-(x.abonado||0));},0);
+    return sb-sa;
+  });
+
+  conDeuda.forEach(function(c){
+    var pendientes=(c.adeudos||[]).filter(function(a){return a.estado!=='pagado';});
+    var saldoCliente=pendientes.reduce(function(s,a){return s+(a.monto-(a.abonado||0));},0);
+    totalGeneral+=saldoCliente;
+
+    html+='<div class="rpt-section no-break">';
+    html+=rptSH('👤 '+esc(c.nombre)+(c.telefono?' · 📞 '+esc(c.telefono):''), fmt(saldoCliente));
+    if(c.precios&&c.precios.length){
+      html+='<div style="font-size:10px;color:#888;padding:4px 0 6px">Precios especiales: '+c.precios.map(function(p){return esc(p.productoNombre)+' → '+fmt(p.precio);}).join(' · ')+'</div>';
+    }
+    html+='<table class="rpt-table" style="width:100%"><thead><tr>'+
+      '<th>Descripción</th><th class="c">F. Entrega</th><th class="c">F. Pago</th><th class="r">Total</th><th class="r">Abonado</th><th class="r">Saldo</th>'+
+    '</tr></thead><tbody>';
+    pendientes.forEach(function(a){
+      var abonado=(a.pagos||[]).reduce(function(s,p){return s+p.monto;},0)||(a.abonado||0);
+      var saldo=a.monto-abonado;
+      var fE=a.fechaEntrega?a.fechaEntrega.split('-').reverse().join('/'):'—';
+      var fP=a.fechaPago?a.fechaPago.split('-').reverse().join('/'):'—';
+      var vencido=a.fechaPago&&a.fechaPago<dateKey(hoy);
+      html+='<tr'+(vencido?' style="background:#fff5f5"':'')+'><td>'+esc(a.desc)+'</td>'+
+        '<td class="cen">'+fE+'</td>'+
+        '<td class="cen"'+(vencido?' style="color:#d44f2e;font-weight:700"':'')+'>'+fP+'</td>'+
+        '<td class="num">'+fmt(a.monto)+'</td>'+
+        '<td class="num" style="color:#1d9e75">'+fmt(abonado)+'</td>'+
+        '<td class="num" style="color:#d44f2e;font-weight:700">'+fmt(saldo)+'</td>'+
+      '</tr>';
+    });
+    html+='<tr class="tot"><td colspan="5" class="r">TOTAL PENDIENTE</td><td class="num" style="color:#d44f2e">'+fmt(saldoCliente)+'</td></tr>';
+    html+='</tbody></table></div>';
+  });
+
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:12px 16px;background:#fdeee9;border-radius:6px">'+
+    '<strong style="font-size:14px">TOTAL A COBRAR</strong>'+
+    '<span style="font-family:Courier New;font-size:20px;font-weight:700;color:#d44f2e">'+fmt(totalGeneral)+'</span>'+
+  '</div>';
+  html+=rptFooter();
+  return html;
+}
+
+// ─── REPORTE DEUDA POR PROVEEDOR ───
+function buildReporteDeudaProveedores(){
+  var hoy=new Date();
+  var fechaLabel=hoy.toLocaleDateString('es-SV',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  var pendientes=pedidosGlobal.filter(function(p){return p.estado==='pendiente';});
+  var html=rptHeader('Deuda con Proveedores',fechaLabel);
+
+  var PROV_COLORS={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'};
+  var byProv={};
+  pendientes.forEach(function(p){
+    if(!byProv[p.tipo]) byProv[p.tipo]={peds:[],total:0};
+    byProv[p.tipo].peds.push(p);
+    byProv[p.tipo].total+=p.monto;
+  });
+
+  var totalGral=pendientes.reduce(function(s,p){return s+p.monto;},0);
+
+  if(!pendientes.length){
+    html+='<p style="text-align:center;color:#aaa;padding:24px">✓ No hay pedidos pendientes de pago.</p>';
+    html+=rptFooter(); return html;
+  }
+
+  html+=rptStrip([
+    {label:'Total a pagar',value:fmt(totalGral),color:'#e8a020'},
+    {label:'Pedidos pendientes',value:pendientes.length+'',color:'#d44f2e'},
+    {label:'Proveedores',value:Object.keys(byProv).length+'',color:'#0a3d2e'}
+  ]);
+
+  Object.keys(byProv).sort().forEach(function(prov){
+    var g=byProv[prov];
+    var color=PROV_COLORS[prov]||'#888';
+    html+='<div class="rpt-section no-break">';
+    html+=rptSH(esc(prov),fmt(g.total));
+    html+='<table class="rpt-table" style="width:100%"><thead><tr>'+
+      '<th>Fecha pedido</th><th>Descripción</th><th class="r">Monto</th>'+
+    '</tr></thead><tbody>';
+    g.peds.sort(function(a,b){return a.fecha<b.fecha?1:-1;}).forEach(function(p){
+      var pdesc=p.desc||'';
+      if(p.items&&p.items.length){var fi=p.items[0].desc||p.items[0].productoNombre||'';pdesc=p.items.length===1?fi:fi+' +'+(p.items.length-1)+' más';}
+      html+='<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(pdesc)+'</td>'+
+        '<td class="num" style="color:'+color+'">'+fmt(p.monto)+'</td></tr>';
+    });
+    html+='<tr class="tot"><td colspan="2" class="r">TOTAL '+esc(prov).toUpperCase()+'</td>'+
+      '<td class="num" style="color:'+color+'">'+fmt(g.total)+'</td></tr>';
+    html+='</tbody></table></div>';
+  });
+
+  html+=rptFooter();
+  return html;
+}
+
 function generarReporte(tipo){
   var html='';
   if(tipo==='diario') html=buildReporteDiario();
@@ -5203,6 +5499,8 @@ function generarReporte(tipo){
   else if(tipo==='pedidosMensual') html=buildReportePedidosMensual();
   else if(tipo==='inventarioSemanal') html=buildReporteInventarioSemanal();
   else if(tipo==='inventarioMensual') html=buildReporteInventarioMensual();
+  else if(tipo==='clientesAdeudos') html=buildReporteClientesAdeudos();
+  else if(tipo==='deudaProveedores') html=buildReporteDeudaProveedores();
 
   // Abrir ventana de impresión con el reporte
   var win = window.open('','_blank');
