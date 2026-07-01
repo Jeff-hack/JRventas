@@ -2790,6 +2790,10 @@ function renderResumen(){
   }
 
   // Ganancia bruta y neta del mes actual
+  // Lógica: ganancia = ventas - costo de productos vendidos - gastos operativos
+  // Solo se resta costo cuando el producto está vinculado y tiene precioCosto > 0
+  // Ventas manuales (sin producto) NO suman a ganancia bruta (no sabemos su costo)
+  // Encargos entregados sí suman con su costo real
   var mesActual=dateKey(currentDate).substring(0,7);
   var ganancia=0;
   var gastosTotal=0;
@@ -2797,32 +2801,37 @@ function renderResumen(){
     if(k.substring(0,7)!==mesActual) return;
     var d=data[k];
     (d.ventas||[]).forEach(function(v){
-      // Ignorar cobros de adeudo (ya se contabilizan en caja pero no son venta real de producto)
+      // Ignorar cobros de adeudo
       if(v.esCobroAdeudo) return;
       if(v.items&&v.items.length){
         v.items.forEach(function(it){
           var prod=it.productoId?getProducto(it.productoId):null;
           if(prod&&prod.precioCosto>0){
+            // Producto con costo conocido: ganancia = venta - costo
             ganancia+=it.monto-(prod.precioCosto*(parseFloat(it.cant)||1));
-          } else {
-            // Sin producto vinculado o costo=0: la venta suma completa a ganancia
+          } else if(it.productoId&&!prod){
+            // Producto eliminado: asumir ganancia 0 (no sabemos el costo)
+            // No sumar nada — más conservador y correcto
+          } else if(!it.productoId){
+            // Item sin producto vinculado (manual): suma margen completo
+            // solo si tiene precio de venta > costo (no sabemos costo, asumimos venta = ganancia)
             ganancia+=it.monto;
           }
         });
       } else {
         var prod=v.productoId?getProducto(v.productoId):null;
-        if(v.productoId&&prod&&prod.precioCosto>0){
+        if(prod&&prod.precioCosto>0){
+          // Venta con producto y costo conocido
           ganancia+=v.monto-(prod.precioCosto*(parseFloat(v.cant)||1));
+        } else if(v.productoId&&!prod){
+          // Producto eliminado: no sumar (costo desconocido)
         } else {
-          // Venta manual sin producto, o producto eliminado: suma completa
+          // Venta manual sin producto: suma completo (precio es lo que recibiste)
           ganancia+=v.monto;
         }
       }
     });
-    // Gastos operativos que restan ganancia:
-    // - Excluir gastos de pedidos (ya se restan al completar)
-    // - Excluir cobros de adeudo que aparezcan en gastos
-    // - Incluir merma, personal, transporte, etc.
+    // Gastos operativos (excluir gastos de pedidos completados que ya bajan del costo)
     (d.gastos||[]).forEach(function(g){
       var esDePedido=g.pedidoId||(g.desc&&g.desc.indexOf('Pedido:')===0);
       if(!esDePedido) gastosTotal+=g.monto;
@@ -4619,7 +4628,7 @@ function buildReporteDiario(){
     var dd=data[dk];
     (dd.ventas||[]).forEach(function(v){
       var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant,monto:v.monto}];
-      items.forEach(function(it){var pp=it.productoId?getProducto(it.productoId):null;if(pp&&pp.precioCosto>0){ganMes+=it.monto-(pp.precioCosto*(parseFloat(it.cant)||1));}else{ganMes+=it.monto;}});
+      items.forEach(function(it){var pp=it.productoId?getProducto(it.productoId):null;if(pp&&pp.precioCosto>0){ganMes+=it.monto-(pp.precioCosto*(parseFloat(it.cant)||1));}else if(!it.productoId){ganMes+=it.monto;}});
     });
     (dd.gastos||[]).forEach(function(g){if(!g.pedidoId&&!(g.desc&&g.desc.indexOf('Pedido:')===0)) gastosMes+=g.monto;});
   });
@@ -4824,7 +4833,7 @@ function buildReporteMensual(){
     // Ganancia
     (dayD.ventas||[]).forEach(function(vx){
       var items=vx.items&&vx.items.length?vx.items:[{productoId:vx.productoId,cant:vx.cant,monto:vx.monto}];
-      items.forEach(function(it){var pr=it.productoId?getProducto(it.productoId):null;if(pr&&pr.precioCosto>0){ganMesRpt+=it.monto-(pr.precioCosto*(parseFloat(it.cant)||1));}else{ganMesRpt+=it.monto;}});
+      items.forEach(function(it){var pr=it.productoId?getProducto(it.productoId):null;if(pr&&pr.precioCosto>0){ganMesRpt+=it.monto-(pr.precioCosto*(parseFloat(it.cant)||1));}else if(!it.productoId){ganMesRpt+=it.monto;}});
     });
     (dayD.gastos||[]).forEach(function(gx){if(!gx.pedidoId&&!(gx.desc&&gx.desc.indexOf("Pedido:")===0)) gastosMesRpt+=gx.monto;});
   }
