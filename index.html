@@ -284,7 +284,12 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .notif{position:fixed;top:76px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;max-width:90vw}
 .notif.show{opacity:1}
 
-/* ══ V2 SECTIONS ══ */
+/* ── Venta Rápida teclado ── */
+.vr-key{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;font-size:22px;font-weight:600;padding:14px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text);transition:all 0.1s;-webkit-tap-highlight-color:transparent}
+.vr-key:active{background:var(--primary);color:#fff;border-color:var(--primary);transform:scale(0.95)}
+.vr-key-del{background:#fdeee9;border-color:#f3c4b3;color:var(--red)}
+
+
 .v2-section{display:none;position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .v2-section.active{display:block}
 .v2-section .page{position:static;overflow:visible;padding:16px 16px 80px;display:flex;flex-direction:column;gap:12px}
@@ -453,6 +458,14 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <span style="font-size:20px">⚠️</span>
         <span id="stockAlertaBannerTxt" style="flex:1;font-size:13px;font-weight:600;color:var(--red)"></span>
         <span style="font-size:12px;color:var(--red);font-weight:700">Ver →</span>
+      </div>
+
+
+      <!-- Banner respaldo semanal -->
+      <div id="respaldoBanner" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:#f3e8ff;border:1px solid #c4b5fd;border-radius:var(--radius);cursor:pointer" onclick="exportarDatosAuto()">
+        <span style="font-size:20px">💾</span>
+        <span style="flex:1;font-size:13px;font-weight:600;color:#7c3aed">Han pasado 7+ días sin respaldo — toca para guardar ahora</span>
+        <span style="font-size:12px;color:#7c3aed;font-weight:700">Guardar →</span>
       </div>
 
       <!-- Banner encargos próximos a entregar -->
@@ -667,6 +680,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <div class="tabs" style="margin-bottom:8px">
           <button class="tab-btn active" id="ventaFiltroLista" onclick="setVentaFiltro('lista')">📋 Lista</button>
           <button class="tab-btn" id="ventaFiltroRanking" onclick="setVentaFiltro('ranking')">🏆 Más vendidos</button>
+          <button class="tab-btn" onclick="repetirUltimaVenta()" style="color:#7c3aed">🔁 Repetir</button>
         </div>
         <div id="listaVentas"></div>
       </div>
@@ -835,9 +849,38 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <!-- ANÁLISIS RÁPIDO -->
       <div id="analisisProductos" style="margin:8px 16px 4px">
         <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">📊 Análisis de productos</div>
-        <div class="card" style="padding:12px 14px;cursor:pointer" onclick="renderAnalisisProductos()">
+        <div class="card" style="padding:12px 14px;cursor:pointer;margin-bottom:8px" onclick="renderAnalisisProductos()">
           <div id="analisisBody">
             <div style="font-size:12px;color:var(--text3);text-align:center;padding:8px">Toca para ver análisis de rentabilidad y ventas →</div>
+          </div>
+        </div>
+
+        <!-- Días más fuerte / débil -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">📅 Días más fuerte y débil</div>
+        <div class="card" style="padding:12px 14px;cursor:pointer;margin-bottom:8px" onclick="renderDiasAnalisis()">
+          <div id="diasAnalisisBody">
+            <div style="font-size:12px;color:var(--text3);text-align:center;padding:8px">Toca para ver análisis por día de la semana →</div>
+          </div>
+        </div>
+
+        <!-- Productos sin movimiento -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">💀 Productos sin movimiento</div>
+        <div class="card" style="padding:12px 14px;margin-bottom:8px">
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <button onclick="renderProductosMuertos(14)" class="tab-btn">14 días</button>
+            <button onclick="renderProductosMuertos(30)" class="tab-btn active" id="btnMuertos30">30 días</button>
+            <button onclick="renderProductosMuertos(60)" class="tab-btn">60 días</button>
+          </div>
+          <div id="productosMuertosBody">
+            <div style="font-size:12px;color:var(--text3);text-align:center;padding:8px">Toca un período para ver productos sin ventas →</div>
+          </div>
+        </div>
+
+        <!-- Comparativo proveedores -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">🔄 Comparativo de proveedores</div>
+        <div class="card" style="padding:12px 14px;cursor:pointer;margin-bottom:8px" onclick="renderComparativoProveedores()">
+          <div id="comparativoProvBody">
+            <div style="font-size:12px;color:var(--text3);text-align:center;padding:8px">Toca para comparar costos por proveedor →</div>
           </div>
         </div>
       </div>
@@ -1012,6 +1055,11 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
             <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬇️</div>
             <div style="flex:1"><div style="font-size:13px;font-weight:600">Exportar datos</div><div style="font-size:11px;color:var(--text3)">Descarga un .json con todos tus registros</div></div>
             <button onclick="exportarDatos()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Exportar</button>
+          </div>
+          <div style="padding:14px 16px;display:flex;align-items:center;gap:10px">
+            <div style="width:32px;height:32px;border-radius:8px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👁️</div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600">Modo solo lectura</div><div style="font-size:11px;color:var(--text3)" id="modoLecturaBtn">Compartir sin permitir edición</div></div>
+            <button onclick="toggleModoLectura()" style="background:#7c3aed;color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Activar</button>
           </div>
           <div style="padding:14px 16px;display:flex;align-items:center;gap:10px">
             <div style="width:32px;height:32px;border-radius:8px;background:#fef0d9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬆️</div>
@@ -1259,6 +1307,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 </div>
 
 <!-- FAB -->
+<button class="fab" id="fabBtnRapido" onclick="openVentaRapida()" style="bottom:80px;right:16px;width:42px;height:42px;font-size:18px;background:var(--green)" title="Venta rápida">⚡</button>
 <button class="fab" id="fabBtn" onclick="openAddModal()">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
@@ -2005,6 +2054,205 @@ function renderVentaProdTop(){
   }).join('');
 }
 
+// ════════════════════════════════
+//  ⚡ VENTA RÁPIDA
+// ════════════════════════════════
+var vrProdId=null, vrCantStr='0', vrPrecio=0;
+
+function openVentaRapida(){
+  vrProdId=null; vrCantStr='0'; vrPrecio=0;
+  document.getElementById('vrNombre').textContent='Selecciona un producto';
+  document.getElementById('vrPrecio').textContent='';
+  document.getElementById('vrCantDisplay').textContent='0';
+  document.getElementById('vrTotalDisplay').textContent='$0.00';
+  document.getElementById('vrConfirmar').disabled=true;
+  document.getElementById('vrConfirmar').style.opacity='0.4';
+  var top=getTop10Vendidos();
+  if(!top.length) top=productos.slice(0,10);
+  document.getElementById('vrProductoList').innerHTML=top.map(function(p){
+    return '<button onclick="vrSelProd('+p.id+',this)" style="background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;white-space:nowrap">'+esc(p.nombre)+'</button>';
+  }).join('');
+  document.getElementById('ventaRapidaModal').classList.add('open');
+}
+
+function vrSelProd(pid,btn){
+  var p=getProducto(parseInt(pid));
+  if(!p) return;
+  vrProdId=pid; vrPrecio=p.precioVenta; vrCantStr='1';
+  document.getElementById('vrNombre').textContent=p.nombre;
+  document.getElementById('vrPrecio').textContent='Precio: '+fmt(p.precioVenta)+' · Stock: '+p.cantidad+' '+p.unidad;
+  vrActualizar();
+  document.querySelectorAll('#vrProductoList button').forEach(function(b){b.style.background='var(--surface)';b.style.color='var(--text)';b.style.borderColor='var(--border)';});
+  if(btn){btn.style.background='var(--primary)';btn.style.color='#fff';}
+}
+
+function vrKey(k){
+  if(k==='del'){vrCantStr=vrCantStr.length>1?vrCantStr.slice(0,-1):'0';}
+  else if(k==='.'){if(!vrCantStr.includes('.')) vrCantStr+='.';}
+  else{vrCantStr=(vrCantStr==='0'&&k!=='.')?k:vrCantStr+k;}
+  vrActualizar();
+}
+
+function vrActualizar(){
+  var cant=parseFloat(vrCantStr)||0;
+  document.getElementById('vrCantDisplay').textContent=vrCantStr;
+  document.getElementById('vrTotalDisplay').textContent=fmt(cant*vrPrecio);
+  var ok=vrProdId&&cant>0;
+  document.getElementById('vrConfirmar').disabled=!ok;
+  document.getElementById('vrConfirmar').style.opacity=ok?'1':'0.4';
+}
+
+function vrConfirmar(){
+  if(!vrProdId) return;
+  var cant=parseFloat(vrCantStr)||0;
+  if(cant<=0) return;
+  var p=getProducto(parseInt(vrProdId));
+  if(!p) return;
+  var monto=cant*vrPrecio;
+  var hora=new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
+  var day=getDayData(currentDate);
+  day.ventas.push({id:Date.now(),monto:monto,desc:p.nombre,cant:cant,hora:hora,productoId:p.id,productoNombre:p.nombre,items:[{productoId:p.id,productoNombre:p.nombre,desc:p.nombre,cant:cant,monto:monto}]});
+  p.cantidad=Math.max(0,parseFloat((p.cantidad-cant).toFixed(4)));
+  saveProductos(); saveData(); renderAll(); checkStockAlertas();
+  closeModal('ventaRapidaModal');
+  toast('✓ '+p.nombre+' × '+cant+' = '+fmt(monto));
+}
+
+// ════════════════════════════════
+//  🔁 REPETIR ÚLTIMA VENTA
+// ════════════════════════════════
+function repetirUltimaVenta(){
+  var day=getDayData(currentDate);
+  if(!day.ventas.length){toast('⚠ No hay ventas registradas hoy');return;}
+  var ultima=day.ventas.slice().filter(function(v){return !v.esCobroAdeudo;})[0];
+  if(!ultima){toast('⚠ No hay ventas de productos hoy');return;}
+  ultima=day.ventas.slice().filter(function(v){return !v.esCobroAdeudo;}).pop();
+  if(!confirm('¿Repetir "'+ultima.desc+'" por '+fmt(ultima.monto)+'?')) return;
+  var hora=new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
+  var nueva=JSON.parse(JSON.stringify(ultima));
+  nueva.id=Date.now(); nueva.hora=hora;
+  day.ventas.push(nueva);
+  // Descontar stock
+  var prodsAfectados=nueva.items&&nueva.items.length?nueva.items:[{productoId:nueva.productoId,cant:nueva.cant||1}];
+  prodsAfectados.forEach(function(it){
+    if(it.productoId){var p=getProducto(it.productoId);if(p) p.cantidad=Math.max(0,parseFloat((p.cantidad-(parseFloat(it.cant)||1)).toFixed(4)));}
+  });
+  saveProductos(); saveData(); renderAll();
+  toast('✓ Venta repetida: '+nueva.desc+' = '+fmt(nueva.monto));
+}
+
+// ════════════════════════════════
+//  📅 DÍA MÁS FUERTE / DÉBIL
+// ════════════════════════════════
+function getDiasAnalisis(){
+  var DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Ventas','Sábado'];
+  var stats={};
+  for(var i=0;i<7;i++) stats[i]={nombre:DIAS[i],total:0,cnt:0};
+  Object.keys(data).forEach(function(k){
+    var d=new Date(k+'T12:00:00');
+    var dow=d.getDay();
+    var v=(data[k].ventas||[]).reduce(function(a,x){return a+x.monto;},0);
+    if(v>0){stats[dow].total+=v; stats[dow].cnt++;}
+  });
+  // Promedio por día
+  return Object.values(stats).map(function(s){
+    s.promedio=s.cnt>0?s.total/s.cnt:0;
+    return s;
+  });
+}
+
+// ════════════════════════════════
+//  💀 PRODUCTOS SIN MOVIMIENTO
+// ════════════════════════════════
+function getProductosMuertos(diasSinVenta){
+  diasSinVenta=diasSinVenta||30;
+  var hoy=new Date();
+  var limite=dateKey(new Date(hoy.getTime()-diasSinVenta*86400000));
+  var ultimaVenta={};
+  Object.keys(data).sort().forEach(function(k){
+    if(k<limite) return;
+    (data[k].ventas||[]).forEach(function(v){
+      var items=v.items&&v.items.length?v.items:[{productoId:v.productoId}];
+      items.forEach(function(it){
+        if(it.productoId) ultimaVenta[it.productoId]=k;
+      });
+    });
+  });
+  return productos.filter(function(p){
+    return p.cantidad>0 && !ultimaVenta[p.id];
+  });
+}
+
+// ════════════════════════════════
+//  🔄 COMPARATIVO DE PROVEEDORES
+// ════════════════════════════════
+function getComparativoProveedores(){
+  // Agrupar pedidos completados por proveedor y calcular costo/lb promedio
+  var stats={};
+  pedidosGlobal.filter(function(p){return p.estado==='completado';}).forEach(function(ped){
+    var prov=ped.tipo;
+    if(!stats[prov]) stats[prov]={totalMonto:0,totalCant:0,pedidos:0,productos:{}};
+    stats[prov].totalMonto+=ped.monto;
+    stats[prov].pedidos++;
+    if(ped.items&&ped.items.length){
+      ped.items.forEach(function(it){
+        var key=it.productoNombre||it.desc||'';
+        if(!stats[prov].productos[key]) stats[prov].productos[key]={monto:0,cant:0};
+        stats[prov].productos[key].monto+=it.monto;
+        stats[prov].productos[key].cant+=parseFloat(it.cant)||1;
+        stats[prov].totalCant+=parseFloat(it.cant)||0;
+      });
+    }
+  });
+  return stats;
+}
+
+// ════════════════════════════════
+//  💾 RESPALDO AUTOMÁTICO SEMANAL
+// ════════════════════════════════
+function checkRespaldoAutomatico(){
+  var hoy=dateKey(new Date());
+  var ultimoRespaldo=localStorage.getItem('jr_ultimo_respaldo')||'';
+  if(!ultimoRespaldo) return; // primera vez, no molesta
+  var diasDesde=Math.floor((new Date(hoy)-new Date(ultimoRespaldo))/86400000);
+  if(diasDesde>=7){
+    // Mostrar banner de recordatorio
+    var bannerEl=document.getElementById('respaldoBanner');
+    if(bannerEl) bannerEl.style.display='flex';
+  }
+}
+
+function exportarDatosAuto(){
+  localStorage.setItem('jr_ultimo_respaldo', dateKey(new Date()));
+  exportarDatos();
+  var bannerEl=document.getElementById('respaldoBanner');
+  if(bannerEl) bannerEl.style.display='none';
+  toast('✓ Respaldo guardado');
+}
+
+function marcarRespaldoHecho(){
+  localStorage.setItem('jr_ultimo_respaldo', dateKey(new Date()));
+  var bannerEl=document.getElementById('respaldoBanner');
+  if(bannerEl) bannerEl.style.display='none';
+}
+
+// ════════════════════════════════
+//  👁 MODO SOLO LECTURA
+// ════════════════════════════════
+var modoLectura=false;
+function toggleModoLectura(){
+  modoLectura=!modoLectura;
+  document.body.classList.toggle('modo-lectura', modoLectura);
+  var fab=document.getElementById('fabBtn');
+  var fabR=document.getElementById('fabBtnRapido');
+  if(fab) fab.style.display=modoLectura?'none':'flex';
+  if(fabR) fabR.style.display=modoLectura?'none':'flex';
+  var btn=document.getElementById('modoLecturaBtn');
+  if(btn) btn.textContent=modoLectura?'👁 Salir de solo lectura':'👁 Modo solo lectura';
+  toast(modoLectura?'👁 Modo solo lectura activado — no se pueden editar datos':'✓ Modo edición restaurado');
+}
+
+
 // Render resultados de búsqueda en tiempo real
 function renderVentaProdResultados(){
   var busq=document.getElementById('ventaProdBuscador').value.trim().toLowerCase();
@@ -2705,6 +2953,7 @@ function renderAll(){
   checkStockAlertas();
   checkEncargosBanner();
   updateCierreBadge();
+  checkRespaldoAutomatico();
   // Update dashboard counters
   var pedPend=pedidosGlobal.filter(function(p){return p.estado==='pendiente';}).length;
   var encPend=encargos.filter(function(e){return e.estado==='pendiente';}).length;
@@ -5274,6 +5523,100 @@ function buildReporteInventarioMensual(){
 
 
 // ─── DISPARAR REPORTE ───
+function renderDiasAnalisis(){
+  var dias=getDiasAnalisis();
+  var maxProm=Math.max.apply(null,dias.map(function(d){return d.promedio;}));
+  if(maxProm===0){document.getElementById('diasAnalisisBody').innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px">Sin datos suficientes.</div>';return;}
+  var sorted=dias.slice().sort(function(a,b){return b.promedio-a.promedio;});
+  var fuerte=sorted[0],debil=sorted.filter(function(d){return d.promedio>0;}).pop();
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'+
+    '<div style="background:#e8f7f1;border-radius:8px;padding:10px;text-align:center">'+
+      '<div style="font-size:9px;font-weight:700;color:#0f6e56;text-transform:uppercase;letter-spacing:0.8px">💪 Más fuerte</div>'+
+      '<div style="font-size:15px;font-weight:700;margin-top:4px">'+fuerte.nombre+'</div>'+
+      '<div style="font-size:12px;color:var(--text3)">Prom: '+fmt(fuerte.promedio)+'</div>'+
+    '</div>'+
+    (debil&&debil.nombre!==fuerte.nombre?
+    '<div style="background:#fdeee9;border-radius:8px;padding:10px;text-align:center">'+
+      '<div style="font-size:9px;font-weight:700;color:#d44f2e;text-transform:uppercase;letter-spacing:0.8px">⚠ Más débil</div>'+
+      '<div style="font-size:15px;font-weight:700;margin-top:4px">'+debil.nombre+'</div>'+
+      '<div style="font-size:12px;color:var(--text3)">Prom: '+fmt(debil.promedio)+'</div>'+
+    '</div>':'<div></div>')+
+  '</div>';
+  dias.forEach(function(d){
+    if(!d.promedio) return;
+    var pct=Math.round((d.promedio/maxProm)*100);
+    html+='<div style="margin-bottom:7px">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:3px">'+
+        '<span style="font-size:12px;font-weight:500">'+d.nombre+'</span>'+
+        '<span style="font-size:12px;color:var(--text3)">'+fmt(d.promedio)+' prom · '+d.cnt+' sem</span>'+
+      '</div>'+
+      '<div style="height:5px;background:var(--surface2);border-radius:3px">'+
+        '<div style="height:5px;border-radius:3px;background:var(--primary);width:'+pct+'%"></div>'+
+      '</div>'+
+    '</div>';
+  });
+  document.getElementById('diasAnalisisBody').innerHTML=html;
+}
+
+function renderProductosMuertos(dias){
+  var muertos=getProductosMuertos(dias);
+  document.querySelectorAll('[id^="btnMuertos"]').forEach(function(b){b.classList.remove('active');});
+  var el=document.getElementById('productosMuertosBody');
+  if(!muertos.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--green);text-align:center;padding:8px">✓ Todos los productos han tenido ventas en los últimos '+dias+' días.</div>';
+    return;
+  }
+  var html='<div style="font-size:11px;color:var(--text3);margin-bottom:8px">'+muertos.length+' producto'+(muertos.length!==1?'s':'')+' sin ventas en '+dias+' días:</div>';
+  muertos.forEach(function(p){
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'+
+      '<div>'+
+        '<div style="font-size:13px;font-weight:500">'+esc(p.nombre)+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">Stock: '+p.cantidad+' '+p.unidad+' · Valor: '+fmt(p.cantidad*p.precioCosto)+'</div>'+
+      '</div>'+
+      '<button onclick="openProductoModal('+p.id+')" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:11px;cursor:pointer;flex-shrink:0">Editar</button>'+
+    '</div>';
+  });
+  el.innerHTML=html;
+}
+
+function renderComparativoProveedores(){
+  var stats=getComparativoProveedores();
+  var provs=Object.keys(stats);
+  var el=document.getElementById('comparativoProvBody');
+  if(!provs.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px">Sin pedidos completados para comparar.</div>';
+    return;
+  }
+  var COLORS={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'};
+  var html='';
+  provs.sort().forEach(function(prov){
+    var g=stats[prov];
+    var color=COLORS[prov]||'#888';
+    var cpU=g.totalCant>0?(g.totalMonto/g.totalCant).toFixed(2):'-';
+    html+='<div style="border-left:3px solid '+color+';padding:8px 10px;margin-bottom:8px;background:var(--surface2);border-radius:0 8px 8px 0">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<span style="font-size:13px;font-weight:700;color:'+color+'">'+esc(prov)+'</span>'+
+        '<span style="font-size:11px;color:var(--text3)">'+g.pedidos+' pedidos · '+fmt(g.totalMonto)+' total</span>'+
+      '</div>'+
+      '<div style="font-size:12px;color:var(--text2);margin-top:4px">Costo prom/unidad: <strong>'+fmt(parseFloat(cpU)||0)+'</strong></div>';
+    var prods=Object.keys(g.productos);
+    if(prods.length){
+      html+='<div style="margin-top:6px;font-size:11px;color:var(--text3)">';
+      prods.forEach(function(prod){
+        var pp=g.productos[prod];
+        var cxU=pp.cant>0?(pp.monto/pp.cant).toFixed(2):'?';
+        html+='<div style="display:flex;justify-content:space-between;padding:2px 0">'+
+          '<span>'+esc(prod)+'</span>'+
+          '<span style="color:'+color+';font-weight:600">'+fmt(parseFloat(cxU))+'  / u</span>'+
+        '</div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
 // ─── ANÁLISIS: MÁS RENTABLE vs MÁS VENDIDO ───
 function renderAnalisisProductos(){
   // Calcular ventas e ingresos por producto desde todo el historial
@@ -5546,6 +5889,7 @@ function generarReporte(tipo){
 loadData();
 updateHeaderDate();
 updateFondoLabel();
+if(!localStorage.getItem("jr_ultimo_respaldo")) localStorage.setItem("jr_ultimo_respaldo",dateKey(new Date()));
 renderAll();
 _fbLoad(); // carga desde Firebase y sincroniza
 
@@ -5579,6 +5923,54 @@ if('serviceWorker' in navigator){
     <div class="modal-header"><button class="modal-back" onclick="closeModal('stockAlertaModal')">‹</button><div class="modal-title" style="color:var(--red)">⚠️ Stock bajo — Pedidos sugeridos</div></div>
     <div class="form-section" style="padding:0">
       <div id="stockAlertaBody" style="padding:0 16px 16px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: VENTA RÁPIDA ═══ -->
+<div class="modal-overlay" id="ventaRapidaModal" onclick="overlayClose(event,'ventaRapidaModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <button class="modal-back" onclick="closeModal('ventaRapidaModal')">‹</button>
+      <div class="modal-title">⚡ Venta rápida</div>
+    </div>
+    <div class="form-section" style="padding:12px 16px">
+      <!-- Producto seleccionado -->
+      <div id="vrProducto" style="background:var(--primary);color:#fff;border-radius:12px;padding:14px 16px;text-align:center;margin-bottom:8px">
+        <div id="vrNombre" style="font-size:16px;font-weight:700">Selecciona un producto</div>
+        <div id="vrPrecio" style="font-size:12px;opacity:0.8;margin-top:2px"></div>
+      </div>
+      <!-- Display de cantidad y total -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Cantidad</div>
+          <div id="vrCantDisplay" style="font-family:'DM Mono',monospace;font-size:26px;font-weight:700;color:var(--text)">0</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Total</div>
+          <div id="vrTotalDisplay" style="font-family:'DM Mono',monospace;font-size:26px;font-weight:700;color:var(--green)">$0.00</div>
+        </div>
+      </div>
+      <!-- Teclado numérico grande -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px" id="vrTeclado">
+        <button class="vr-key" onclick="vrKey('1')">1</button>
+        <button class="vr-key" onclick="vrKey('2')">2</button>
+        <button class="vr-key" onclick="vrKey('3')">3</button>
+        <button class="vr-key" onclick="vrKey('4')">4</button>
+        <button class="vr-key" onclick="vrKey('5')">5</button>
+        <button class="vr-key" onclick="vrKey('6')">6</button>
+        <button class="vr-key" onclick="vrKey('7')">7</button>
+        <button class="vr-key" onclick="vrKey('8')">8</button>
+        <button class="vr-key" onclick="vrKey('9')">9</button>
+        <button class="vr-key" onclick="vrKey('.')">.</button>
+        <button class="vr-key" onclick="vrKey('0')">0</button>
+        <button class="vr-key vr-key-del" onclick="vrKey('del')">⌫</button>
+      </div>
+      <!-- Top 10 selección rápida de producto -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Producto</div>
+      <div id="vrProductoList" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+      <button id="vrConfirmar" onclick="vrConfirmar()" class="btn-primary" disabled style="opacity:0.4">✓ Registrar venta</button>
     </div>
   </div>
 </div>
