@@ -688,6 +688,17 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <!-- Panel Gastos -->
       <div id="opsPanelGastos" style="display:none">
         <div class="section-title" style="margin-bottom:8px">Gastos del día <span class="badge" id="badgeGastos">0</span></div>
+        <div id="gastoFiltroChips" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch">
+          <button class="tab-btn active" id="gastoFiltroTodos" onclick="setGastoFiltro('todos')" style="flex:0 0 auto;white-space:nowrap">Todos</button>
+          <button class="tab-btn" id="gastoFiltroPasaje" onclick="setGastoFiltro('pasaje')" style="flex:0 0 auto;white-space:nowrap">🚌 Transporte</button>
+          <button class="tab-btn" id="gastoFiltroAlimentacion" onclick="setGastoFiltro('alimentacion')" style="flex:0 0 auto;white-space:nowrap">🍽 Alimentación</button>
+          <button class="tab-btn" id="gastoFiltroAlcaldia" onclick="setGastoFiltro('alcaldia')" style="flex:0 0 auto;white-space:nowrap">🏛 Alcaldía</button>
+          <button class="tab-btn" id="gastoFiltroElectricidad" onclick="setGastoFiltro('electricidad')" style="flex:0 0 auto;white-space:nowrap">⚡ Electricidad</button>
+          <button class="tab-btn" id="gastoFiltroPersonal" onclick="setGastoFiltro('personal')" style="flex:0 0 auto;white-space:nowrap">👤 Personal</button>
+          <button class="tab-btn" id="gastoFiltroOtro" onclick="setGastoFiltro('otro')" style="flex:0 0 auto;white-space:nowrap">📋 Operativo</button>
+          <button class="tab-btn" id="gastoFiltroPedido" onclick="setGastoFiltro('pedido')" style="flex:0 0 auto;white-space:nowrap">📦 Pedido</button>
+          <button class="tab-btn" id="gastoFiltroMerma" onclick="setGastoFiltro('merma')" style="flex:0 0 auto;white-space:nowrap">🗑 Merma</button>
+        </div>
         <div class="card" style="padding:12px 16px;margin-bottom:8px" id="gastosCatResumen"></div>
         <div id="listaGastos"></div>
       </div>
@@ -3209,6 +3220,17 @@ function setVentaFiltro(f){
   renderList('ventas');
 }
 
+var gastoFiltroActual='todos';
+var GASTO_FILTRO_KEYS=['todos','pasaje','alimentacion','alcaldia','electricidad','personal','otro','pedido','merma'];
+function setGastoFiltro(f){
+  gastoFiltroActual=f;
+  GASTO_FILTRO_KEYS.forEach(function(k){
+    var el=document.getElementById('gastoFiltro'+k.charAt(0).toUpperCase()+k.slice(1));
+    if(el) el.classList.toggle('active', k===f);
+  });
+  renderList('gastos');
+}
+
 var rankingScope='hoy';
 function setRankingScope(s){
   rankingScope=s;
@@ -3285,7 +3307,7 @@ function renderList(tipo){
   if(badge) badge.textContent=items.length;
   var CATS={pasaje:{label:'Transporte',icon:'🚌',color:'#2563eb'},alimentacion:{label:'Alimentación',icon:'🍽',color:'#c4860a'},alcaldia:{label:'Alcaldía',icon:'🏛',color:'#7c3aed'},electricidad:{label:'Electricidad',icon:'⚡',color:'#d44f2e'},personal:{label:'Personal',icon:'👤',color:'#7c3aed'},otro:{label:'Operativo',icon:'📋',color:'#666'},pedido:{label:'Pedido',icon:'📦',color:'#e8a020'},merma:{label:'Merma',icon:'🗑',color:'#d44f2e'}};
 
-  // Resumen por categoría (solo gastos)
+  // Resumen por categoría (solo gastos) — tarjetas clicables para filtrar
   if(tipo==='gastos'){
     var porCat={};
     items.forEach(function(it){
@@ -3296,11 +3318,12 @@ function renderList(tipo){
     var resEl=document.getElementById('gastosCatResumen');
     if(resEl){
       if(Object.keys(porCat).length){
-        var rh='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">Resumen por categoría</div>';
+        var rh='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">Resumen por categoría <span style="text-transform:none;font-weight:400">(toca para filtrar)</span></div>';
         rh+='<div style="display:flex;flex-wrap:wrap;gap:8px">';
         Object.keys(porCat).forEach(function(c){
           var ci=CATS[c]||CATS.otro;
-          rh+='<div style="flex:1;min-width:80px;background:var(--surface2);border-radius:8px;padding:8px;border-left:3px solid '+ci.color+'">'+
+          var isActive=gastoFiltroActual===c;
+          rh+='<div onclick="setGastoFiltro(\''+c+'\')" style="cursor:pointer;flex:1;min-width:80px;background:var(--surface2);border-radius:8px;padding:8px;border-left:3px solid '+ci.color+(isActive?';box-shadow:0 0 0 2px '+ci.color+' inset':'')+'">'+
             '<div style="font-size:10px;color:var(--text3)">'+ci.icon+' '+ci.label+'</div>'+
             '<div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:600;color:'+ci.color+'">'+fmt(porCat[c])+'</div></div>';
         });
@@ -3311,12 +3334,22 @@ function renderList(tipo){
     }
   }
 
-  if(!items.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">'+(tipo==='ventas'?'💰':'📋')+'</div><div class="empty-text">No hay '+tipo+' registradas hoy.<br>Toca <strong>+</strong> para agregar.</div></div>';
+  // Aplicar filtro de categoría (gastoFiltroActual) solo a la lista de gastos
+  var itemsView=items;
+  if(tipo==='gastos'&&gastoFiltroActual!=='todos'){
+    itemsView=items.filter(function(it){
+      var cat=it.pedidoId?'pedido':(it.categoria||'otro');
+      return cat===gastoFiltroActual;
+    });
+  }
+
+  if(!itemsView.length){
+    var msg=(tipo==='gastos'&&gastoFiltroActual!=='todos')?'No hay gastos en esta categoría hoy.<br>Toca <strong>Todos</strong> para ver el resto.':'No hay '+tipo+' registradas hoy.<br>Toca <strong>+</strong> para agregar.';
+    el.innerHTML='<div class="empty"><div class="empty-icon">'+(tipo==='ventas'?'💰':'📋')+'</div><div class="empty-text">'+msg+'</div></div>';
     return;
   }
   var html='<div class="tx-list">';
-  items.forEach(function(it){
+  itemsView.forEach(function(it){
     var isV=tipo==='ventas';
     var bg=isV?'#e8f7f1':'#fdeee9';
     var color=isV?'var(--green)':'var(--red)';
