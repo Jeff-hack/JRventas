@@ -2449,7 +2449,16 @@ function vrActualizar(){
   var cant=parseFloat(vrCantStr)||0;
   document.getElementById('vrCantDisplay').textContent=vrCantStr;
   document.getElementById('vrTotalDisplay').textContent=fmt(cant*vrPrecio);
-  var ok=vrProdId&&cant>0;
+  var p=vrProdId?getProducto(parseInt(vrProdId)):null;
+  var excedeStock=p&&cant>p.cantidad;
+  var cantEl=document.getElementById('vrCantDisplay');
+  if(cantEl) cantEl.style.color=excedeStock?'var(--red)':'';
+  var precioEl=document.getElementById('vrPrecio');
+  if(precioEl&&p){
+    precioEl.textContent='Precio: '+fmt(p.precioVenta)+' · Stock: '+p.cantidad+' '+p.unidad+(excedeStock?' ⚠ No hay suficiente':'');
+    precioEl.style.color=excedeStock?'var(--red)':'';
+  }
+  var ok=vrProdId&&cant>0&&!excedeStock;
   document.getElementById('vrConfirmar').disabled=!ok;
   document.getElementById('vrConfirmar').style.opacity=ok?'1':'0.4';
 }
@@ -2460,6 +2469,10 @@ function vrConfirmar(){
   if(cant<=0) return;
   var p=getProducto(parseInt(vrProdId));
   if(!p) return;
+  if(cant>p.cantidad){
+    toast('⚠ Stock insuficiente — solo hay '+p.cantidad+' '+p.unidad+' disponibles');
+    return;
+  }
   var monto=cant*vrPrecio;
   var hora=new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
   var day=getDayData(currentDate);
