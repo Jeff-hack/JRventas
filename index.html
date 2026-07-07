@@ -189,6 +189,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 /* FAB */
 .fab{position:fixed;bottom:80px;right:calc(50% - 215px + 16px);width:52px;height:52px;background:var(--primary);border:none;border-radius:50%;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(10,61,46,0.35);display:flex;align-items:center;justify-content:center;transition:transform 0.2s;z-index:50}
 .fab:active{transform:scale(0.92)}
+.fab-rapido{bottom:144px;width:44px;height:44px;font-size:18px;z-index:51}
+#fabBtnRapido{background:var(--green)!important;box-shadow:0 4px 16px rgba(15,110,86,0.35)!important}
 @media(max-width:430px){.fab{right:16px}}
 
 /* ══ RESPONSIVE LAYOUT ══ */
@@ -424,6 +426,37 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 
 </head>
 <body>
+
+<!-- ═══ LOGIN GATE: selección de rol ═══ -->
+<div id="loginGate" style="position:fixed;inset:0;z-index:500;background:linear-gradient(160deg,#0a3d2e,#0f172a);display:flex;align-items:center;justify-content:center;padding:24px">
+  <div style="width:100%;max-width:340px">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.12);color:#fff;font-family:'DM Mono',monospace;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">JR</div>
+      <div style="color:#fff;font-size:17px;font-weight:700">JR Control de Negocio</div>
+      <div style="color:rgba(255,255,255,0.55);font-size:12px;margin-top:4px" id="loginGateSub">¿Quién eres?</div>
+    </div>
+
+    <div id="loginGateRoles" style="display:flex;flex-direction:column;gap:10px">
+      <button onclick="pedirPin('admin')" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#fff;font-family:'DM Sans',sans-serif;text-align:left">
+        <span style="font-size:22px">👑</span>
+        <span><span style="display:block;font-size:14px;font-weight:700">Admin</span><span style="display:block;font-size:11px;color:rgba(255,255,255,0.55)">Acceso completo</span></span>
+      </button>
+      <button onclick="pedirPin('vendedor')" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#fff;font-family:'DM Sans',sans-serif;text-align:left">
+        <span style="font-size:22px">🧑‍💼</span>
+        <span><span style="display:block;font-size:14px;font-weight:700">Vendedor</span><span style="display:block;font-size:11px;color:rgba(255,255,255,0.55)">Ventas e inventario</span></span>
+      </button>
+    </div>
+
+    <div id="loginGatePinWrap" style="display:none">
+      <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-bottom:8px;text-align:center" id="loginGatePinLabel">Ingresa tu PIN</div>
+      <input id="loginGatePinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" onkeyup="if(event.key==='Enter')confirmarPin()" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:10px;font-size:22px;font-family:'DM Mono',monospace;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;outline:none">
+      <div id="loginGateError" style="color:#f87171;font-size:12px;text-align:center;margin-top:8px;min-height:16px"></div>
+      <button onclick="confirmarPin()" style="width:100%;margin-top:10px;background:var(--green,#1d9e75);color:#fff;border:none;border-radius:12px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Entrar</button>
+      <button onclick="cancelarPin()" style="width:100%;margin-top:8px;background:transparent;color:rgba(255,255,255,0.6);border:none;padding:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">‹ Volver</button>
+    </div>
+  </div>
+</div>
+
 <div id="app">
 
   <div class="header">
@@ -435,6 +468,9 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span id="syncIndicator" style="font-size:10px;font-weight:600;color:var(--text3)">⚡ Local</span>
+      <button onclick="cerrarSesion()" id="rolBadge" title="Cambiar de usuario" style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:none;border-radius:20px;padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer">
+        <span id="rolBadgeIcon">👑</span><span id="rolBadgeLabel">Admin</span>
+      </button>
       <button class="date-btn" onclick="openFondoModal()" title="Caja Actual (acumulada, automática)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         <span id="fondoLabel">$0.00</span>
@@ -721,9 +757,9 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <div id="invPanelStock">
         <div class="section-title" style="margin-bottom:8px">
           Inventario
-          <button onclick="openProductoModal(null)" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Producto</button>
+          <button id="btnAddProducto" onclick="openProductoModal(null)" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Producto</button>
         </div>
-        <div class="card" style="padding:12px 16px;margin-bottom:8px">
+        <div class="card" style="padding:12px 16px;margin-bottom:8px" id="invTotalInvertidoCard">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
               <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:2px">💰 Total invertido en stock</div>
@@ -1079,6 +1115,17 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           </div>
         </div>
       </div><!-- /masPanelDatos -->
+
+      <!-- Panel Usuarios -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:4px 0 6px;padding-left:2px">👥 Usuarios y PIN</div>
+      <div class="card" style="padding:14px 16px;margin-bottom:12px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">El vendedor solo puede registrar ventas y ver el inventario (sin costos).</div>
+        <label class="form-label">PIN de Admin</label>
+        <input class="form-input" type="password" inputmode="numeric" maxlength="4" id="pinAdminInput" placeholder="••••" style="margin-bottom:10px">
+        <label class="form-label">PIN de Vendedor</label>
+        <input class="form-input" type="password" inputmode="numeric" maxlength="4" id="pinVendedorInput" placeholder="••••">
+        <button onclick="guardarPins()" style="width:100%;margin-top:12px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">✓ Guardar PIN</button>
+      </div>
     </div><!-- /page-mas -->
     <div class="page" id="page-historial" style="display:none!important"></div>
     </div><!-- /section-mas -->
@@ -1318,7 +1365,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 </div>
 
 <!-- FAB -->
-<button class="fab" id="fabBtnRapido" onclick="openVentaRapida()" style="bottom:80px;right:16px;width:42px;height:42px;font-size:18px;background:var(--green)" title="Venta rápida">⚡</button>
+<button class="fab fab-rapido" id="fabBtnRapido" onclick="openVentaRapida()" title="Venta rápida">⚡</button>
 <button class="fab" id="fabBtn" onclick="openAddModal()">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
@@ -1699,6 +1746,128 @@ function updateSyncIndicator(){
     el.textContent = '☁ Sync';
     el.style.color = 'var(--green)';
   }
+}
+
+// ══════════════════ ROLES Y PIN (Admin / Vendedor) ══════════════════
+var ROLES_DOC = 'config/roles';
+var rolesConfig = {adminPin:'0000', vendedorPin:'1111'};
+var rolActual = localStorage.getItem('rolActual') || null;
+var pinRolPendiente = null;
+
+function cargarRolesConfig(cb){
+  try{ var c=localStorage.getItem('cvd_rolesConfig'); if(c) rolesConfig=JSON.parse(c); }catch(e){}
+  db.doc(ROLES_DOC).get().then(function(doc){
+    if(doc.exists){
+      var d=doc.data();
+      rolesConfig={adminPin:d.adminPin||'0000', vendedorPin:d.vendedorPin||'1111'};
+      localStorage.setItem('cvd_rolesConfig', JSON.stringify(rolesConfig));
+    } else {
+      db.doc(ROLES_DOC).set(rolesConfig).catch(function(){});
+    }
+    if(cb) cb();
+  }).catch(function(){ if(cb) cb(); });
+}
+
+function guardarPins(){
+  var a=document.getElementById('pinAdminInput').value.trim();
+  var v=document.getElementById('pinVendedorInput').value.trim();
+  if(a && !/^\d{4}$/.test(a)){ toast('⚠ El PIN de Admin debe tener 4 dígitos'); return; }
+  if(v && !/^\d{4}$/.test(v)){ toast('⚠ El PIN de Vendedor debe tener 4 dígitos'); return; }
+  if(a) rolesConfig.adminPin=a;
+  if(v) rolesConfig.vendedorPin=v;
+  localStorage.setItem('cvd_rolesConfig', JSON.stringify(rolesConfig));
+  db.doc(ROLES_DOC).set(rolesConfig).then(function(){
+    toast('✓ PIN actualizado');
+    document.getElementById('pinAdminInput').value='';
+    document.getElementById('pinVendedorInput').value='';
+  }).catch(function(){ toast('⚠ Guardado local; se sincronizará cuando haya conexión'); });
+}
+
+function pedirPin(rol){
+  pinRolPendiente=rol;
+  document.getElementById('loginGateRoles').style.display='none';
+  document.getElementById('loginGatePinWrap').style.display='block';
+  document.getElementById('loginGatePinLabel').textContent='PIN de '+(rol==='admin'?'Admin':'Vendedor');
+  document.getElementById('loginGateError').textContent='';
+  var input=document.getElementById('loginGatePinInput');
+  input.value='';
+  setTimeout(function(){input.focus();},50);
+}
+
+function cancelarPin(){
+  pinRolPendiente=null;
+  document.getElementById('loginGatePinWrap').style.display='none';
+  document.getElementById('loginGateRoles').style.display='flex';
+}
+
+function confirmarPin(){
+  var val=document.getElementById('loginGatePinInput').value.trim();
+  var esperado=pinRolPendiente==='admin'?rolesConfig.adminPin:rolesConfig.vendedorPin;
+  if(val===esperado){
+    rolActual=pinRolPendiente;
+    localStorage.setItem('rolActual', rolActual);
+    ocultarLoginGate();
+    aplicarRestriccionesRol();
+  } else {
+    document.getElementById('loginGateError').textContent='PIN incorrecto';
+    document.getElementById('loginGatePinInput').value='';
+  }
+}
+
+function ocultarLoginGate(){
+  var gate=document.getElementById('loginGate');
+  if(gate) gate.style.display='none';
+}
+
+function cerrarSesion(){
+  localStorage.removeItem('rolActual');
+  location.reload();
+}
+
+// Aplica/oculta vistas según el rol activo. Vendedor: solo Ventas + Inventario (sin costos).
+function aplicarRestriccionesRol(){
+  var esVendedor=(rolActual==='vendedor');
+
+  var badgeIcon=document.getElementById('rolBadgeIcon');
+  var badgeLabel=document.getElementById('rolBadgeLabel');
+  if(badgeIcon) badgeIcon.textContent=esVendedor?'🧑‍💼':'👑';
+  if(badgeLabel) badgeLabel.textContent=esVendedor?'Vendedor':'Admin';
+
+  ['navInicio','navOrd','navMas'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.style.display=esVendedor?'none':'';
+  });
+  var opsTabGastosEl=document.getElementById('opsTabGastos');
+  if(opsTabGastosEl) opsTabGastosEl.style.display=esVendedor?'none':'';
+  var invMainTabPedidosEl=document.getElementById('invMainTabPedidos');
+  if(invMainTabPedidosEl) invMainTabPedidosEl.style.display=esVendedor?'none':'';
+  var invTotalCard=document.getElementById('invTotalInvertidoCard');
+  if(invTotalCard) invTotalCard.style.display=esVendedor?'none':'';
+  var btnAddProducto=document.getElementById('btnAddProducto');
+  if(btnAddProducto) btnAddProducto.style.display=esVendedor?'none':'';
+  ['tBtnGasto','tBtnPedido'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.style.display=esVendedor?'none':'';
+  });
+
+  if(esVendedor){
+    // Vendedor entra directo a Operaciones → Ventas
+    var navOpsBtn=document.getElementById('navOps');
+    showSection('operaciones', navOpsBtn);
+    setOpsTab('ventas');
+  }
+  renderInventario();
+}
+
+// Muestra el gate o entra directo si ya hay sesión guardada en este dispositivo
+function iniciarSesionOApp(){
+  cargarRolesConfig(function(){
+    if(rolActual){
+      ocultarLoginGate();
+      aplicarRestriccionesRol();
+    }
+    // Si no hay rol guardado, el gate permanece visible (comportamiento por defecto del HTML)
+  });
 }
 
 function openFondoModal(){
@@ -3712,6 +3881,7 @@ function renderInventario(){
     return;
   }
   var html='';
+  var esVendedor=(rolActual==='vendedor');
   filtrados.forEach(function(p){
     var bajoPorMinimo=p.stockMinimo!=null&&p.cantidad<=p.stockMinimo;
     var sc=p.cantidad<=0?'stock-out':(bajoPorMinimo||p.cantidad<=5)?'stock-low':'stock-ok';
@@ -3731,16 +3901,17 @@ function renderInventario(){
       '</div>'+
       '<div class="inv-card-body">'+
         '<div class="inv-stat"><div class="inv-stat-label">Stock</div><div class="inv-stat-value">'+p.cantidad+'<span style="font-size:10px;color:var(--text3)"> '+esc(p.unidad)+'</span></div></div>'+
-        '<div class="inv-stat"><div class="inv-stat-label">Costo</div><div class="inv-stat-value" style="color:var(--red)">'+fmt(p.precioCosto)+'</div></div>'+
+        (esVendedor?'':'<div class="inv-stat"><div class="inv-stat-label">Costo</div><div class="inv-stat-value" style="color:var(--red)">'+fmt(p.precioCosto)+'</div></div>')+
         '<div class="inv-stat"><div class="inv-stat-label">Venta</div><div class="inv-stat-value" style="color:var(--green)">'+fmt(p.precioVenta)+'</div></div>'+
       '</div>'+
+      (esVendedor?'':
       '<div style="padding:0 16px 12px;font-size:11px;color:var(--text3)">Margen: <strong style="color:var(--primary)">'+(margen!=='--'?margen+'%':'--')+'</strong> &nbsp;|&nbsp; Valor stock: <strong style="color:var(--text)">'+fmt(p.cantidad*p.precioCosto)+'</strong></div>'+
       '<div class="inv-card-footer">'+
         '<button class="inv-btn inv-btn-danger" onclick="eliminarProducto('+p.id+')">Eliminar</button>'+
         '<button class="inv-btn" style="background:#fdeee9;color:var(--red);border-color:#f3c4b3" onclick="openMermaModal('+p.id+')">🗑 Merma</button>'+
         '<button class="inv-btn" onclick="openStockModal('+p.id+')">Ajustar</button>'+
         '<button class="inv-btn inv-btn-primary" onclick="openProductoModal('+p.id+')">Editar</button>'+
-      '</div>'+
+      '</div>')+
     '</div>';
   });
   el.innerHTML=html;
@@ -5925,6 +6096,7 @@ updateFondoLabel();
 if(!localStorage.getItem("jr_ultimo_respaldo")) localStorage.setItem("jr_ultimo_respaldo",dateKey(new Date()));
 renderAll();
 _fbLoad(); // carga desde Firebase y sincroniza
+iniciarSesionOApp(); // gate de acceso Admin/Vendedor
 
 // ── PWA: registrar service worker para permitir instalación con ícono propio ──
 if('serviceWorker' in navigator){
