@@ -690,6 +690,34 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <div id="proyeccionMes" style="padding:10px 16px;border-top:1px solid var(--border);font-size:12px"></div>
       </div>
 
+      <!-- Resumen mensual -->
+      <div class="semana-card">
+        <div class="semana-header">
+          <div class="semana-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Este mes
+          </div>
+          <span id="mesRango" style="font-size:10px;color:var(--text3)"></span>
+        </div>
+        <div class="semana-body">
+          <div class="semana-stat">
+            <div class="semana-stat-label">Ventas</div>
+            <div class="semana-stat-value" id="mesVentas" style="color:var(--green)">$0</div>
+            <div id="mesVentasDiff" style="font-size:10px;margin-top:2px"></div>
+          </div>
+          <div class="semana-stat">
+            <div class="semana-stat-label">Gastos</div>
+            <div class="semana-stat-value" id="mesGastos" style="color:var(--red)">$0</div>
+            <div id="mesGastosDiff" style="font-size:10px;margin-top:2px"></div>
+          </div>
+          <div class="semana-stat">
+            <div class="semana-stat-label">Balance</div>
+            <div class="semana-stat-value" id="mesBalance">$0</div>
+            <div id="mesBalanceDiff" style="font-size:10px;margin-top:2px"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Gráfico distribución -->
       <div class="card">
         <div class="chart-title">Distribución Financiera</div>
@@ -1147,6 +1175,16 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <span>Más</span>
     </button>
   </div>
+</div>
+
+<!-- ═══ VISTA PREVIA DE REPORTE (reemplaza window.open, funciona en PWA instalada) ═══ -->
+<div id="reportePreviewOverlay" style="display:none;position:fixed;inset:0;z-index:600;background:#fff;flex-direction:column">
+  <div style="background:#0a3d2e;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <button onclick="cerrarReportePreview()" style="background:rgba(255,255,255,0.12);border:none;color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer">‹ Cerrar</button>
+    <span style="font-size:13px;font-weight:600">Vista previa</span>
+    <button onclick="imprimirReportePreview()" style="background:#e8a020;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">⬇ Guardar PDF</button>
+  </div>
+  <iframe id="reportePreviewFrame" style="flex:1;border:none;width:100%;background:#fff"></iframe>
 </div>
 
 <!-- ═══ MODAL: FONDO INICIAL (HISTÓRICO, UNA SOLA VEZ) ═══ -->
@@ -1636,7 +1674,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 // ══════════════════════════════════════════
 //  ESTADO
 // ══════════════════════════════════════════
-var META = 500;
+var META = 200;
 var selectedTipo = 'venta';
 var stkOpActual = 'sumar';
 var pedidoTab = 'pendiente';
@@ -2708,6 +2746,11 @@ function editarPedidoGlobal(id){
         if(uSel.options[i].value===ped.unidad){uSel.selectedIndex=i;break;}
       }
     }
+    if(ped.productoId){
+      var prodSelEl=document.getElementById('pedidoProdSel');
+      if(prodSelEl) prodSelEl.value=ped.productoId;
+      onPedidoProdChange();
+    }
   }
   renderPedidoItems();
   document.getElementById('addModal').classList.add('open');
@@ -2784,7 +2827,7 @@ function saveRecord(){
       if(!pedExist){toast('⚠ Pedido no encontrado');closeModal('addModal');return;}
       if(pedExist.estado!=='pendiente'){toast('⚠ Solo se pueden editar pedidos pendientes');closeModal('addModal');return;}
 
-      var nuevoDesc, nuevoMonto, nuevoCant, nuevosItems, nuevaUnidad;
+      var nuevoDesc, nuevoMonto, nuevoCant, nuevosItems, nuevaUnidad, nuevoProductoId;
       if(pedidoItems.length>0){
         var firstPedE=pedidoItems[0].desc||pedidoItems[0].productoNombre||'Producto';
         nuevoDesc=pedidoItems.length===1?firstPedE:firstPedE+' + '+(pedidoItems.length-1)+' más';
@@ -2797,13 +2840,18 @@ function saveRecord(){
         var uSelE=document.getElementById('fUnidad');
         nuevaUnidad=uSelE?uSelE.value:undefined;
         nuevoDesc=desc; nuevoMonto=monto; nuevoCant=cant; nuevosItems=null;
+        var pedSelElE=document.getElementById('pedidoProdSel');
+        var pidManualE=pedSelElE?parseInt(pedSelElE.value)||null:null;
+        var prodManualE=pidManualE?getProducto(pidManualE):null;
+        nuevoProductoId=prodManualE?prodManualE.id:null;
       }
 
       pedExist.tipo=tipo;
       pedExist.desc=nuevoDesc;
       pedExist.monto=nuevoMonto;
       pedExist.cant=nuevoCant;
-      if(nuevosItems) pedExist.items=nuevosItems; else delete pedExist.items;
+      if(nuevosItems){ pedExist.items=nuevosItems; delete pedExist.productoId; }
+      else { delete pedExist.items; pedExist.productoId=nuevoProductoId; }
       if(nuevaUnidad) pedExist.unidad=nuevaUnidad;
 
       // Sincronizar el reflejo en day.pedidos del día original del pedido
@@ -2846,13 +2894,16 @@ function saveRecord(){
       // Pedido manual simple
       if(!monto||monto<=0){toast('⚠ Ingresa un monto válido');document.getElementById('fMonto').focus();return;}
       if(!desc) desc='Pedido';
+      var pedSelEl=document.getElementById('pedidoProdSel');
+      var pidManual=pedSelEl?parseInt(pedSelEl.value)||null:null;
+      var prodManual=pidManual?getProducto(pidManual):null;
       var pedRec={
         id:Date.now(),
         tipo:tipo,
         desc:desc, cant:cant, monto:monto, hora:hora,
         fecha:dateKey(currentDate),
         estado:'pendiente',
-        productoId:null
+        productoId:prodManual?prodManual.id:null
       };
       day.pedidos.push({id:pedRec.id,tipo:tipo,desc:desc,cant:cant,monto:monto,hora:hora});
       pedidosGlobal.push(pedRec);
@@ -2942,7 +2993,7 @@ function completarPedido(id){
   ped.fechaCompletado=fechaCompletado;
   savePedidos();
   renderAll();
-  toast('✓ Pedido completado — $'+ped.monto.toFixed(2)+' registrado en gastos'+(stockMsg?' · Stock:'+stockMsg:''));
+  toast('✓ Pedido completado — $'+ped.monto.toFixed(2)+' registrado en gastos'+(stockMsg?' · Stock:'+stockMsg:' · ⚠ Sin producto vinculado, el stock no cambió'));
 }
 
 function cancelarPedido(id){
@@ -3450,6 +3501,53 @@ function renderResumen(){
 
   // Semana
   renderSemana();
+  renderMesResumen();
+}
+
+function renderMesResumen(){
+  var year=currentDate.getFullYear(), month=currentDate.getMonth();
+  var mesKey=year+'-'+String(month+1).padStart(2,'0');
+  var mesLabel=currentDate.toLocaleDateString('es-SV',{month:'long',year:'numeric'});
+  var rangoEl=document.getElementById('mesRango');
+  if(rangoEl) rangoEl.textContent=mesLabel.charAt(0).toUpperCase()+mesLabel.slice(1);
+
+  var mV=0, mG=0, cntV=0, cntG=0;
+  Object.keys(data).forEach(function(k){
+    if(k.substring(0,7)!==mesKey) return;
+    var d=data[k];
+    mV+=(d.ventas||[]).reduce(function(a,x){return a+x.monto;},0);
+    mG+=(d.gastos||[]).reduce(function(a,x){return a+x.monto;},0);
+    cntV+=(d.ventas||[]).length; cntG+=(d.gastos||[]).length;
+  });
+
+  var mVEl=document.getElementById('mesVentas'); if(mVEl) mVEl.textContent=fmtShort(mV);
+  var mGEl=document.getElementById('mesGastos'); if(mGEl) mGEl.textContent=fmtShort(mG);
+  var mBal=mV-mG;
+  var balEl=document.getElementById('mesBalance');
+  if(balEl){ balEl.textContent=fmtShort(Math.abs(mBal)); balEl.style.color=mBal>=0?'var(--green)':'var(--red)'; }
+
+  // Comparativo mes anterior
+  var prevDate=new Date(year, month-1, 1);
+  var prevKey=prevDate.getFullYear()+'-'+String(prevDate.getMonth()+1).padStart(2,'0');
+  var pV=0, pG=0;
+  Object.keys(data).forEach(function(k){
+    if(k.substring(0,7)!==prevKey) return;
+    var d=data[k];
+    pV+=(d.ventas||[]).reduce(function(a,x){return a+x.monto;},0);
+    pG+=(d.gastos||[]).reduce(function(a,x){return a+x.monto;},0);
+  });
+  function diffBadgeMes(curr, prev, elId, positiveIsGood){
+    var el=document.getElementById(elId);
+    if(!el) return;
+    if(prev===0){el.textContent='';return;}
+    var pct=Math.round(((curr-prev)/prev)*100);
+    var up=pct>=0;
+    var good=(positiveIsGood?up:!up);
+    el.innerHTML='<span style="color:'+(good?'var(--green)':'var(--red)')+'">'+(up?'↑':'↓')+Math.abs(pct)+'% vs mes ant.</span>';
+  }
+  diffBadgeMes(mV,pV,'mesVentasDiff',true);
+  diffBadgeMes(mG,pG,'mesGastosDiff',false);
+  diffBadgeMes(mBal,pV-pG,'mesBalanceDiff',true);
 }
 
 function renderSemana(){
@@ -6257,28 +6355,29 @@ function buildReporteDeudaProveedores(){
 
 function generarReporte(tipo){
   var html='';
-  if(tipo==='diario') html=buildReporteDiario();
-  else if(tipo==='semanal') html=buildReporteSemanal();
-  else if(tipo==='mensual') html=buildReporteMensual();
-  else if(tipo==='inventario') html=buildReporteInventario();
-  else if(tipo==='ventasDiario') html=buildReporteVentasDiario();
-  else if(tipo==='ventasSemanal') html=buildReporteVentasSemanal();
-  else if(tipo==='ventasMensual') html=buildReporteVentasMensual();
-  else if(tipo==='pedidosDiario') html=buildReportePedidosDiario();
-  else if(tipo==='pedidosSemanal') html=buildReportePedidosSemanal();
-  else if(tipo==='pedidosMensual') html=buildReportePedidosMensual();
-  else if(tipo==='inventarioSemanal') html=buildReporteInventarioSemanal();
-  else if(tipo==='inventarioMensual') html=buildReporteInventarioMensual();
-  else if(tipo==='clientesAdeudos') html=buildReporteClientesAdeudos();
-  else if(tipo==='deudaProveedores') html=buildReporteDeudaProveedores();
+  try{
+    if(tipo==='diario') html=buildReporteDiario();
+    else if(tipo==='semanal') html=buildReporteSemanal();
+    else if(tipo==='mensual') html=buildReporteMensual();
+    else if(tipo==='inventario') html=buildReporteInventario();
+    else if(tipo==='ventasDiario') html=buildReporteVentasDiario();
+    else if(tipo==='ventasSemanal') html=buildReporteVentasSemanal();
+    else if(tipo==='ventasMensual') html=buildReporteVentasMensual();
+    else if(tipo==='pedidosDiario') html=buildReportePedidosDiario();
+    else if(tipo==='pedidosSemanal') html=buildReportePedidosSemanal();
+    else if(tipo==='pedidosMensual') html=buildReportePedidosMensual();
+    else if(tipo==='inventarioSemanal') html=buildReporteInventarioSemanal();
+    else if(tipo==='inventarioMensual') html=buildReporteInventarioMensual();
+    else if(tipo==='clientesAdeudos') html=buildReporteClientesAdeudos();
+    else if(tipo==='deudaProveedores') html=buildReporteDeudaProveedores();
+  }catch(err){
+    console.error('Error generando reporte', tipo, err);
+    toast('⚠ No se pudo generar el reporte. Revisa que tengas datos registrados.');
+    return;
+  }
 
-  // Abrir ventana de impresión con el reporte
-  var win = window.open('','_blank');
-  if(!win){ toast('⚠ Permite ventanas emergentes para generar el PDF'); return; }
-  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte</title><style>');
-  win.document.write('*{margin:0;padding:0;box-sizing:border-box}');
-  win.document.write('body{background:#fff;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a}');
-  // Copiar todos los estilos de reporte
+  // Construir el documento del reporte (CSS rpt- copiado de la hoja de estilos)
+  var styleRules='';
   var styleSheets = document.styleSheets;
   for(var i=0;i<styleSheets.length;i++){
     try{
@@ -6286,21 +6385,44 @@ function generarReporte(tipo){
       for(var j=0;j<rules.length;j++){
         var rule = rules[j].cssText||'';
         if(rule.indexOf('rpt-')!==-1||rule.indexOf('no-break')!==-1){
-          win.document.write(rule+'\n');
+          styleRules+=rule+'\n';
         }
       }
     }catch(e){}
   }
-  win.document.write('@media print{.no-print{display:none}.no-break{page-break-inside:avoid}}');
-  win.document.write('</style></head><body>');
-  win.document.write('<div class="no-print" style="background:#0a3d2e;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99">');
-  win.document.write('<span style="font-size:14px;font-weight:600">Vista previa del reporte</span>');
-  win.document.write('<button onclick="window.print()" style="background:#e8a020;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">⬇ Guardar como PDF</button>');
-  win.document.write('</div>');
-  win.document.write(html);
-  win.document.write('</body></html>');
-  win.document.close();
+  var doc='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte</title><style>'+
+    '*{margin:0;padding:0;box-sizing:border-box}'+
+    'body{background:#fff;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;padding:12px}'+
+    styleRules+
+    '@media print{.no-print{display:none}.no-break{page-break-inside:avoid}}'+
+    '</style></head><body>'+html+'</body></html>';
+
+  // Mostrar en el iframe de vista previa (funciona también en la app instalada/PWA,
+  // donde window.open no abre ventanas nuevas)
+  var overlay=document.getElementById('reportePreviewOverlay');
+  var frame=document.getElementById('reportePreviewFrame');
+  if(!overlay||!frame){ toast('⚠ No se pudo abrir la vista previa'); return; }
+  frame.srcdoc=doc;
+  overlay.style.display='flex';
   toast('✓ Reporte generado');
+}
+
+function cerrarReportePreview(){
+  var overlay=document.getElementById('reportePreviewOverlay');
+  var frame=document.getElementById('reportePreviewFrame');
+  if(overlay) overlay.style.display='none';
+  if(frame) frame.srcdoc='';
+}
+
+function imprimirReportePreview(){
+  var frame=document.getElementById('reportePreviewFrame');
+  if(!frame||!frame.contentWindow){ toast('⚠ La vista previa aún está cargando, intenta de nuevo'); return; }
+  try{
+    frame.contentWindow.focus();
+    frame.contentWindow.print();
+  }catch(e){
+    toast('⚠ No se pudo abrir el diálogo de impresión');
+  }
 }
 
 // ── INIT ──
