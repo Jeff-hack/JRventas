@@ -1353,6 +1353,17 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <input type="hidden" id="adeudoId">
       <input type="hidden" id="adeudoClienteId">
       <div id="adeudoClienteLabel" style="font-size:13px;font-weight:600;color:var(--primary);padding:8px 12px;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:4px"></div>
+      <div id="adeudoProductoWrap">
+        <label class="form-label">Producto <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional — descuenta del inventario al fiar)</span></label>
+        <div class="form-row">
+          <select class="form-input" id="adeudoProductoSel" onchange="onAdeudoProductoChange()" style="flex:2">
+            <option value="">— Sin producto (solo descripción) —</option>
+          </select>
+          <input class="form-input" type="number" id="adeudoCantidad" placeholder="Cant." step="0.01" min="0.01" oninput="onAdeudoProductoChange()" style="flex:1">
+        </div>
+        <div id="adeudoStockInfo" style="font-size:11px;color:var(--text3);margin-top:4px;display:none"></div>
+      </div>
+      <div id="adeudoProductoFijo" style="display:none;font-size:11px;color:var(--text3);background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:4px"></div>
       <div>
         <label class="form-label">Descripción</label>
         <input class="form-input" type="text" id="adeudoDesc" placeholder="Ej: 10 libras de pechuga">
@@ -2679,7 +2690,13 @@ function agregarItemVenta(){
   if(monto<=0){toast('⚠ Ingresa un monto válido');return;}
   if(!desc) desc='Venta';
   var prod=pid?getProducto(pid):null;
-  if(prod && cant>prod.cantidad){toast('⚠ Stock insuficiente ('+prod.cantidad+' '+prod.unidad+' disponibles)');return;}
+  if(prod){
+    var yaEnLista=ventaItems.filter(function(it){return it.productoId===pid;}).reduce(function(a,it){return a+it.cant;},0);
+    if((cant+yaEnLista)>prod.cantidad){
+      toast('⚠ Stock insuficiente ('+prod.cantidad+' '+prod.unidad+' disponibles'+(yaEnLista>0?', ya agregaste '+yaEnLista:'')+')');
+      return;
+    }
+  }
   ventaItems.push({productoId:prod?prod.id:null,productoNombre:prod?prod.nombre:null,desc:desc,cant:cant,monto:monto});
   // reset campos
   document.getElementById('ventaProductoSel').value='';
@@ -2937,7 +2954,18 @@ function deleteRecord(tipo,id){
   if(tipo==='ventas'){
     var rec=null;
     for(var i=0;i<day.ventas.length;i++){if(day.ventas[i].id===id){rec=day.ventas[i];break;}}
-    if(rec&&rec.productoId){var prod=getProducto(rec.productoId);if(prod){prod.cantidad+=rec.cant;saveProductos();}}
+    if(rec && !rec.esCobroAdeudo){
+      if(rec.items&&rec.items.length){
+        // Venta de varios productos: restaurar stock de cada item
+        rec.items.forEach(function(it){
+          if(it.productoId){var prod=getProducto(it.productoId);if(prod) prod.cantidad+=parseFloat(it.cant)||0;}
+        });
+        saveProductos();
+      } else if(rec.productoId){
+        var prod=getProducto(rec.productoId);
+        if(prod){prod.cantidad+=parseFloat(rec.cant)||0;saveProductos();}
+      }
+    }
   }
   day[tipo]=day[tipo].filter(function(x){return x.id!==id;});
   saveData();
@@ -2978,7 +3006,7 @@ function completarPedido(id){
   });
   saveData();
 
-  // Sumar stock y actualizar fechaIngreso
+  // Sumar stock y actualizar fecha de ingreso (para que la tarjeta de inventario refleje la reposición)
   var stockMsg='';
   if(ped.items&&ped.items.length){
     ped.items.forEach(function(it){
@@ -2986,7 +3014,7 @@ function completarPedido(id){
         var prod=getProducto(it.productoId);
         if(prod){
           prod.cantidad+=parseFloat(it.cant)||1;
-          prod.fechaIngreso=fechaCompletado;   // ← actualizar fecha ingreso
+          prod.fecha=fechaCompletado;
           stockMsg+=' +'+it.cant+' '+prod.unidad+' '+prod.nombre+';';
         }
       }
@@ -2996,7 +3024,7 @@ function completarPedido(id){
     var prod=getProducto(ped.productoId);
     if(prod){
       prod.cantidad+=parseFloat(ped.cant)||1;
-      prod.fechaIngreso=fechaCompletado;       // ← actualizar fecha ingreso
+      prod.fecha=fechaCompletado;
       saveProductos();
       stockMsg=' +'+ped.cant+' '+prod.unidad+' en stock de '+prod.nombre;
     }
@@ -3172,7 +3200,6 @@ function saveMerma(){
 
   // 1. Descontar del stock
   p.cantidad=Math.max(0, parseFloat((p.cantidad-cant).toFixed(4)));
-  p.fechaIngreso=dateKey(new Date());
   saveProductos();
 
   // 2. Registrar como gasto del día (categoría merma)
@@ -3459,8 +3486,6 @@ function renderResumen(){
     if(k.substring(0,7)!==mesActual) return;
     var d=data[k];
     (d.ventas||[]).forEach(function(v){
-      // Ignorar cobros de adeudo
-      if(v.esCobroAdeudo) return;
       if(v.items&&v.items.length){
         v.items.forEach(function(it){
           var prod=it.productoId?getProducto(it.productoId):null;
@@ -4560,11 +4585,13 @@ function saveCierre(){
   var hoy=dateKey(currentDate);
   var cajaCalculada=getCajaAcumulada(currentDate);
   fondos['cierre_'+hoy]={efectivo:efectivo,calculado:cajaCalculada,diferencia:efectivo-cajaCalculada,hora:new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'})};
-  fondos['efectivoApertura']=efectivo;
+  // NOTA: NO se toca fondos['efectivoApertura'] — es el ancla histórica única y fija.
+  // getCajaAcumulada() ya suma TODOS los días desde esa ancla; sobreescribirla aquí
+  // duplicaba el saldo de todos los días anteriores cada vez que se cerraba caja.
   saveFondos();
   closeModal('cierreModal');
   renderAll();
-  toast('✓ Caja cerrada — mañana inicia con '+fmt(efectivo));
+  toast('✓ Caja cerrada — quedó registrada para hoy');
 }
 
 function updateCierreBadge(){
@@ -4730,6 +4757,26 @@ function eliminarCliente(id){
 // Buffer temporal de pagos mientras se edita el modal de adeudo
 var adeudoPagosBuffer=[];
 
+function onAdeudoProductoChange(){
+  var pid=parseInt(document.getElementById('adeudoProductoSel').value)||null;
+  var cant=parseFloat(document.getElementById('adeudoCantidad').value)||0;
+  var info=document.getElementById('adeudoStockInfo');
+  if(!pid){ info.style.display='none'; return; }
+  var p=getProducto(pid);
+  if(!p){ info.style.display='none'; return; }
+  info.style.display='block';
+  var excede=cant>p.cantidad;
+  info.style.color=excede?'var(--red)':'var(--text3)';
+  info.textContent='Stock disponible: '+p.cantidad+' '+p.unidad+(excede?' ⚠ No hay suficiente':'');
+  if(cant>0){
+    document.getElementById('adeudoMonto').value=(cant*p.precioVenta).toFixed(2);
+    renderPagosAdeudo();
+  }
+  if(!document.getElementById('adeudoDesc').value.trim()){
+    document.getElementById('adeudoDesc').value=cant+' '+p.unidad+' de '+p.nombre;
+  }
+}
+
 function openAdeudoModal(clienteId, adeudoId){
   var c=getCliente(clienteId);
   if(!c) return;
@@ -4749,6 +4796,16 @@ function openAdeudoModal(clienteId, adeudoId){
     document.getElementById('adeudoFechaEntrega').value=a.fechaEntrega;
     document.getElementById('adeudoFechaPago').value=a.fechaPago||'';
     document.getElementById('adeudoEstado').value=a.estado;
+    // El producto vinculado no se puede cambiar al editar (ya se descontó del stock al crear)
+    document.getElementById('adeudoProductoWrap').style.display='none';
+    var fijoEl=document.getElementById('adeudoProductoFijo');
+    if(a.productoId){
+      var prodFijo=getProducto(a.productoId);
+      fijoEl.style.display='block';
+      fijoEl.textContent='📦 Vinculado a '+(prodFijo?prodFijo.nombre:'producto eliminado')+' · '+a.cantidadTotal+' unidades (ya descontadas del inventario, no se puede cambiar)';
+    } else {
+      fijoEl.style.display='none';
+    }
     // Migración: si venía del modelo viejo con "abonado" plano, convertir a un pago único
     if(a.pagos && a.pagos.length){
       adeudoPagosBuffer=a.pagos.map(function(p){return Object.assign({},p);});
@@ -4765,6 +4822,12 @@ function openAdeudoModal(clienteId, adeudoId){
     document.getElementById('adeudoFechaPago').value='';
     document.getElementById('adeudoEstado').value='pendiente';
     adeudoPagosBuffer=[];
+    document.getElementById('adeudoProductoWrap').style.display='block';
+    document.getElementById('adeudoProductoFijo').style.display='none';
+    poblarSelectProductos('adeudoProductoSel');
+    document.getElementById('adeudoProductoSel').value='';
+    document.getElementById('adeudoCantidad').value='';
+    document.getElementById('adeudoStockInfo').style.display='none';
   }
   renderPagosAdeudo();
   document.getElementById('adeudoModal').classList.add('open');
@@ -4829,11 +4892,37 @@ function saveAdeudo(){
   if(!monto||monto<=0){toast('⚠ Ingresa un monto válido');return;}
   if(!fechaEntrega){toast('⚠ Selecciona la fecha de entrega');return;}
 
+  // Capturar el registro y pagos previos ANTES de sobreescribir nada — antes este cálculo
+  // se hacía después de reemplazar el registro, así que nunca detectaba abonos nuevos al editar.
+  var registroAnterior=null, pagosPrevios=0;
+  if(idExist){
+    registroAnterior=c.adeudos.find(function(x){return x.id===parseInt(idExist);});
+    if(registroAnterior) pagosPrevios=(registroAnterior.pagos||[]).reduce(function(s,p){return s+p.monto;},0);
+  }
+
   var totalPagado=adeudoPagosBuffer.reduce(function(s,p){return s+p.monto;},0);
   var saldo=monto-totalPagado;
   var estado=saldo<=0?'pagado':'pendiente';
 
   var registro={desc:desc,monto:monto,abonado:totalPagado,pagos:adeudoPagosBuffer.slice(),fechaEntrega:fechaEntrega,fechaPago:fechaPago||null,estado:estado};
+
+  // Producto vinculado: solo se define al CREAR (no se puede cambiar al editar, ya se descontó del stock)
+  var pidNuevo=null, cantNueva=0;
+  if(!idExist){
+    pidNuevo=parseInt(document.getElementById('adeudoProductoSel').value)||null;
+    cantNueva=parseFloat(document.getElementById('adeudoCantidad').value)||0;
+    if(pidNuevo){
+      var prodF=getProducto(pidNuevo);
+      if(!prodF){toast('⚠ Producto no encontrado');return;}
+      if(cantNueva<=0){toast('⚠ Ingresa la cantidad del producto');return;}
+      if(cantNueva>prodF.cantidad){toast('⚠ Stock insuficiente ('+prodF.cantidad+' '+prodF.unidad+' disponibles)');return;}
+      registro.productoId=pidNuevo;
+      registro.cantidadTotal=cantNueva;
+    }
+  } else if(registroAnterior && registroAnterior.productoId){
+    registro.productoId=registroAnterior.productoId;
+    registro.cantidadTotal=registroAnterior.cantidadTotal;
+  }
 
   if(idExist){
     var idx=c.adeudos.findIndex(function(x){return x.id===parseInt(idExist);});
@@ -4841,27 +4930,33 @@ function saveAdeudo(){
   } else {
     registro.id=Date.now();
     c.adeudos.push(registro);
+    // Descontar del inventario AL CREAR (el producto ya salió del negocio, aunque no se haya cobrado)
+    if(pidNuevo){
+      var prodDesc=getProducto(pidNuevo);
+      if(prodDesc){ prodDesc.cantidad=Math.max(0,parseFloat((prodDesc.cantidad-cantNueva).toFixed(4))); saveProductos(); }
+    }
   }
 
-  // Calcular cuánto se pagó nuevo (diferencia con lo que había antes)
-  var pagosPrevios=0;
-  if(idExist){
-    var aAnterior=c.adeudos.find(function(x){return x.id===parseInt(idExist);});
-    if(aAnterior) pagosPrevios=(aAnterior.pagos||[]).reduce(function(s,p){return s+p.monto;},0);
-  }
   var nuevoPago=totalPagado-pagosPrevios;
   if(nuevoPago>0){
     var hoy=new Date();
     var hora=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
     var dayData=getDayData(hoy);
-    dayData.ventas.push({
+    var pagoRec={
       id:Date.now()+2,
       monto:nuevoPago,
       desc:'Abono adeudo: '+desc+' ('+c.nombre+')',
       cant:1,
       hora:hora,
       esCobroAdeudo:true
-    });
+    };
+    // Si el adeudo tiene producto vinculado, prorratear la cantidad según lo pagado
+    // para que la ganancia se calcule con el costo real, no como margen 100%.
+    if(registro.productoId && registro.cantidadTotal && monto>0){
+      pagoRec.productoId=registro.productoId;
+      pagoRec.cant=(nuevoPago/monto)*registro.cantidadTotal;
+    }
+    dayData.ventas.push(pagoRec);
     saveData();
   }
 
@@ -4903,14 +4998,19 @@ function marcarAdeudoPagado(clienteId, adeudoId){
     var hoy=new Date();
     var hora=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
     var dayData=getDayData(hoy);
-    dayData.ventas.push({
+    var pagoRec={
       id:Date.now()+1,
       monto:saldoRestante,
       desc:'Cobro adeudo: '+esc(a.desc)+' ('+esc(c.nombre)+')',
       cant:1,
       hora:hora,
       esCobroAdeudo:true
-    });
+    };
+    if(a.productoId && a.cantidadTotal && a.monto>0){
+      pagoRec.productoId=a.productoId;
+      pagoRec.cant=(saldoRestante/a.monto)*a.cantidadTotal;
+    }
+    dayData.ventas.push(pagoRec);
     saveData();
   }
 
