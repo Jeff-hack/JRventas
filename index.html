@@ -147,6 +147,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .inv-btn-danger{border-color:#fca5a5;color:var(--red);background:#fff5f5}
 .inv-btn-primary{border-color:var(--primary);color:var(--primary);background:#e8f7f1}
 .stock-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.dash-section-head{display:flex;align-items:center;justify-content:space-between;padding:14px 2px 8px;cursor:pointer}
+.dash-section-head-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
+.dash-section-chevron{font-size:12px;color:var(--text3);transition:transform .2s}
+.dash-section-chevron.collapsed{transform:rotate(-90deg)}
+.dash-section-body.collapsed{display:none}
 .inv-row-main{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
 .inv-row-main:active{background:var(--surface2)}
 .inv-row-chevron{font-size:11px;color:var(--text3);transition:transform .2s;flex-shrink:0}
@@ -573,6 +578,13 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <div id="cierreBadge" style="display:none;margin-top:6px;font-size:11px;color:rgba(255,255,255,0.7);text-align:center"></div>
       </div>
 
+      <!-- ═══ SECCIÓN: PANORAMA DEL NEGOCIO (colapsable) ═══ -->
+      <div class="dash-section-head" onclick="toggleDashSection('panorama')">
+        <span class="dash-section-head-title">📊 Panorama del negocio</span>
+        <span class="dash-section-chevron" id="dashChev_panorama">▾</span>
+      </div>
+      <div class="dash-section-body" id="dashSec_panorama">
+
       <!-- Fila: Patrimonio + Ganancia Neta Mes -->
       <div class="stats-row">
         <div class="stat-card" id="fondoInicialCard">
@@ -622,6 +634,12 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <div class="stat-value" id="gananciaDia" style="color:var(--gold)">$0.00</div>
           <div class="stat-sub" id="gananciaBrutaSub">Venta − costo</div>
         </div>
+      </div>
+      </div><!-- /dashSec_panorama -->
+
+      <!-- ═══ SECCIÓN: HOY (siempre visible) ═══ -->
+      <div class="dash-section-head" style="cursor:default">
+        <span class="dash-section-head-title">💰 Hoy</span>
       </div>
 
       <!-- Fila 2x2: Ventas / Gastos / Pedidos / Encargos hoy -->
@@ -703,6 +721,14 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <div class="stat-sub" id="dashDeudaProvCnt">0 pedidos pendientes</div>
         </div>
       </div>
+      <!-- /Sección Hoy -->
+
+      <!-- ═══ SECCIÓN: PERÍODOS (colapsable) ═══ -->
+      <div class="dash-section-head" onclick="toggleDashSection('periodos')">
+        <span class="dash-section-head-title">📈 Períodos</span>
+        <span class="dash-section-chevron" id="dashChev_periodos">▾</span>
+      </div>
+      <div class="dash-section-body" id="dashSec_periodos">
 
       <!-- Resumen semanal -->
       <div class="semana-card">
@@ -762,6 +788,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           </div>
         </div>
       </div>
+      </div><!-- /dashSec_periodos -->
 
       <!-- Hidden stats for JS compatibility -->
       <span id="semVentasCard" style="display:none">$0.00</span>
@@ -1922,6 +1949,28 @@ function cargarCategoriasConfig(cb){
 }
 
 // ══════════════════ TEMA CLARO / OSCURO ══════════════════
+// ══════════════════ SECCIONES COLAPSABLES DEL DASHBOARD ══════════════════
+function toggleDashSection(id){
+  var body=document.getElementById('dashSec_'+id);
+  var chevron=document.getElementById('dashChev_'+id);
+  if(!body) return;
+  var collapsed=body.classList.toggle('collapsed');
+  if(chevron) chevron.classList.toggle('collapsed', collapsed);
+  try{ localStorage.setItem('cvd_dashSec_'+id, collapsed?'1':'0'); }catch(e){}
+}
+function initDashSections(){
+  // Por defecto: "Panorama" abierto, "Períodos" cerrado — recuerda lo que el usuario prefiera.
+  [{id:'panorama',defaultCollapsed:false},{id:'periodos',defaultCollapsed:true}].forEach(function(s){
+    var saved=null;
+    try{ saved=localStorage.getItem('cvd_dashSec_'+s.id); }catch(e){}
+    var collapsed = saved!==null ? saved==='1' : s.defaultCollapsed;
+    var body=document.getElementById('dashSec_'+s.id);
+    var chevron=document.getElementById('dashChev_'+s.id);
+    if(body) body.classList.toggle('collapsed', collapsed);
+    if(chevron) chevron.classList.toggle('collapsed', collapsed);
+  });
+}
+
 function setTema(t){
   if(t==='dark') document.documentElement.setAttribute('data-theme','dark');
   else document.documentElement.removeAttribute('data-theme');
@@ -6646,6 +6695,7 @@ _fbLoad(); // carga desde Firebase y sincroniza
 iniciarSesionOApp(); // gate de acceso Admin/Vendedor
 cargarCategoriasConfig(function(){ renderCategoriasAjustes(); });
 try{ setTema(localStorage.getItem('cvd_tema')==='dark'?'dark':'light'); }catch(e){}
+initDashSections();
 
 // ── PWA: registrar service worker para permitir instalación con ícono propio ──
 if('serviceWorker' in navigator){
