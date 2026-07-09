@@ -435,13 +435,13 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 [data-theme="dark"]{
  --bg:#0f1419!important;
  --surface:#1a2028!important;
- --surface2:#212832!important;
+ --surface2:#242c37!important;
  --primary:#2dd4a0!important;
  --primary-l:#12332a!important;
- --border:#2e3742!important;
- --text:#e8ebee!important;
- --text2:#9aa4b0!important;
- --text3:#68727e!important;
+ --border:#3a4552!important;
+ --text:#f5f7fa!important;
+ --text2:#c3cad2!important;
+ --text3:#98a2ae!important;
 }
 [data-theme="dark"] body{background:#0f1419!important}
 [data-theme="dark"] .header{background:rgba(10,15,20,.94)!important}
@@ -6558,19 +6558,48 @@ function generarReporte(tipo){
   }
 
   // Construir el documento del reporte (CSS rpt- copiado de la hoja de estilos)
-  var styleRules='';
-  var styleSheets = document.styleSheets;
-  for(var i=0;i<styleSheets.length;i++){
-    try{
-      var rules = styleSheets[i].cssRules||styleSheets[i].rules;
-      for(var j=0;j<rules.length;j++){
-        var rule = rules[j].cssText||'';
-        if(rule.indexOf('rpt-')!==-1||rule.indexOf('no-break')!==-1){
-          styleRules+=rule+'\n';
-        }
-      }
-    }catch(e){}
-  }
+  // CSS del reporte, incrustado directamente (antes se copiaba en tiempo real desde las hojas
+  // de estilo de la app buscando cualquier regla que contuviera "rpt-", lo cual también
+  // arrastraba por accidente estilos de los BOTONES DEL MENÚ de Reportes (.rpt-btn) —
+  // incluida su versión de tema oscuro con var(--surface), que no existe dentro del iframe
+  // del reporte y dejaba texto y fondo del mismo color. Ahora es un bloque fijo y exacto.
+  var styleRules=
+    ".rpt-wrap{font-family:'Helvetica Neue',Arial,Helvetica,sans-serif;color:#1a1a1a;background:#fff;max-width:780px;margin:0 auto;padding:24px 20px 16px;font-size:12px;line-height:1.4}"+
+    ".rpt-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2.5px solid #0a3d2e}"+
+    ".rpt-logo-area{display:flex;align-items:center;gap:10px}"+
+    ".rpt-logo-box{width:38px;height:38px;background:#0a3d2e;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;letter-spacing:-0.5px;flex-shrink:0}"+
+    ".rpt-biz-name{font-size:16px;font-weight:700;color:#0a3d2e;line-height:1.1}"+
+    ".rpt-meta{text-align:right;font-size:10px;color:#888;line-height:1.7}"+
+    ".rpt-titleblock{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;padding-bottom:5px;border-bottom:1px solid #e0ddd8}"+
+    ".rpt-title{font-size:18px;font-weight:700;color:#0a3d2e}"+
+    ".rpt-subtitle{font-size:10px;color:#777;text-align:right}"+
+    ".rpt-strip{display:flex;border:1px solid #d0cfc9;border-radius:5px;overflow:hidden;margin-bottom:14px}"+
+    ".rpt-strip-cell{flex:1;padding:8px 10px;border-right:1px solid #d0cfc9}"+
+    ".rpt-strip-cell:last-child{border-right:none}"+
+    ".rpt-strip-label{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#999;margin-bottom:2px;font-weight:700}"+
+    ".rpt-strip-value{font-size:15px;font-weight:700;font-family:'Courier New',Courier,monospace;line-height:1}"+
+    ".rpt-strip-sub{font-size:9px;color:#aaa;margin-top:1px}"+
+    ".rpt-section{margin-bottom:14px}"+
+    ".rpt-sh{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;background:#0a3d2e;padding:4px 9px;border-radius:3px 3px 0 0;display:flex;justify-content:space-between;align-items:center}"+
+    ".rpt-table-wrap{overflow-x:auto}"+
+    ".rpt-table{width:100%;border-collapse:collapse;font-size:11px}"+
+    ".rpt-table th{background:#f0ede7;color:#4a4a4a;padding:4px 7px;text-align:left;font-size:9px;letter-spacing:0.3px;text-transform:uppercase;font-weight:700;border-bottom:1.5px solid #ccc}"+
+    ".rpt-table th.r{text-align:right}"+
+    ".rpt-table th.c{text-align:center}"+
+    ".rpt-table td{padding:4px 7px;border-bottom:1px solid #ede9e3;vertical-align:top;color:#1a1a1a}"+
+    ".rpt-table tr:nth-child(even) td{background:#faf9f6}"+
+    ".rpt-table .num{text-align:right;font-family:'Courier New',Courier,monospace;font-weight:600;white-space:nowrap}"+
+    ".rpt-table .cen{text-align:center}"+
+    ".rpt-table .tot td{background:#e8f0ea!important;font-weight:700;border-top:1.5px solid #b8d4bc;border-bottom:none}"+
+    ".rpt-table .empty-row td{color:#bbb;font-style:italic;text-align:center;padding:8px}"+
+    ".rpt-day-head{font-size:10px;font-weight:700;color:#0a3d2e;padding:4px 7px;background:#f0ede7;border-radius:3px;margin:8px 0 3px;display:flex;justify-content:space-between}"+
+    ".rpt-tag{display:inline-block;padding:1px 5px;border-radius:8px;font-size:9px;font-weight:700}"+
+    ".rpt-tag-green{background:#e8f7f1;color:#0f6e56}"+
+    ".rpt-tag-red{background:#fdeee9;color:#993c1d}"+
+    ".rpt-tag-yellow{background:#fef9e7;color:#b7791f}"+
+    ".rpt-tag-grey{background:#f0f0f0;color:#666}"+
+    ".rpt-footer{display:flex;justify-content:space-between;margin-top:16px;padding-top:7px;border-top:1px solid #e0ddd8;font-size:9px;color:#bbb}"+
+    ".no-break{page-break-inside:avoid}";
   var doc='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte</title><style>'+
     '*{margin:0;padding:0;box-sizing:border-box}'+
     'body{background:#fff;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;padding:12px}'+
