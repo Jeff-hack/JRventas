@@ -24,6 +24,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 
 <title>Control de Ventas</title>
+<script>(function(){try{var t=localStorage.getItem('cvd_tema');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
@@ -146,6 +147,12 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .inv-btn-danger{border-color:#fca5a5;color:var(--red);background:#fff5f5}
 .inv-btn-primary{border-color:var(--primary);color:var(--primary);background:#e8f7f1}
 .stock-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.inv-row-main{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.inv-row-main:active{background:var(--surface2)}
+.inv-row-chevron{font-size:11px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.inv-row-chevron.open{transform:rotate(180deg)}
+.inv-row-detail{max-height:0;overflow:hidden;transition:max-height .25s ease}
+.inv-row-detail.open{max-height:340px}
 .stock-ok{background:#e8f7f1;color:#0f6e56}
 .stock-low{background:#fef0d9;color:#854f0b}
 .stock-out{background:#fdeee9;color:#993c1d}
@@ -422,6 +429,44 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
  transform:translateY(-1px);
  transition:.2s;
 }
+</style>
+
+<style id="theme-dark">
+[data-theme="dark"]{
+ --bg:#0f1419!important;
+ --surface:#1a2028!important;
+ --surface2:#212832!important;
+ --primary:#2dd4a0!important;
+ --primary-l:#12332a!important;
+ --border:#2e3742!important;
+ --text:#e8ebee!important;
+ --text2:#9aa4b0!important;
+ --text3:#68727e!important;
+}
+[data-theme="dark"] body{background:#0f1419!important}
+[data-theme="dark"] .header{background:rgba(10,15,20,.94)!important}
+[data-theme="dark"] .logo{background:linear-gradient(135deg,#2dd4a0,#0a3d2e)!important;color:#0f1419!important}
+[data-theme="dark"] .card,[data-theme="dark"] .stat-card,[data-theme="dark"] .semana-card,[data-theme="dark"] .inv-card,[data-theme="dark"] .ped-card{
+ background:var(--surface)!important;
+ box-shadow:0 8px 24px rgba(0,0,0,.35)!important;
+}
+[data-theme="dark"] .balance-card{background:linear-gradient(135deg,#0a1f18,#132a22)!important;box-shadow:0 12px 32px rgba(0,0,0,.5)!important}
+[data-theme="dark"] .bottom-nav{background:var(--surface)!important;border-top:1px solid var(--border)!important;box-shadow:0 -8px 24px rgba(0,0,0,.35)!important}
+[data-theme="dark"] .nav-btn{color:var(--text3)!important}
+[data-theme="dark"] .nav-btn.active{color:var(--primary)!important}
+[data-theme="dark"] .fab{background:linear-gradient(135deg,#2dd4a0,#1d9e75)!important;box-shadow:0 12px 30px rgba(29,158,117,.35)!important;color:#0f1419!important}
+[data-theme="dark"] .form-input{background:var(--surface2)!important;border:1px solid var(--border)!important;color:var(--text)!important}
+[data-theme="dark"] .form-input::placeholder{color:var(--text3)!important}
+[data-theme="dark"] select.form-input option{background:var(--surface2);color:var(--text)}
+[data-theme="dark"] .modal-overlay{background:rgba(0,0,0,.65)!important}
+[data-theme="dark"] .modal{background:var(--surface)!important}
+[data-theme="dark"] .tab-btn.active,[data-theme="dark"] .v2-stab.active{background:var(--surface2)!important;color:var(--primary)!important}
+[data-theme="dark"] .tabs,[data-theme="dark"] .v2-section-tabs{background:var(--surface2)!important}
+[data-theme="dark"] .empty-icon{opacity:.6}
+[data-theme="dark"] .stock-badge.stock-ok{background:#0f2e22!important;color:#2dd4a0!important}
+[data-theme="dark"] .stock-badge.stock-low{background:#3a2a0a!important;color:#e8a020!important}
+[data-theme="dark"] .stock-badge.stock-out{background:#3a1510!important;color:#f4715c!important}
+[data-theme="dark"] .rpt-btn{background:var(--surface)!important;box-shadow:0 4px 12px rgba(0,0,0,.35)!important}
 </style>
 
 </head>
@@ -1099,6 +1144,13 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 
       <!-- Panel Datos -->
       <div id="masPanelDatos" style="display:none">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:4px 0 6px;padding-left:2px">🎨 Apariencia</div>
+        <div class="card" style="padding:14px 16px;margin-bottom:12px">
+          <div class="tabs" style="margin:0">
+            <button class="tab-btn active" id="temaClaroBtn" onclick="setTema('light')">☀️ Claro</button>
+            <button class="tab-btn" id="temaOscuroBtn" onclick="setTema('dark')">🌙 Oscuro</button>
+          </div>
+        </div>
         <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:4px 0 6px;padding-left:2px">🔒 Respaldo de datos</div>
         <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
           <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
@@ -1875,6 +1927,16 @@ function cargarCategoriasConfig(cb){
     }
     if(cb) cb();
   }).catch(function(){ if(cb) cb(); });
+}
+
+// ══════════════════ TEMA CLARO / OSCURO ══════════════════
+function setTema(t){
+  if(t==='dark') document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+  try{ localStorage.setItem('cvd_tema', t); }catch(e){}
+  var claroBtn=document.getElementById('temaClaroBtn'), oscuroBtn=document.getElementById('temaOscuroBtn');
+  if(claroBtn) claroBtn.classList.toggle('active', t!=='dark');
+  if(oscuroBtn) oscuroBtn.classList.toggle('active', t==='dark');
 }
 
 function guardarCategoriasConfig(){
@@ -4237,32 +4299,49 @@ function renderInventario(){
     var fd='';if(p.fecha){var fp=p.fecha.split('-');fd=fp[2]+'/'+fp[1]+'/'+fp[0];}
     var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0):'--';
     var alertaBadge=bajoPorMinimo?
-      '<span onclick="verAlertasStock()" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--red);background:#fdeee9;border:1px solid #f3c4b3;border-radius:6px;padding:2px 6px;margin-left:6px">⚠ Pedir '+(p.cantidadReorden||'?')+' '+p.unidad+'</span>':
-      (p.stockMinimo!=null?'<span style="font-size:10px;color:var(--text3);margin-left:6px">Mín: '+p.stockMinimo+' '+p.unidad+'</span>':'');
-    html+='<div class="inv-card">'+
-      '<div class="inv-card-header">'+
+      '<span onclick="event.stopPropagation();verAlertasStock()" style="cursor:pointer;font-size:9px;font-weight:700;color:var(--red);background:#fdeee9;border:1px solid #f3c4b3;border-radius:6px;padding:1px 5px;margin-left:5px">⚠ Pedir</span>':'';
+    html+='<div class="inv-card" style="margin-bottom:8px">'+
+      '<div class="inv-row-main" onclick="toggleInvCard('+p.id+')">'+
         '<div style="flex:1;min-width:0">'+
-          '<div class="inv-card-name" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+esc(p.nombre)+alertaBadge+'</div>'+
-          '<div class="inv-card-date">Ingreso: '+esc(fd)+(p.notas?' &middot; '+esc(p.notas):'')+'</div>'+
+          '<div style="font-size:13.5px;font-weight:600;display:flex;align-items:center;flex-wrap:wrap">'+esc(p.nombre)+alertaBadge+'</div>'+
+          '<div style="font-size:11.5px;color:var(--text3);margin-top:1px">'+p.cantidad+' '+esc(p.unidad)+' en stock</div>'+
         '</div>'+
-        '<span class="stock-badge '+sc+'">'+sl+'</span>'+
+        '<div style="text-align:right;flex-shrink:0">'+
+          '<div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:600;color:var(--green)">'+fmt(p.precioVenta)+'</div>'+
+          '<span class="stock-badge '+sc+'" style="margin-top:2px;display:inline-block">'+sl+'</span>'+
+        '</div>'+
+        '<span class="inv-row-chevron" id="invChevron_'+p.id+'">▾</span>'+
       '</div>'+
-      '<div class="inv-card-body">'+
-        '<div class="inv-stat"><div class="inv-stat-label">Stock</div><div class="inv-stat-value">'+p.cantidad+'<span style="font-size:10px;color:var(--text3)"> '+esc(p.unidad)+'</span></div></div>'+
-        (esVendedor?'':'<div class="inv-stat"><div class="inv-stat-label">Costo</div><div class="inv-stat-value" style="color:var(--red)">'+fmt(p.precioCosto)+'</div></div>')+
-        '<div class="inv-stat"><div class="inv-stat-label">Venta</div><div class="inv-stat-value" style="color:var(--green)">'+fmt(p.precioVenta)+'</div></div>'+
+      '<div class="inv-row-detail" id="invDetail_'+p.id+'">'+
+        '<div style="padding:0 14px 14px;border-top:1px solid var(--border);margin-top:2px">'+
+          '<div class="inv-card-body" style="padding:12px 0 8px">'+
+            '<div class="inv-stat"><div class="inv-stat-label">Stock</div><div class="inv-stat-value">'+p.cantidad+'<span style="font-size:10px;color:var(--text3)"> '+esc(p.unidad)+'</span></div></div>'+
+            (esVendedor?'':'<div class="inv-stat"><div class="inv-stat-label">Costo</div><div class="inv-stat-value" style="color:var(--red)">'+fmt(p.precioCosto)+'</div></div>')+
+            '<div class="inv-stat"><div class="inv-stat-label">Venta</div><div class="inv-stat-value" style="color:var(--green)">'+fmt(p.precioVenta)+'</div></div>'+
+          '</div>'+
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Ingreso: '+esc(fd)+(p.notas?' &middot; '+esc(p.notas):'')+(bajoPorMinimo&&p.cantidadReorden?' &middot; Pedir '+p.cantidadReorden+' '+esc(p.unidad):'')+'</div>'+
+          (esVendedor?'':
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Margen: <strong style="color:var(--primary)">'+(margen!=='--'?margen+'%':'--')+'</strong> &nbsp;|&nbsp; Valor stock: <strong style="color:var(--text)">'+fmt(p.cantidad*p.precioCosto)+'</strong></div>'+
+          '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">'+
+            '<button class="inv-btn inv-btn-danger" onclick="eliminarProducto('+p.id+')">Eliminar</button>'+
+            '<button class="inv-btn" style="background:#fdeee9;color:var(--red);border-color:#f3c4b3" onclick="openMermaModal('+p.id+')">🗑 Merma</button>'+
+            '<button class="inv-btn" onclick="openStockModal('+p.id+')">Ajustar</button>'+
+            '<button class="inv-btn inv-btn-primary" onclick="openProductoModal('+p.id+')">Editar</button>'+
+          '</div>')+
+        '</div>'+
       '</div>'+
-      (esVendedor?'':
-      '<div style="padding:0 16px 12px;font-size:11px;color:var(--text3)">Margen: <strong style="color:var(--primary)">'+(margen!=='--'?margen+'%':'--')+'</strong> &nbsp;|&nbsp; Valor stock: <strong style="color:var(--text)">'+fmt(p.cantidad*p.precioCosto)+'</strong></div>'+
-      '<div class="inv-card-footer">'+
-        '<button class="inv-btn inv-btn-danger" onclick="eliminarProducto('+p.id+')">Eliminar</button>'+
-        '<button class="inv-btn" style="background:#fdeee9;color:var(--red);border-color:#f3c4b3" onclick="openMermaModal('+p.id+')">🗑 Merma</button>'+
-        '<button class="inv-btn" onclick="openStockModal('+p.id+')">Ajustar</button>'+
-        '<button class="inv-btn inv-btn-primary" onclick="openProductoModal('+p.id+')">Editar</button>'+
-      '</div>')+
     '</div>';
   });
   el.innerHTML=html;
+}
+
+function toggleInvCard(id){
+  var detail=document.getElementById('invDetail_'+id);
+  var chevron=document.getElementById('invChevron_'+id);
+  if(!detail) return;
+  var abrir=!detail.classList.contains('open');
+  detail.classList.toggle('open', abrir);
+  if(chevron) chevron.classList.toggle('open', abrir);
 }
 
 function renderHistorial(){
@@ -6548,6 +6627,7 @@ renderAll();
 _fbLoad(); // carga desde Firebase y sincroniza
 iniciarSesionOApp(); // gate de acceso Admin/Vendedor
 cargarCategoriasConfig(function(){ renderCategoriasAjustes(); });
+try{ setTema(localStorage.getItem('cvd_tema')==='dark'?'dark':'light'); }catch(e){}
 
 // ── PWA: registrar service worker para permitir instalación con ícono propio ──
 if('serviceWorker' in navigator){
