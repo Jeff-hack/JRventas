@@ -845,6 +845,10 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
             </div>
             <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--primary)" id="invTotalInvertido">$0.00</div>
           </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2)">📈 Ganancia esperada</div>
+            <div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--green)" id="invGananciaEsperada">$0.00</div>
+          </div>
         </div>
         <div id="invLineaChips" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch">
           <button class="tab-btn active" id="invLineaTodos" onclick="setInvLinea('todos')" style="flex:0 0 auto;white-space:nowrap">Todas las líneas</button>
@@ -4238,9 +4242,12 @@ function renderInventario(){
     el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">No tienes productos en inventario.<br>Toca <strong>+ Producto</strong> para agregar.</div></div>';
     return;
   }
-  // Total invertido
+  // Total invertido y ganancia esperada
   var totalInv=productos.reduce(function(a,p){return a+p.precioCosto*p.cantidad;},0);
+  var totalGanEsperada=productos.reduce(function(a,p){return a+(p.precioVenta-p.precioCosto)*p.cantidad;},0);
   var totalInvEl=document.getElementById('invTotalInvertido');
+  var ganEspEl=document.getElementById('invGananciaEsperada');
+  if(ganEspEl){ ganEspEl.textContent=fmt(totalGanEsperada); ganEspEl.style.color=totalGanEsperada>=0?'var(--green)':'var(--red)'; }
   var cntEl=document.getElementById('invProductosCnt');
   if(totalInvEl) totalInvEl.textContent=fmt(totalInv);
   if(cntEl) cntEl.textContent=productos.length+' productos';
