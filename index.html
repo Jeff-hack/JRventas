@@ -763,18 +763,6 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         </div>
       </div>
 
-      <!-- Gráfico distribución -->
-      <div class="card">
-        <div class="chart-title">Distribución Financiera</div>
-        <div class="bar-chart">
-          <div class="bar-wrap"><div class="bar" id="bVentas" style="background:#1d9e75;height:4px"></div><div class="bar-label">Ventas</div></div>
-          <div class="bar-wrap"><div class="bar" id="bGastos" style="background:#d44f2e;height:4px"></div><div class="bar-label">Gastos</div></div>
-          <div class="bar-wrap"><div class="bar" id="bPollo" style="background:#e8a020;height:4px"></div><div class="bar-label">P. Rico</div></div>
-          <div class="bar-wrap"><div class="bar" id="bIndio" style="background:#d44f2e;height:4px"></div><div class="bar-label">P. Indio</div></div>
-          <div class="bar-wrap"><div class="bar" id="bSello" style="background:#c4860a;height:4px"></div><div class="bar-label">S. Oro</div></div>
-        </div>
-      </div>
-
       <!-- Hidden stats for JS compatibility -->
       <span id="semVentasCard" style="display:none">$0.00</span>
       <span id="semGastosCard" style="display:none">$0.00</span>
@@ -3593,12 +3581,6 @@ function renderResumen(){
   if(ganSub) ganSub.textContent='Mes: '+mesLabel;
   if(ganNetaSub) ganNetaSub.textContent='Mes: '+mesLabel;
 
-  var maxVal=Math.max(tv,tg,tpr,tpi,tso,1);
-  ['bVentas','bGastos','bPollo','bIndio','bSello'].forEach(function(bid,i){
-    var vals=[tv,tg,tpr,tpi,tso];
-    document.getElementById(bid).style.height=Math.max(4,Math.round((vals[i]/maxVal)*80))+'px';
-  });
-
   // Semana
   renderSemana();
   renderMesResumen();
@@ -4321,7 +4303,7 @@ function renderInventario(){
           '</div>'+
           '<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Ingreso: '+esc(fd)+(p.notas?' &middot; '+esc(p.notas):'')+(bajoPorMinimo&&p.cantidadReorden?' &middot; Pedir '+p.cantidadReorden+' '+esc(p.unidad):'')+'</div>'+
           (esVendedor?'':
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Margen: <strong style="color:var(--primary)">'+(margen!=='--'?margen+'%':'--')+'</strong> &nbsp;|&nbsp; Valor stock: <strong style="color:var(--text)">'+fmt(p.cantidad*p.precioCosto)+'</strong></div>'+
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Margen: <strong style="color:var(--primary)">'+(margen!=='--'?margen+'%':'--')+'</strong> &nbsp;|&nbsp; Valor stock: <strong style="color:var(--text)">'+fmt(p.cantidad*p.precioCosto)+'</strong> &nbsp;|&nbsp; Ganancia esperada: <strong style="color:var(--green)">'+fmt((p.precioVenta-p.precioCosto)*p.cantidad)+'</strong></div>'+
           '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">'+
             '<button class="inv-btn inv-btn-danger" onclick="eliminarProducto('+p.id+')">Eliminar</button>'+
             '<button class="inv-btn" style="background:#fdeee9;color:var(--red);border-color:#f3c4b3" onclick="openMermaModal('+p.id+')">🗑 Merma</button>'+
