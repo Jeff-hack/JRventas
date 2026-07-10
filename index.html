@@ -534,6 +534,10 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <div class="logo">JR</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="abrirNotificaciones()" id="notifBellBtn" title="Notificaciones" style="position:relative;background:none;border:none;font-size:17px;cursor:pointer;padding:4px;display:flex;align-items:center;line-height:1">
+        🔔
+        <span id="notifBadge" style="display:none;position:absolute;top:0;right:0;background:var(--red);color:#fff;border-radius:50%;min-width:15px;height:15px;font-size:9px;font-weight:700;align-items:center;justify-content:center;padding:0 3px;line-height:1">0</span>
+      </button>
       <span id="syncIndicator" style="font-size:10px;font-weight:600;color:var(--text3)">⚡ Local</span>
       <button onclick="cerrarSesion()" id="rolBadge" title="Cambiar de usuario" style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:none;border-radius:20px;padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer">
         <span id="rolBadgeIcon">👑</span><span id="rolBadgeLabel">Admin</span>
@@ -1634,6 +1638,18 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 </div>
 
 <!-- ═══ MODAL: PRODUCTO ═══ -->
+<div class="modal-overlay" id="notifModal" onclick="overlayClose(event,'notifModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <button class="modal-back" onclick="closeModal('notifModal')">‹</button>
+      <div class="modal-title">🔔 Notificaciones</div>
+    </div>
+    <div class="modal-body">
+      <div id="notifModalBody"></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="invFiltrosModal" onclick="overlayClose(event,'invFiltrosModal')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
@@ -2741,20 +2757,61 @@ function getComparativoProveedores(){
 // ══════════════════ CENTRO DE ATENCIÓN (unifica todas las alertas del dashboard) ══════════════════
 var alertasActivas={}; // clave: 'stock'|'encargos'|'adeudos'|'respaldo' → {icon,text,color,bg,border,onclick} | null
 
-function renderCentroAtencion(){
-  var wrap=document.getElementById('centroAtencion');
-  var body=document.getElementById('centroAtencionBody');
-  if(!wrap||!body) return;
-  var lista=Object.keys(alertasActivas).map(function(k){return alertasActivas[k];}).filter(Boolean);
-  if(!lista.length){ wrap.style.display='none'; body.innerHTML=''; return; }
-  wrap.style.display='block';
-  body.innerHTML=lista.map(function(a){
-    return '<div onclick="'+a.onclick+'" style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:'+a.bg+';border:1px solid '+a.border+';border-radius:var(--radius-sm);cursor:pointer">'+
+function buildAlertaRowHTML(a, fromModal){
+  var accion=fromModal?("closeModal('notifModal');"+a.onclick):a.onclick;
+  return '<div style="display:flex;align-items:stretch;gap:0;background:'+a.bg+';border:1px solid '+a.border+';border-radius:var(--radius-sm);overflow:hidden">'+
+    '<div onclick="'+accion+'" style="flex:1;display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer">'+
       '<span style="font-size:17px;flex-shrink:0">'+a.icon+'</span>'+
       '<span style="flex:1;font-size:12.5px;font-weight:600;color:'+a.color+'">'+a.text+'</span>'+
       '<span style="font-size:11px;color:'+a.color+';font-weight:700;flex-shrink:0">→</span>'+
-    '</div>';
-  }).join('');
+    '</div>'+
+  '</div>';
+}
+
+function getAlertasVisibles(){
+  var claves=Object.keys(alertasActivas);
+  if(rolActual==='vendedor') claves=claves.filter(function(k){return k==='stock';}); // vendedor no tiene acceso a Órdenes/Ajustes
+  return claves.map(function(k){return alertasActivas[k];}).filter(Boolean);
+}
+
+function renderCentroAtencion(){
+  var lista=getAlertasVisibles();
+
+  // Tarjeta inline en el Dashboard
+  var wrap=document.getElementById('centroAtencion');
+  var body=document.getElementById('centroAtencionBody');
+  if(wrap&&body){
+    if(!lista.length){ wrap.style.display='none'; body.innerHTML=''; }
+    else { wrap.style.display='block'; body.innerHTML=lista.map(function(a){return buildAlertaRowHTML(a);}).join(''); }
+  }
+
+  // Campanita del header (visible en todas las pantallas)
+  var badge=document.getElementById('notifBadge');
+  if(badge){
+    if(lista.length){ badge.textContent=lista.length>9?'9+':lista.length; badge.style.display='flex'; }
+    else { badge.style.display='none'; }
+  }
+  // Si el modal de notificaciones está abierto, refrescar su contenido también
+  var modalBody=document.getElementById('notifModalBody');
+  if(modalBody && document.getElementById('notifModal').classList.contains('open')){
+    renderNotifModalBody();
+  }
+}
+
+function abrirNotificaciones(){
+  renderNotifModalBody();
+  document.getElementById('notifModal').classList.add('open');
+}
+
+function renderNotifModalBody(){
+  var lista=getAlertasVisibles();
+  var el=document.getElementById('notifModalBody');
+  if(!el) return;
+  if(!lista.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">No tienes notificaciones pendientes.<br>Todo está al día.</div></div>';
+    return;
+  }
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+lista.map(function(a){return buildAlertaRowHTML(a,true);}).join('')+'</div>';
 }
 
 function checkRespaldoAutomatico(){
