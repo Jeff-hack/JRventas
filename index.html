@@ -24,7 +24,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 
 <title>Control de Ventas</title>
-<script>(function(){try{var t=localStorage.getItem('cvd_tema');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('cvd_tema');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');var r=localStorage.getItem('rolActual');if(r==='vendedor')document.documentElement.setAttribute('data-rol','vendedor');}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
@@ -378,6 +378,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 /* App report buttons */
 .rpt-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
 .rpt-btn { border:none; border-radius:16px; padding:16px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,.08); display:flex; flex-direction:column; gap:8px; cursor:pointer; }
+.rpt-btn-period { font-size:11px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--text3); text-align:left; }
+.rpt-btn-label { font-size:15px; font-weight:700; color:var(--text); text-align:left; }
+.rpt-btn-arrow { font-size:14px; font-weight:700; color:var(--c, var(--primary)); text-align:left; }
 </style>
 
 <style id="modern-ui-upgrade">
@@ -472,6 +475,23 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 [data-theme="dark"] .stock-badge.stock-low{background:#3a2a0a!important;color:#e8a020!important}
 [data-theme="dark"] .stock-badge.stock-out{background:#3a1510!important;color:#f4715c!important}
 [data-theme="dark"] .rpt-btn{background:var(--surface)!important;box-shadow:0 4px 12px rgba(0,0,0,.35)!important}
+</style>
+
+<style id="theme-rol">
+/* Modo Vendedor: acento azul distinto al verde de Admin, para que sea imposible confundirse de en qué modo se está */
+[data-rol="vendedor"]{
+ --primary:#1e4fb7!important;
+ --primary-l:#e8f0fe!important;
+}
+[data-theme="dark"][data-rol="vendedor"]{
+ --primary:#5b8def!important;
+ --primary-l:#132540!important;
+}
+[data-rol="vendedor"] .header{background:linear-gradient(120deg,#1e3a6e,#1e4fb7)!important}
+[data-rol="vendedor"] .logo{background:linear-gradient(135deg,#1e4fb7,#1e3a6e)!important}
+[data-rol="vendedor"] .fab{background:linear-gradient(135deg,#1e4fb7,#1e3a6e)!important;box-shadow:0 12px 30px rgba(30,79,183,.35)!important}
+[data-rol="vendedor"] #rolBadge{background:rgba(30,79,183,.15)!important;color:#1e4fb7!important}
+[data-theme="dark"][data-rol="vendedor"] #rolBadge{background:rgba(91,141,239,.18)!important;color:#5b8def!important}
 </style>
 
 </head>
@@ -861,23 +881,17 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
             <div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--green)" id="invGananciaEsperada">$0.00</div>
           </div>
         </div>
-        <div id="invLineaChips" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch">
-          <button class="tab-btn active" id="invLineaTodos" onclick="setInvLinea('todos')" style="flex:0 0 auto;white-space:nowrap">Todas las líneas</button>
-          <button class="tab-btn" id="invLineaPollo" onclick="setInvLinea('Pollo')" style="flex:0 0 auto;white-space:nowrap">🐔 Pollo</button>
-          <button class="tab-btn" id="invLineaDesechables" onclick="setInvLinea('Desechables')" style="flex:0 0 auto;white-space:nowrap">🧴 Desechables</button>
-          <button class="tab-btn" id="invLineaVarios" onclick="setInvLinea('Varios')" style="flex:0 0 auto;white-space:nowrap">📦 Varios</button>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div style="position:relative;flex:1">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none">🔍</span>
+            <input type="text" id="invBuscador" placeholder="Buscar producto..." oninput="renderInventario()" style="width:100%;padding:10px 14px 10px 36px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;box-sizing:border-box">
+          </div>
+          <button onclick="openInvFiltrosModal()" style="position:relative;flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);cursor:pointer">
+            🎚 Filtros
+            <span id="invFiltrosBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;align-items:center;justify-content:center"></span>
+          </button>
         </div>
-        <div id="invCategoriaChips" style="display:none;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch"></div>
-        <div class="tabs" style="margin-bottom:8px">
-          <button class="tab-btn active" id="invFiltroTodos" onclick="setInvFiltro('todos')">Todos</button>
-          <button class="tab-btn" id="invFiltroAlto" onclick="setInvFiltro('alto')" style="color:var(--green)">↑ Alto</button>
-          <button class="tab-btn" id="invFiltroMedio" onclick="setInvFiltro('medio')" style="color:var(--orange)">~ Medio</button>
-          <button class="tab-btn" id="invFiltroBajo" onclick="setInvFiltro('bajo')" style="color:var(--red)">↓ Bajo</button>
-        </div>
-        <div style="position:relative;margin-bottom:8px">
-          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none">🔍</span>
-          <input type="text" id="invBuscador" placeholder="Buscar producto..." oninput="renderInventario()" style="width:100%;padding:10px 14px 10px 36px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;box-sizing:border-box">
-        </div>
+        <div id="invFiltrosResumen" style="display:none;font-size:11px;color:var(--text3);margin:-2px 0 8px"></div>
         <div id="listaInventario"></div>
       </div>
 
@@ -1549,9 +1563,20 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         </div>
         <div style="margin-top:10px">
           <label class="form-label">Producto del inventario</label>
-          <select class="form-input" id="pedidoProdSel" onchange="onPedidoProdChange()">
-            <option value="">— Seleccionar producto registrado —</option>
-          </select>
+          <div style="position:relative;margin-bottom:6px">
+            <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none">🔍</span>
+            <input type="text" id="pedidoProdBuscador" placeholder="Buscar producto..." oninput="renderPedidoProdResultados()" autocomplete="off"
+              style="width:100%;padding:10px 14px 10px 34px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;box-sizing:border-box">
+          </div>
+          <!-- Resultados de búsqueda (aparece al escribir) -->
+          <div id="pedidoProdResultados" style="display:none;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;margin-bottom:6px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)"></div>
+          <!-- Productos de este proveedor (visible cuando el buscador está vacío) -->
+          <div id="pedidoProdTop">
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Productos de este proveedor</div>
+            <div id="pedidoProdTopList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+          <!-- Campo oculto: mantiene compatibilidad con el resto del código -->
+          <input type="hidden" id="pedidoProdSel">
         </div>
         <div id="pedidoProdInfo" style="display:none;font-size:11px;color:var(--text3);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-top:6px"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;margin-bottom:6px">
@@ -1609,6 +1634,37 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 </div>
 
 <!-- ═══ MODAL: PRODUCTO ═══ -->
+<div class="modal-overlay" id="invFiltrosModal" onclick="overlayClose(event,'invFiltrosModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <button class="modal-back" onclick="closeModal('invFiltrosModal')">‹</button>
+      <div class="modal-title">Filtros de inventario</div>
+      <button onclick="limpiarInvFiltros()" style="background:none;border:none;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer">Limpiar</button>
+    </div>
+    <div class="modal-body">
+      <label class="form-label">Línea de negocio</label>
+      <div id="invLineaChips" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;-webkit-overflow-scrolling:touch">
+        <button class="tab-btn active" id="invLineaTodos" onclick="setInvLinea('todos')" style="flex:0 0 auto;white-space:nowrap">Todas las líneas</button>
+        <button class="tab-btn" id="invLineaPollo" onclick="setInvLinea('Pollo')" style="flex:0 0 auto;white-space:nowrap">🐔 Pollo</button>
+        <button class="tab-btn" id="invLineaDesechables" onclick="setInvLinea('Desechables')" style="flex:0 0 auto;white-space:nowrap">🧴 Desechables</button>
+        <button class="tab-btn" id="invLineaVarios" onclick="setInvLinea('Varios')" style="flex:0 0 auto;white-space:nowrap">📦 Varios</button>
+      </div>
+      <div id="invCategoriaWrap" style="display:none">
+        <label class="form-label">Categoría</label>
+        <div id="invCategoriaChips" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;-webkit-overflow-scrolling:touch"></div>
+      </div>
+      <label class="form-label">Nivel de stock</label>
+      <div class="tabs" style="margin-bottom:8px">
+        <button class="tab-btn active" id="invFiltroTodos" onclick="setInvFiltro('todos')">Todos</button>
+        <button class="tab-btn" id="invFiltroAlto" onclick="setInvFiltro('alto')" style="color:var(--green)">↑ Alto</button>
+        <button class="tab-btn" id="invFiltroMedio" onclick="setInvFiltro('medio')" style="color:var(--orange)">~ Medio</button>
+        <button class="tab-btn" id="invFiltroBajo" onclick="setInvFiltro('bajo')" style="color:var(--red)">↓ Bajo</button>
+      </div>
+      <button onclick="closeModal('invFiltrosModal')" style="width:100%;margin-top:10px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Ver resultados</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="productoModal" onclick="overlayClose(event,'productoModal')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -2069,6 +2125,7 @@ function cerrarSesion(){
 // Aplica/oculta vistas según el rol activo. Vendedor: solo Ventas + Inventario (sin costos).
 function aplicarRestriccionesRol(){
   var esVendedor=(rolActual==='vendedor');
+  document.documentElement.setAttribute('data-rol', esVendedor?'vendedor':'admin');
 
   var badgeIcon=document.getElementById('rolBadgeIcon');
   var badgeLabel=document.getElementById('rolBadgeLabel');
@@ -2362,7 +2419,11 @@ function openAddModal(){
   renderVentaProdTop();
   var pedidoTipoSel=document.getElementById('pedidoTipo');
   if(pedidoTipoSel) pedidoTipoSel.selectedIndex=0;
-  poblarSelectProductos('pedidoProdSel', pedidoTipoSel?pedidoTipoSel.value:null);
+  pedidoFiltroProveedorActual=pedidoTipoSel?pedidoTipoSel.value:null;
+  document.getElementById('pedidoProdBuscador').value='';
+  document.getElementById('pedidoProdResultados').style.display='none';
+  document.getElementById('pedidoProdTop').style.display='block';
+  renderPedidoProdTop();
   var info=document.getElementById('pedidoProdInfo');
   if(info) info.style.display='none';
   var uSel=document.getElementById('fUnidad');
@@ -2398,7 +2459,11 @@ function poblarSelectProductos(selId, filtroProveedor){
 
 function onPedidoTipoChange(){
   var prov=document.getElementById('pedidoTipo').value;
-  poblarSelectProductos('pedidoProdSel', prov);
+  pedidoFiltroProveedorActual=prov;
+  document.getElementById('pedidoProdBuscador').value='';
+  document.getElementById('pedidoProdResultados').style.display='none';
+  document.getElementById('pedidoProdTop').style.display='block';
+  renderPedidoProdTop();
   var info=document.getElementById('pedidoProdInfo');
   if(info) info.style.display='none';
 }
@@ -2881,7 +2946,11 @@ function editarPedidoGlobal(id){
 
   var tipoSel=document.getElementById('pedidoTipo');
   tipoSel.value=ped.tipo;
-  poblarSelectProductos('pedidoProdSel', ped.tipo);
+  pedidoFiltroProveedorActual=ped.tipo;
+  document.getElementById('pedidoProdBuscador').value='';
+  document.getElementById('pedidoProdResultados').style.display='none';
+  document.getElementById('pedidoProdTop').style.display='block';
+  renderPedidoProdTop();
   var info=document.getElementById('pedidoProdInfo');
   if(info) info.style.display='none';
 
@@ -3457,7 +3526,11 @@ function crearPedidoDesdeAlerta(proveedor){
     setTipo('pedido');
     var tipoSel=document.getElementById('pedidoTipo');
     if(tipoSel) tipoSel.value=proveedor;
-    poblarSelectProductos('pedidoProdSel',proveedor);
+    pedidoFiltroProveedorActual=proveedor;
+    document.getElementById('pedidoProdBuscador').value='';
+    document.getElementById('pedidoProdResultados').style.display='none';
+    document.getElementById('pedidoProdTop').style.display='block';
+    renderPedidoProdTop();
     document.getElementById('addModalTitle').textContent='Pedido sugerido — '+proveedor;
     document.getElementById('addModalSaveBtn').textContent='✓ Confirmar pedido';
     renderPedidoItems();
@@ -4270,6 +4343,7 @@ function setInvFiltro(f){
   });
   var actEl=document.getElementById('invFiltro'+f.charAt(0).toUpperCase()+f.slice(1));
   if(actEl) actEl.classList.add('active');
+  actualizarInvFiltrosResumen();
   renderInventario();
 }
 
@@ -4283,24 +4357,54 @@ function setInvLinea(l){
     var el=document.getElementById('invLinea'+x); if(el) el.classList.toggle('active', (x==='Todos'&&l==='todos')||x===l);
   });
   renderInvCategoriaChips();
+  actualizarInvFiltrosResumen();
   renderInventario();
 }
 function setInvCategoria(c){
   invCategoriaActual=c;
   renderInvCategoriaChips();
+  actualizarInvFiltrosResumen();
   renderInventario();
 }
 function renderInvCategoriaChips(){
-  var wrap=document.getElementById('invCategoriaChips');
-  if(!wrap) return;
-  if(invLineaActual==='todos'){ wrap.style.display='none'; wrap.innerHTML=''; return; }
+  var chips=document.getElementById('invCategoriaChips');
+  var wrap=document.getElementById('invCategoriaWrap');
+  if(!chips||!wrap) return;
+  if(invLineaActual==='todos'){ wrap.style.display='none'; chips.innerHTML=''; return; }
   var cats=categoriasConfig[invLineaActual]||[];
   var html='<button class="tab-btn'+(invCategoriaActual==='todos'?' active':'')+'" onclick="setInvCategoria(\'todos\')" style="flex:0 0 auto;white-space:nowrap">Todas</button>';
   cats.forEach(function(c){
     html+='<button class="tab-btn'+(invCategoriaActual===c?' active':'')+'" onclick="setInvCategoria(\''+esc(c).replace(/'/g,"\\'")+'\')" style="flex:0 0 auto;white-space:nowrap">'+esc(c)+'</button>';
   });
-  wrap.innerHTML=html;
-  wrap.style.display='flex';
+  chips.innerHTML=html;
+  wrap.style.display='block';
+}
+
+function openInvFiltrosModal(){
+  document.getElementById('invFiltrosModal').classList.add('open');
+}
+
+function limpiarInvFiltros(){
+  setInvLinea('todos');
+  setInvFiltro('todos');
+}
+
+// Cuenta filtros activos (distintos del default) y lo refleja como badge + resumen en la pantalla principal
+function actualizarInvFiltrosResumen(){
+  var partes=[];
+  if(invLineaActual!=='todos') partes.push(LINEA_ICONO[invLineaActual]+' '+invLineaActual+(invCategoriaActual!=='todos'?' · '+invCategoriaActual:''));
+  if(invFiltroActual!=='todos') partes.push({alto:'↑ Alto',medio:'~ Medio',bajo:'↓ Bajo'}[invFiltroActual]+' stock');
+
+  var badge=document.getElementById('invFiltrosBadge');
+  if(badge){
+    if(partes.length){ badge.textContent=partes.length; badge.style.display='flex'; }
+    else { badge.style.display='none'; }
+  }
+  var resumen=document.getElementById('invFiltrosResumen');
+  if(resumen){
+    if(partes.length){ resumen.textContent='Filtrando: '+partes.join(' · '); resumen.style.display='block'; }
+    else { resumen.style.display='none'; }
+  }
 }
 
 function renderInventario(){
@@ -5436,6 +5540,63 @@ function importarDatos(event){
 }
 
 // ── PEDIDO MULTI-PRODUCTO ──
+var pedidoFiltroProveedorActual=null;
+
+function seleccionarProductoPedido(pid){
+  document.getElementById('pedidoProdSel').value=pid;
+  document.getElementById('pedidoProdBuscador').value='';
+  document.getElementById('pedidoProdResultados').style.display='none';
+  document.getElementById('pedidoProdTop').style.display='block';
+  onPedidoProdChange();
+}
+
+function renderPedidoProdTop(){
+  var el=document.getElementById('pedidoProdTopList');
+  if(!el) return;
+  var lista=productos;
+  if(pedidoFiltroProveedorActual && pedidoFiltroProveedorActual!=='Abuela'){
+    lista=productos.filter(function(p){return p.proveedor===pedidoFiltroProveedorActual;});
+  }
+  if(!lista.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0">Sin productos asignados a '+esc(pedidoFiltroProveedorActual||'este proveedor')+' todavía.</div>';
+    return;
+  }
+  el.innerHTML=lista.slice(0,15).map(function(p){
+    return '<button type="button" onclick="seleccionarProductoPedido('+p.id+')" '+
+      'style="background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;white-space:nowrap">'+
+      esc(p.nombre)+' <span style="color:var(--text3)">('+p.cantidad+' '+esc(p.unidad)+')</span></button>';
+  }).join('');
+}
+
+function renderPedidoProdResultados(){
+  var busq=document.getElementById('pedidoProdBuscador').value.trim().toLowerCase();
+  var resEl=document.getElementById('pedidoProdResultados');
+  var topEl=document.getElementById('pedidoProdTop');
+  if(!busq){
+    resEl.style.display='none';
+    topEl.style.display='block';
+    return;
+  }
+  topEl.style.display='none';
+  var lista=productos;
+  if(pedidoFiltroProveedorActual && pedidoFiltroProveedorActual!=='Abuela'){
+    lista=productos.filter(function(p){return p.proveedor===pedidoFiltroProveedorActual;});
+  }
+  var resultados=lista.filter(function(p){return p.nombre.toLowerCase().indexOf(busq)!==-1;}).slice(0,8);
+  if(!resultados.length){
+    resEl.style.display='flex';
+    resEl.innerHTML='<div style="padding:12px;font-size:12px;color:var(--text3);text-align:center">Sin resultados para "'+esc(busq)+'"</div>';
+    return;
+  }
+  resEl.style.display='flex';
+  resEl.innerHTML=resultados.map(function(p){
+    return '<div onclick="seleccionarProductoPedido('+p.id+')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">'+
+      '<span style="font-size:13px;font-weight:500">'+esc(p.nombre)+'</span>'+
+      '<span style="font-size:11px;color:var(--text3)">'+p.cantidad+' '+esc(p.unidad)+'</span>'+
+    '</div>';
+  }).join('');
+}
+
 function onPedidoProdChange(){
   var pid=parseInt(document.getElementById('pedidoProdSel').value);
   var info=document.getElementById('pedidoProdInfo');
@@ -5483,6 +5644,9 @@ function agregarItemPedido(){
   });
   // Reset campos
   document.getElementById('pedidoProdSel').value='';
+  document.getElementById('pedidoProdBuscador').value='';
+  document.getElementById('pedidoProdResultados').style.display='none';
+  document.getElementById('pedidoProdTop').style.display='block';
   document.getElementById('pedidoProdInfo').style.display='none';
   document.getElementById('fDesc').value='';
   document.getElementById('fCant').value='1';
