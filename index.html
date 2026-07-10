@@ -536,26 +536,10 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
     <!-- ══ RESUMEN ══ -->
     <div class="page active" id="page-resumen">
 
-      <!-- Banner alertas de stock bajo — ARRIBA para visibilidad inmediata -->
-      <div id="stockAlertaBanner" onclick="verAlertasStock()" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:#fdeee9;border:1px solid #f3c4b3;border-radius:var(--radius);cursor:pointer">
-        <span style="font-size:20px">⚠️</span>
-        <span id="stockAlertaBannerTxt" style="flex:1;font-size:13px;font-weight:600;color:var(--red)"></span>
-        <span style="font-size:12px;color:var(--red);font-weight:700">Ver →</span>
-      </div>
-
-
-      <!-- Banner respaldo semanal -->
-      <div id="respaldoBanner" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:#f3e8ff;border:1px solid #c4b5fd;border-radius:var(--radius);cursor:pointer" onclick="exportarDatosAuto()">
-        <span style="font-size:20px">💾</span>
-        <span style="flex:1;font-size:13px;font-weight:600;color:#7c3aed">Han pasado 7+ días sin respaldo — toca para guardar ahora</span>
-        <span style="font-size:12px;color:#7c3aed;font-weight:700">Guardar →</span>
-      </div>
-
-      <!-- Banner encargos próximos a entregar -->
-      <div id="encargosBanner" onclick="showSection('ordenes',document.getElementById('navOrd'));setOrdMainTab('encargos')" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:#e8f0fe;border:1px solid #93c5fd;border-radius:var(--radius);cursor:pointer">
-        <span style="font-size:20px">📦</span>
-        <span id="encargosBannerTxt" style="flex:1;font-size:13px;font-weight:600;color:#1e4fb7"></span>
-        <span style="font-size:12px;color:#1e4fb7;font-weight:700">Ver →</span>
+      <!-- ═══ CENTRO DE ATENCIÓN: unifica alertas de stock, encargos, adeudos y respaldo ═══ -->
+      <div id="centroAtencion" style="display:none;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;padding-left:2px">🔔 Atención requerida</div>
+        <div id="centroAtencionBody" style="display:flex;flex-direction:column;gap:6px"></div>
       </div>
 
       <!-- HERO: Caja Actual -->
@@ -2689,30 +2673,68 @@ function getComparativoProveedores(){
 // ════════════════════════════════
 //  💾 RESPALDO AUTOMÁTICO SEMANAL
 // ════════════════════════════════
+// ══════════════════ CENTRO DE ATENCIÓN (unifica todas las alertas del dashboard) ══════════════════
+var alertasActivas={}; // clave: 'stock'|'encargos'|'adeudos'|'respaldo' → {icon,text,color,bg,border,onclick} | null
+
+function renderCentroAtencion(){
+  var wrap=document.getElementById('centroAtencion');
+  var body=document.getElementById('centroAtencionBody');
+  if(!wrap||!body) return;
+  var lista=Object.keys(alertasActivas).map(function(k){return alertasActivas[k];}).filter(Boolean);
+  if(!lista.length){ wrap.style.display='none'; body.innerHTML=''; return; }
+  wrap.style.display='block';
+  body.innerHTML=lista.map(function(a){
+    return '<div onclick="'+a.onclick+'" style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:'+a.bg+';border:1px solid '+a.border+';border-radius:var(--radius-sm);cursor:pointer">'+
+      '<span style="font-size:17px;flex-shrink:0">'+a.icon+'</span>'+
+      '<span style="flex:1;font-size:12.5px;font-weight:600;color:'+a.color+'">'+a.text+'</span>'+
+      '<span style="font-size:11px;color:'+a.color+';font-weight:700;flex-shrink:0">→</span>'+
+    '</div>';
+  }).join('');
+}
+
 function checkRespaldoAutomatico(){
   var hoy=dateKey(new Date());
   var ultimoRespaldo=localStorage.getItem('jr_ultimo_respaldo')||'';
-  if(!ultimoRespaldo) return; // primera vez, no molesta
+  if(!ultimoRespaldo){ alertasActivas.respaldo=null; renderCentroAtencion(); return; } // primera vez, no molesta
   var diasDesde=Math.floor((new Date(hoy)-new Date(ultimoRespaldo))/86400000);
-  if(diasDesde>=7){
-    // Mostrar banner de recordatorio
-    var bannerEl=document.getElementById('respaldoBanner');
-    if(bannerEl) bannerEl.style.display='flex';
-  }
+  alertasActivas.respaldo = diasDesde>=7 ? {
+    icon:'💾', text:'Han pasado '+diasDesde+' días sin respaldo — toca para guardar ahora',
+    color:'#7c3aed', bg:'#f3e8ff', border:'#c4b5fd', onclick:'exportarDatosAuto()'
+  } : null;
+  renderCentroAtencion();
 }
 
 function exportarDatosAuto(){
   localStorage.setItem('jr_ultimo_respaldo', dateKey(new Date()));
   exportarDatos();
-  var bannerEl=document.getElementById('respaldoBanner');
-  if(bannerEl) bannerEl.style.display='none';
+  alertasActivas.respaldo=null;
+  renderCentroAtencion();
   toast('✓ Respaldo guardado');
 }
 
 function marcarRespaldoHecho(){
   localStorage.setItem('jr_ultimo_respaldo', dateKey(new Date()));
-  var bannerEl=document.getElementById('respaldoBanner');
-  if(bannerEl) bannerEl.style.display='none';
+  alertasActivas.respaldo=null;
+  renderCentroAtencion();
+}
+
+function checkAdeudosVencidos(){
+  var hoy=dateKey(new Date());
+  var vencidos=0, montoVencido=0;
+  clientes.forEach(function(c){
+    (c.adeudos||[]).forEach(function(a){
+      if(a.estado!=='pagado' && a.fechaPago && a.fechaPago<hoy){
+        vencidos++;
+        montoVencido+=(a.monto-(a.abonado||0));
+      }
+    });
+  });
+  alertasActivas.adeudos = vencidos>0 ? {
+    icon:'💳', text:vencidos+' adeudo'+(vencidos!==1?'s vencidos':' vencido')+' — '+fmt(montoVencido)+' por cobrar',
+    color:'#993c1d', bg:'#fdeee9', border:'#f3c4b3',
+    onclick:"showSection('ordenes',document.getElementById('navOrd'));setOrdMainTab('clientes')"
+  } : null;
+  renderCentroAtencion();
 }
 
 // ════════════════════════════════
@@ -3350,17 +3372,12 @@ function checkStockAlertas(){
     badge.textContent=bajos.length>0?bajos.length:'';
     badge.style.display=bajos.length>0?'flex':'none';
   }
-  // Banner en dashboard
-  var bannerEl=document.getElementById('stockAlertaBanner');
-  if(bannerEl){
-    if(bajos.length>0){
-      bannerEl.style.display='flex';
-      bannerEl.querySelector('#stockAlertaBannerTxt').textContent=
-        bajos.length+' producto'+(bajos.length!==1?'s tienen':'tiene')+' stock bajo — pedidos sugeridos';
-    } else {
-      bannerEl.style.display='none';
-    }
-  }
+  // Centro de atención
+  alertasActivas.stock = bajos.length>0 ? {
+    icon:'⚠️', text:bajos.length+' producto'+(bajos.length!==1?'s tienen':' tiene')+' stock bajo — pedidos sugeridos',
+    color:'var(--red)', bg:'#fdeee9', border:'#f3c4b3', onclick:'verAlertasStock()'
+  } : null;
+  renderCentroAtencion();
 }
 
 function verAlertasStock(){
@@ -3487,6 +3504,7 @@ function renderAll(){
   updateFondoLabel();
   checkStockAlertas();
   checkEncargosBanner();
+  checkAdeudosVencidos();
   updateCierreBadge();
   checkRespaldoAutomatico();
   // Update dashboard counters
@@ -4729,18 +4747,20 @@ function checkEncargosBanner(){
   var proximos=encargos.filter(function(e){
     return (e.estado==='pendiente'||e.estado==='listo')&&(e.fecha===hoy||e.fecha===manana);
   });
-  var banner=document.getElementById('encargosBanner');
-  var txt=document.getElementById('encargosBannerTxt');
-  if(!banner||!txt) return;
   if(proximos.length){
     var hoyC=proximos.filter(function(e){return e.fecha===hoy;}).length;
     var manC=proximos.filter(function(e){return e.fecha===manana;}).length;
     var msg='';
     if(hoyC) msg+='📦 '+hoyC+' encargo'+(hoyC>1?'s':'')+' para entregar HOY';
     if(manC) msg+=(msg?' · ':'')+manC+' para mañana';
-    txt.textContent=msg;
-    banner.style.display='flex';
-  } else {banner.style.display='none';}
+    alertasActivas.encargos={
+      icon:'📦', text:msg, color:'#1e4fb7', bg:'#e8f0fe', border:'#93c5fd',
+      onclick:"showSection('ordenes',document.getElementById('navOrd'));setOrdMainTab('encargos')"
+    };
+  } else {
+    alertasActivas.encargos=null;
+  }
+  renderCentroAtencion();
 }
 
 // ═══════════════════════════════════════════
