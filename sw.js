@@ -3,7 +3,7 @@
 // IMPORTANTE: cada vez que se suba una actualización importante, cambiar CACHE_NAME
 // (por ejemplo de v2 a v3) para forzar a todos los dispositivos a tomar la versión nueva.
 
-const CACHE_NAME = 'jr-control-v3-orbit';
+const CACHE_NAME = 'jr-control-v2';
 
 self.addEventListener('install', function(event) {
   self.skipWaiting(); // activa el nuevo SW de inmediato, sin esperar a cerrar pestañas
