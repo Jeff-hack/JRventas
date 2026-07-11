@@ -3444,10 +3444,31 @@ function saveMerma(){
 }
 
 // ── ALERTAS DE STOCK BAJO ──
-function getProductosBajoStock(){
-  return productos.filter(function(p){
-    return p.stockMinimo!=null && p.cantidad<=p.stockMinimo;
+// Agrupa productos "equivalentes" (mismo nombre, distinto proveedor) — ej. "Muslo congelado"
+// de Pollo Indio, Sello de Oro y Pollo Rico son el mismo producto para efectos de alerta.
+function gruposDeProductosEquivalentes(){
+  var grupos={};
+  productos.forEach(function(p){
+    var clave=(p.nombre||'').trim().toLowerCase();
+    if(!grupos[clave]) grupos[clave]=[];
+    grupos[clave].push(p);
   });
+  return grupos;
+}
+
+function getProductosBajoStock(){
+  var grupos=gruposDeProductosEquivalentes();
+  var resultado=[];
+  Object.keys(grupos).forEach(function(clave){
+    var grupo=grupos[clave];
+    var conMinimo=grupo.filter(function(p){return p.stockMinimo!=null;});
+    if(!conMinimo.length) return; // nadie en el grupo tiene mínimo configurado
+    // Solo alertar si TODOS los proveedores de este producto están bajos — si uno solo
+    // tiene stock sano, el producto sigue disponible para vender y no hace falta avisar.
+    var todosProblema=conMinimo.every(function(p){return p.cantidad<=p.stockMinimo;});
+    if(todosProblema) conMinimo.forEach(function(p){resultado.push(p);});
+  });
+  return resultado;
 }
 
 function checkStockAlertas(){
@@ -4572,13 +4593,15 @@ function renderInventario(){
   }
   var html='';
   var esVendedor=(rolActual==='vendedor');
+  var idsConAlertaReal={};
+  getProductosBajoStock().forEach(function(p){ idsConAlertaReal[p.id]=true; });
   filtrados.forEach(function(p){
     var bajoPorMinimo=p.stockMinimo!=null&&p.cantidad<=p.stockMinimo;
     var sc=p.cantidad<=0?'stock-out':(bajoPorMinimo||p.cantidad<=5)?'stock-low':'stock-ok';
     var sl=p.cantidad<=0?'Sin stock':(bajoPorMinimo||p.cantidad<=5)?'Stock bajo':'En stock';
     var fd='';if(p.fecha){var fp=p.fecha.split('-');fd=fp[2]+'/'+fp[1]+'/'+fp[0];}
     var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0):'--';
-    var alertaBadge=bajoPorMinimo?
+    var alertaBadge=idsConAlertaReal[p.id]?
       '<span onclick="event.stopPropagation();verAlertasStock()" style="cursor:pointer;font-size:9px;font-weight:700;color:var(--red);background:#fdeee9;border:1px solid #f3c4b3;border-radius:6px;padding:1px 5px;margin-left:5px">⚠ Pedir</span>':'';
     html+='<div class="inv-card" style="margin-bottom:8px">'+
       '<div class="inv-row-main" onclick="toggleInvCard('+p.id+')">'+
