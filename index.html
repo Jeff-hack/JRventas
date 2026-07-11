@@ -24,21 +24,21 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 
 <title>Control de Ventas</title>
-<script>(function(){try{var t=localStorage.getItem('cvd_tema');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');var r=localStorage.getItem('rolActual');if(r==='vendedor')document.documentElement.setAttribute('data-rol','vendedor');}catch(e){}})();</script>
+<script>(function(){try{var r=localStorage.getItem('rolActual');if(r==='vendedor')document.documentElement.setAttribute('data-rol','vendedor');}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#f4f1eb; --surface:#fff; --surface2:#f9f7f3;
-  --primary:#0a3d2e; --primary-l:#e8f7f1;
-  --text:#1a1a1a; --text2:#5a5a5a; --text3:#9a9a9a;
-  --border:#e2ddd5;
-  --green:#1d9e75; --red:#d44f2e; --orange:#e8a020; --gold:#c4860a; --blue:#2563eb;
-  --radius:14px; --radius-sm:8px;
+  --bg:#07090D; --surface:#12161D; --surface2:#1A2029;
+  --primary:#2EE6A8; --primary-l:#12332B;
+  --text:#F5F7F9; --text2:#8B95A3; --text3:#525C68;
+  --border:#212832;
+  --green:#2EE6A8; --red:#FF6259; --orange:#F0A93E; --gold:#D9B368; --blue:#5B9CFF;
+  --radius:18px; --radius-sm:12px;
 }
 html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 #app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto}
@@ -64,7 +64,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .stat-card{background:var(--surface);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border);min-width:0;overflow:hidden}
 .stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
 .stat-icon{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center}
-.stat-value{font-family:'DM Mono',monospace;font-size:clamp(15px,4.5vw,22px);font-weight:500;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-value{font-family:'Space Grotesk',monospace;font-size:clamp(15px,4.5vw,22px);font-weight:500;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat-sub{font-size:10px;color:var(--text3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* SEMANA CARD */
@@ -74,7 +74,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .semana-body{display:grid;grid-template-columns:1fr 1fr 1fr;padding:12px 16px 14px;gap:6px}
 .semana-stat{text-align:center;padding:8px 4px;border-radius:var(--radius-sm);background:var(--surface2)}
 .semana-stat-label{font-size:9px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
-.semana-stat-value{font-family:'DM Mono',monospace;font-size:16px;font-weight:500}
+.semana-stat-value{font-family:'Space Grotesk',monospace;font-size:16px;font-weight:500}
 .semana-days{display:flex;gap:3px;padding:0 16px 12px}
 .semana-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
 .semana-day-label{font-size:8px;color:var(--text3);text-transform:uppercase;font-weight:600}
@@ -85,7 +85,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 /* BALANCE */
 .balance-card{background:var(--primary);border-radius:var(--radius);padding:18px;color:#fff}
 .balance-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:6px}
-.balance-value{font-family:'DM Mono',monospace;font-size:30px;font-weight:500;letter-spacing:-1px;margin-bottom:8px}
+.balance-value{font-family:'Space Grotesk',monospace;font-size:30px;font-weight:500;letter-spacing:-1px;margin-bottom:8px}
 .balance-meta{font-size:12px;color:rgba(255,255,255,0.5);display:flex;justify-content:space-between;align-items:center}
 .balance-tag{background:rgba(255,255,255,0.12);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;color:#fff}
 .progress-bar{height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin-top:12px;overflow:hidden}
@@ -95,7 +95,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .pedido-item{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-radius:var(--radius-sm);background:var(--surface2);margin-bottom:8px}
 .pedido-dot{width:8px;height:8px;border-radius:50%;margin-right:10px;flex-shrink:0}
 .pedido-name{font-size:14px;font-weight:500;display:flex;align-items:center}
-.pedido-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:500}
+.pedido-val{font-family:'Space Grotesk',monospace;font-size:14px;font-weight:500}
 
 /* CHART */
 .chart-title{font-size:12px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2);margin-bottom:14px}
@@ -111,7 +111,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .tx-info{flex:1;min-width:0}
 .tx-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx-meta{font-size:11px;color:var(--text3);margin-top:2px}
-.tx-amount{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;flex-shrink:0}
+.tx-amount{font-family:'Space Grotesk',monospace;font-size:14px;font-weight:500;flex-shrink:0}
 .tx-del{background:none;border:none;color:var(--text3);cursor:pointer;padding:6px;font-size:18px;line-height:1;border-radius:4px;flex-shrink:0}
 .tx-del:active{color:var(--red)}
 
@@ -121,7 +121,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .ped-card-info{flex:1;min-width:0}
 .ped-card-name{font-size:15px;font-weight:600;margin-bottom:3px}
 .ped-card-meta{font-size:11px;color:var(--text3);line-height:1.5}
-.ped-card-amount{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;flex-shrink:0}
+.ped-card-amount{font-family:'Space Grotesk',monospace;font-size:16px;font-weight:500;flex-shrink:0}
 .ped-status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-top:4px}
 .ped-status-pending{background:#fef9e7;color:#b7791f;border:1px solid #f6e05e}
 .ped-status-done{background:#e8f7f1;color:#0f6e56;border:1px solid #9ae6b4}
@@ -141,7 +141,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .inv-card-body{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .inv-stat{text-align:center}
 .inv-stat-label{font-size:9px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
-.inv-stat-value{font-family:'DM Mono',monospace;font-size:15px;font-weight:500}
+.inv-stat-value{font-family:'Space Grotesk',monospace;font-size:15px;font-weight:500}
 .inv-card-footer{padding:8px 16px;background:var(--surface2);display:flex;gap:8px;justify-content:flex-end}
 .inv-btn{padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2)}
 .inv-btn-danger{border-color:#fca5a5;color:var(--red);background:#fff5f5}
@@ -383,115 +383,78 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .rpt-btn-arrow { font-size:14px; font-weight:700; color:var(--c, var(--primary)); text-align:left; }
 </style>
 
-<style id="modern-ui-upgrade">
-:root{
- --bg:#f8fafc!important;
- --surface:#ffffff!important;
- --surface2:#f8fafc!important;
- --primary:#0f172a!important;
- --border:#e2e8f0!important;
- --text:#0f172a!important;
- --text2:#475569!important;
- --text3:#94a3b8!important;
- --radius:20px!important;
- --radius-sm:14px!important;
-}
-body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
+<style id="orbit-theme">
+body{background:radial-gradient(circle at 85% 0%, rgba(46,230,168,.05), transparent 55%), #020304!important}
 .header{
- background:rgba(15,23,42,.92)!important;
- backdrop-filter:blur(14px)!important;
+ background:linear-gradient(165deg,#0F151C,#0A0D12)!important;
+ border-bottom:1px solid var(--border)!important;
  position:sticky!important;
  top:0!important;
  z-index:50!important;
 }
 .logo{
- background:linear-gradient(135deg,#2563eb,#0f172a)!important;
- color:#fff!important;
+ background:linear-gradient(135deg,#2EE6A8,#0D8F68)!important;
+ color:#03140D!important;
 }
 .card,.stat-card,.semana-card,.inv-card,.ped-card{
- border:none!important;
- box-shadow:0 8px 24px rgba(15,23,42,.08)!important;
+ border:1px solid var(--border)!important;
+ background:var(--surface)!important;
+ box-shadow:0 8px 24px rgba(0,0,0,.35)!important;
 }
 .balance-card{
- background:linear-gradient(135deg,#0f172a,#1e293b)!important;
- box-shadow:0 12px 32px rgba(15,23,42,.25)!important;
+ background:linear-gradient(165deg,#0F151C,#0A0D12)!important;
+ border:1px solid var(--border)!important;
+ box-shadow:0 12px 32px rgba(0,0,0,.5)!important;
 }
 .bottom-nav{
- border-top:none!important;
- box-shadow:0 -8px 24px rgba(15,23,42,.08)!important;
+ background:var(--surface)!important;
+ border-top:1px solid var(--border)!important;
+ box-shadow:0 -8px 24px rgba(0,0,0,.35)!important;
 }
+.nav-btn{color:var(--text3)!important}
 .nav-btn.active{
- color:#2563eb!important;
+ color:var(--primary)!important;
 }
 .fab{
- background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;
- box-shadow:0 12px 30px rgba(37,99,235,.35)!important;
+ background:linear-gradient(135deg,#2EE6A8,#0D8F68)!important;
+ color:#03140D!important;
+ box-shadow:0 12px 30px rgba(46,230,168,.3)!important;
 }
 .form-input{
- border:1px solid #dbe4ee!important;
+ background:var(--surface2)!important;
+ border:1px solid var(--border)!important;
+ color:var(--text)!important;
 }
+.form-input::placeholder{color:var(--text3)!important}
+select.form-input option{background:var(--surface2);color:var(--text)}
 .section-title{
  font-size:13px!important;
+ color:var(--text2)!important;
 }
+.modal-overlay{background:rgba(0,0,0,.65)!important}
+.modal{background:var(--surface)!important;border:1px solid var(--border)!important}
+.tab-btn.active,.v2-stab.active{background:var(--surface2)!important;color:var(--primary)!important}
+.tabs,.v2-section-tabs{background:var(--surface2)!important}
+.stock-badge.stock-ok{background:#0f2e22!important;color:#2EE6A8!important}
+.stock-badge.stock-low{background:#3a2a0a!important;color:#F0A93E!important}
+.stock-badge.stock-out{background:#3a1510!important;color:#FF6259!important}
+.rpt-btn{background:var(--surface)!important;box-shadow:0 4px 12px rgba(0,0,0,.35)!important}
 .tx-item:hover,.inv-card:hover,.ped-card:hover{
  transform:translateY(-1px);
  transition:.2s;
 }
 </style>
 
-<style id="theme-dark">
-[data-theme="dark"]{
- --bg:#0f1419!important;
- --surface:#1a2028!important;
- --surface2:#242c37!important;
- --primary:#2dd4a0!important;
- --primary-l:#12332a!important;
- --border:#3a4552!important;
- --text:#f5f7fa!important;
- --text2:#c3cad2!important;
- --text3:#98a2ae!important;
-}
-[data-theme="dark"] body{background:#0f1419!important}
-[data-theme="dark"] .header{background:rgba(10,15,20,.94)!important}
-[data-theme="dark"] .logo{background:linear-gradient(135deg,#2dd4a0,#0a3d2e)!important;color:#0f1419!important}
-[data-theme="dark"] .card,[data-theme="dark"] .stat-card,[data-theme="dark"] .semana-card,[data-theme="dark"] .inv-card,[data-theme="dark"] .ped-card{
- background:var(--surface)!important;
- box-shadow:0 8px 24px rgba(0,0,0,.35)!important;
-}
-[data-theme="dark"] .balance-card{background:linear-gradient(135deg,#0a1f18,#132a22)!important;box-shadow:0 12px 32px rgba(0,0,0,.5)!important}
-[data-theme="dark"] .bottom-nav{background:var(--surface)!important;border-top:1px solid var(--border)!important;box-shadow:0 -8px 24px rgba(0,0,0,.35)!important}
-[data-theme="dark"] .nav-btn{color:var(--text3)!important}
-[data-theme="dark"] .nav-btn.active{color:var(--primary)!important}
-[data-theme="dark"] .fab{background:linear-gradient(135deg,#2dd4a0,#1d9e75)!important;box-shadow:0 12px 30px rgba(29,158,117,.35)!important;color:#0f1419!important}
-[data-theme="dark"] .form-input{background:var(--surface2)!important;border:1px solid var(--border)!important;color:var(--text)!important}
-[data-theme="dark"] .form-input::placeholder{color:var(--text3)!important}
-[data-theme="dark"] select.form-input option{background:var(--surface2);color:var(--text)}
-[data-theme="dark"] .modal-overlay{background:rgba(0,0,0,.65)!important}
-[data-theme="dark"] .modal{background:var(--surface)!important}
-[data-theme="dark"] .tab-btn.active,[data-theme="dark"] .v2-stab.active{background:var(--surface2)!important;color:var(--primary)!important}
-[data-theme="dark"] .tabs,[data-theme="dark"] .v2-section-tabs{background:var(--surface2)!important}
-[data-theme="dark"] .empty-icon{opacity:.6}
-[data-theme="dark"] .stock-badge.stock-ok{background:#0f2e22!important;color:#2dd4a0!important}
-[data-theme="dark"] .stock-badge.stock-low{background:#3a2a0a!important;color:#e8a020!important}
-[data-theme="dark"] .stock-badge.stock-out{background:#3a1510!important;color:#f4715c!important}
-[data-theme="dark"] .rpt-btn{background:var(--surface)!important;box-shadow:0 4px 12px rgba(0,0,0,.35)!important}
-</style>
-
 <style id="theme-rol">
-/* Modo Vendedor: acento azul distinto al verde de Admin, para que sea imposible confundirse de en qué modo se está */
+/* Modo Vendedor: acento azul distinto al menta de Admin, para que sea imposible confundirse de en qué modo se está */
 [data-rol="vendedor"]{
- --primary:#1e4fb7!important;
- --primary-l:#e8f0fe!important;
-}
-[data-theme="dark"][data-rol="vendedor"]{
  --primary:#5b8def!important;
  --primary-l:#132540!important;
 }
-[data-rol="vendedor"] .header{background:linear-gradient(120deg,#1e3a6e,#1e4fb7)!important}
-[data-rol="vendedor"] .logo{background:linear-gradient(135deg,#1e4fb7,#1e3a6e)!important}
-[data-rol="vendedor"] .fab{background:linear-gradient(135deg,#1e4fb7,#1e3a6e)!important;box-shadow:0 12px 30px rgba(30,79,183,.35)!important}
-[data-rol="vendedor"] #rolBadge{background:rgba(30,79,183,.15)!important;color:#1e4fb7!important}
-[data-theme="dark"][data-rol="vendedor"] #rolBadge{background:rgba(91,141,239,.18)!important;color:#5b8def!important}
+[data-rol="vendedor"] .header{background:linear-gradient(165deg,#101A2E,#0A0F1C)!important}
+[data-rol="vendedor"] .logo{background:linear-gradient(135deg,#5b8def,#1e3a6e)!important;color:#fff!important}
+[data-rol="vendedor"] .fab{background:linear-gradient(135deg,#5b8def,#1e3a6e)!important;color:#fff!important;box-shadow:0 12px 30px rgba(91,141,239,.3)!important}
+[data-rol="vendedor"] #rolBadge{background:rgba(91,141,239,.18)!important;color:#5b8def!important}
 </style>
 
 </head>
@@ -501,7 +464,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div id="loginGate" style="position:fixed;inset:0;z-index:500;background:linear-gradient(160deg,#0a3d2e,#0f172a);display:flex;align-items:center;justify-content:center;padding:24px">
   <div style="width:100%;max-width:340px">
     <div style="text-align:center;margin-bottom:28px">
-      <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.12);color:#fff;font-family:'DM Mono',monospace;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">JR</div>
+      <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.12);color:#fff;font-family:'Space Grotesk',monospace;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">JR</div>
       <div style="color:#fff;font-size:17px;font-weight:700">JR Control de Negocio</div>
       <div style="color:rgba(255,255,255,0.55);font-size:12px;margin-top:4px" id="loginGateSub">¿Quién eres?</div>
     </div>
@@ -519,7 +482,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 
     <div id="loginGatePinWrap" style="display:none">
       <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-bottom:8px;text-align:center" id="loginGatePinLabel">Ingresa tu PIN</div>
-      <input id="loginGatePinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" onkeyup="if(event.key==='Enter')confirmarPin()" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:10px;font-size:22px;font-family:'DM Mono',monospace;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;outline:none">
+      <input id="loginGatePinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" onkeyup="if(event.key==='Enter')confirmarPin()" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:10px;font-size:22px;font-family:'Space Grotesk',monospace;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;outline:none">
       <div id="loginGateError" style="color:#f87171;font-size:12px;text-align:center;margin-top:8px;min-height:16px"></div>
       <button onclick="confirmarPin()" style="width:100%;margin-top:10px;background:var(--green,#1d9e75);color:#fff;border:none;border-radius:12px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Entrar</button>
       <button onclick="cancelarPin()" style="width:100%;margin-top:8px;background:transparent;color:rgba(255,255,255,0.6);border:none;padding:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">‹ Volver</button>
@@ -562,22 +525,57 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 
       <!-- HERO: Caja Actual -->
       <div class="balance-card" style="position:relative;overflow:hidden">
-        <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
-        <div style="position:absolute;right:20px;top:-40px;width:80px;height:80px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
-        <div class="balance-label">💵 Caja Actual <span style="font-weight:400;opacity:0.7">(acumulada)</span></div>
-        <div class="balance-value" id="balanceNeto">$0.00</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:-6px;margin-bottom:8px" id="balanceHoyDesglose">Hoy: +$0.00 ventas − $0.00 gastos</div>
-        <div class="balance-meta">
-          <span>Meta diaria</span>
-          <span class="balance-tag" id="balanceTag">Neutro</span>
+        <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:rgba(46,230,168,.06);border-radius:50%"></div>
+        <div style="position:absolute;right:20px;top:-40px;width:80px;height:80px;background:rgba(46,230,168,.05);border-radius:50%"></div>
+        <div style="display:flex;align-items:center;gap:16px;position:relative">
+          <div style="position:relative;width:80px;height:80px;flex-shrink:0">
+            <svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/>
+              <circle id="metaRing" cx="40" cy="40" r="34" fill="none" stroke="var(--primary)" stroke-width="7" stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <div id="metaRingPct" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#fff">0%</div>
+              <div style="font-size:7.5px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:0.4px">Meta</div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div class="balance-label">💵 Caja Actual <span style="font-weight:400;opacity:0.7">(acumulada)</span></div>
+            <div class="balance-value" id="balanceNeto" style="margin-bottom:2px">$0.00</div>
+            <span class="balance-tag" id="balanceTag">Neutro</span>
+          </div>
         </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-        <div class="balance-meta" style="margin-top:6px">
+        <div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:12px" id="balanceHoyDesglose">Hoy: +$0.00 ventas − $0.00 gastos</div>
+        <div class="balance-meta" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)">
           <span id="metaText">0% de meta ($500.00)</span>
           <button onclick="openCierreModal()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🔒 Cerrar caja</button>
         </div>
         <!-- Estado cierre del día -->
         <div id="cierreBadge" style="display:none;margin-top:6px;font-size:11px;color:rgba(255,255,255,0.7);text-align:center"></div>
+      </div>
+
+      <!-- Tendencia de ventas — últimos 7 días -->
+      <div class="card" style="margin-top:12px;padding:16px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px">Ventas · últimos 7 días</div>
+          <div id="tendenciaDelta" style="font-size:11px;font-weight:700;color:var(--primary)"></div>
+        </div>
+        <svg id="tendenciaSvg" viewBox="0 0 300 52" preserveAspectRatio="none" style="width:100%;height:52px;display:block">
+          <defs>
+            <linearGradient id="tendGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2EE6A8" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#2EE6A8" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path id="tendenciaFill" fill="url(#tendGrad)"/>
+          <path id="tendenciaLine" fill="none" stroke="#2EE6A8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <!-- Líneas de negocio — hoy -->
+      <div class="card" id="cardLineasNegocio" style="margin-top:12px;padding:16px 18px;display:none">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:12px">Líneas de negocio · hoy</div>
+        <div style="display:flex;height:10px;border-radius:6px;overflow:hidden;margin-bottom:12px" id="lineasStack"></div>
+        <div style="display:flex;justify-content:space-between" id="lineasLegend"></div>
       </div>
 
       <!-- ═══ SECCIÓN: PANORAMA DEL NEGOCIO (colapsable) ═══ -->
@@ -872,11 +870,11 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
               <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:2px">💰 Total invertido en stock</div>
               <div style="font-size:11px;color:var(--text3)" id="invProductosCnt">0 productos</div>
             </div>
-            <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--primary)" id="invTotalInvertido">$0.00</div>
+            <div style="font-family:'Space Grotesk',monospace;font-size:22px;font-weight:700;color:var(--primary)" id="invTotalInvertido">$0.00</div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
             <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2)">📈 Ganancia esperada</div>
-            <div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--green)" id="invGananciaEsperada">$0.00</div>
+            <div style="font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:var(--green)" id="invGananciaEsperada">$0.00</div>
           </div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:8px">
@@ -902,30 +900,30 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
               <div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:3px">Total pedidos del día</div>
               <div style="font-size:11px;color:var(--text3)" id="pedidosDiaCnt">0 pedidos activos</div>
             </div>
-            <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:600;color:var(--primary)" id="pedidosDiaTotal">$0.00</div>
+            <div style="font-family:'Space Grotesk',monospace;font-size:22px;font-weight:600;color:var(--primary)" id="pedidosDiaTotal">$0.00</div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px">
             <div style="text-align:center;cursor:pointer" onclick="verPedidosPorProveedor('Pollo Rico','#e8a020')">
               <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#e8a020;margin-bottom:3px">Pollo Rico ›</div>
-              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#e8a020" id="pedDiaPR">$0.00</div>
+              <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:#e8a020" id="pedDiaPR">$0.00</div>
             </div>
             <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);cursor:pointer" onclick="verPedidosPorProveedor('Pollo Indio','#d44f2e')">
               <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--red);margin-bottom:3px">Pollo Indio ›</div>
-              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--red)" id="pedDiaPI">$0.00</div>
+              <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:var(--red)" id="pedDiaPI">$0.00</div>
             </div>
             <div style="text-align:center;cursor:pointer" onclick="verPedidosPorProveedor('Sello de Oro','#c4860a')">
               <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:3px">Sello de Oro ›</div>
-              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="pedDiaSO">$0.00</div>
+              <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="pedDiaSO">$0.00</div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px;margin-top:8px">
             <div style="text-align:center;cursor:pointer" onclick="verPedidosPorProveedor('Superior','#6366f1')">
               <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#6366f1;margin-bottom:3px">Superior ›</div>
-              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#6366f1" id="pedDiaSup">$0.00</div>
+              <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:#6366f1" id="pedDiaSup">$0.00</div>
             </div>
             <div style="text-align:center;border-left:1px solid var(--border);cursor:pointer" onclick="verPedidosPorProveedor('Abuela','#0f6e56')">
               <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f6e56;margin-bottom:3px">Abuela ›</div>
-              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#0f6e56" id="pedDiaAb">$0.00</div>
+              <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:#0f6e56" id="pedDiaAb">$0.00</div>
             </div>
           </div>
         </div>
@@ -1159,13 +1157,6 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 
       <!-- Panel Datos -->
       <div id="masPanelDatos" style="display:none">
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:4px 0 6px;padding-left:2px">🎨 Apariencia</div>
-        <div class="card" style="padding:14px 16px;margin-bottom:12px">
-          <div class="tabs" style="margin:0">
-            <button class="tab-btn active" id="temaClaroBtn" onclick="setTema('light')">☀️ Claro</button>
-            <button class="tab-btn" id="temaOscuroBtn" onclick="setTema('dark')">🌙 Oscuro</button>
-          </div>
-        </div>
         <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:4px 0 6px;padding-left:2px">🔒 Respaldo de datos</div>
         <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
           <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
@@ -1771,7 +1762,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
     <div class="modal-header"><button class="modal-back" onclick="closeModal('stockModal')">‹</button><div class="modal-title" id="stockModalTitle">Ajustar stock</div></div>
     <div class="form-section">
       <input type="hidden" id="sId">
-      <div class="info-box">Stock actual: <strong id="sActual" style="font-family:'DM Mono',monospace"></strong></div>
+      <div class="info-box">Stock actual: <strong id="sActual" style="font-family:'Space Grotesk',monospace"></strong></div>
       <div>
         <label class="form-label">Operación</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -2019,15 +2010,6 @@ function initDashSections(){
     if(body) body.classList.toggle('collapsed', collapsed);
     if(chevron) chevron.classList.toggle('collapsed', collapsed);
   });
-}
-
-function setTema(t){
-  if(t==='dark') document.documentElement.setAttribute('data-theme','dark');
-  else document.documentElement.removeAttribute('data-theme');
-  try{ localStorage.setItem('cvd_tema', t); }catch(e){}
-  var claroBtn=document.getElementById('temaClaroBtn'), oscuroBtn=document.getElementById('temaOscuroBtn');
-  if(claroBtn) claroBtn.classList.toggle('active', t!=='dark');
-  if(oscuroBtn) oscuroBtn.classList.toggle('active', t==='dark');
 }
 
 function guardarCategoriasConfig(){
@@ -2891,7 +2873,7 @@ function renderVentaProdResultados(){
         '<div style="font-size:13px;font-weight:500;color:var(--text)">'+esc(p.nombre)+'</div>'+
         '<div style="font-size:11px;color:var(--text3)">Stock: '+p.cantidad+' '+esc(p.unidad)+'</div>'+
       '</div>'+
-      '<span style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:var(--green);flex-shrink:0">'+fmt(p.precioVenta)+'</span>'+
+      '<span style="font-family:\'Space Grotesk\',monospace;font-size:13px;font-weight:600;color:var(--green);flex-shrink:0">'+fmt(p.precioVenta)+'</span>'+
     '</button>';
   }).join('');
   resEl.style.display='flex';
@@ -2966,7 +2948,7 @@ function renderVentaItems(){
         '<div style="font-size:13px;font-weight:500">'+esc(it.desc)+'</div>'+
         '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+(it.productoNombre?' &middot; '+esc(it.productoNombre):'')+'</div>'+
       '</div>'+
-      '<div style="font-family:DM Mono,monospace;font-size:13px;color:var(--green);font-weight:500">'+fmt(it.monto)+'</div>'+
+      '<div style="font-family:Space Grotesk,monospace;font-size:13px;color:var(--green);font-weight:500">'+fmt(it.monto)+'</div>'+
       '<button onclick="removeVentaItem('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1">×</button>'+
     '</div>';
   });
@@ -3529,7 +3511,7 @@ function verAlertasStock(){
         '</div>'+
         '<div style="text-align:right;flex-shrink:0">'+
           '<div style="font-size:11px;color:var(--text3)">Pedir</div>'+
-          '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:700;color:'+color+'">'+
+          '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;font-weight:700;color:'+color+'">'+
             (p.cantidadReorden!=null?p.cantidadReorden+' '+p.unidad:'—')+
           '</div>'+
         '</div>'+
@@ -3690,7 +3672,10 @@ function renderResumen(){
   if(desgloseEl) desgloseEl.textContent=fmt(cajaAyer)+' anterior + '+fmt(tv)+' ventas'+(tex>0?' + '+fmt(tex)+' extra':'')+' − '+fmt(tg)+' gastos';
   document.getElementById('balanceTag').textContent=bal>0?'Positivo':bal<0?'Negativo':'Neutro';
   document.getElementById('metaText').textContent=Math.round(pct)+'% de meta ('+fmt(META)+')';
-  document.getElementById('progressFill').style.width=pct+'%';
+  var ring=document.getElementById('metaRing');
+  if(ring){ var circ=213.6; ring.style.strokeDashoffset=circ*(1-pct/100); }
+  var ringPct=document.getElementById('metaRingPct');
+  if(ringPct) ringPct.textContent=Math.round(pct)+'%';
   var sumPR=document.getElementById('sumPolloRico'); if(sumPR) sumPR.textContent=fmt(tpr);
   var sumPI=document.getElementById('sumPolloIndio'); if(sumPI) sumPI.textContent=fmt(tpi);
   var sumSO=document.getElementById('sumSelloOro'); if(sumSO) sumSO.textContent=fmt(tso);
@@ -3771,6 +3756,98 @@ function renderResumen(){
   // Semana
   renderSemana();
   renderMesResumen();
+  renderTendenciaVentas();
+  renderLineasNegocio();
+}
+
+// ══════════════════ TENDENCIA DE VENTAS (últimos 7 días) ══════════════════
+function renderTendenciaVentas(){
+  var pathFill=document.getElementById('tendenciaFill');
+  var pathLine=document.getElementById('tendenciaLine');
+  var deltaEl=document.getElementById('tendenciaDelta');
+  if(!pathFill||!pathLine) return;
+
+  var dias=[];
+  for(var i=6;i>=0;i--){
+    var d=new Date(currentDate.getFullYear(),currentDate.getMonth(),currentDate.getDate()-i);
+    var k=dateKey(d);
+    var dd=data[k]||{ventas:[]};
+    dias.push((dd.ventas||[]).reduce(function(a,x){return a+x.monto;},0));
+  }
+  var diasPrev=[];
+  for(var j=13;j>=7;j--){
+    var d2=new Date(currentDate.getFullYear(),currentDate.getMonth(),currentDate.getDate()-j);
+    var k2=dateKey(d2);
+    var dd2=data[k2]||{ventas:[]};
+    diasPrev.push((dd2.ventas||[]).reduce(function(a,x){return a+x.monto;},0));
+  }
+  var sumActual=dias.reduce(function(a,x){return a+x;},0);
+  var sumPrev=diasPrev.reduce(function(a,x){return a+x;},0);
+
+  if(deltaEl){
+    if(sumPrev>0){
+      var deltaPct=Math.round(((sumActual-sumPrev)/sumPrev)*100);
+      deltaEl.textContent=(deltaPct>=0?'↑ ':'↓ ')+Math.abs(deltaPct)+'%';
+      deltaEl.style.color=deltaPct>=0?'var(--primary)':'var(--red)';
+    } else {
+      deltaEl.textContent='';
+    }
+  }
+
+  var max=Math.max.apply(null,dias.concat([1]));
+  var w=300, h=52, n=dias.length;
+  var pts=dias.map(function(v,idx){
+    var x=n>1?(idx/(n-1))*w:0;
+    var y=h-4-((v/max)*(h-10));
+    return [x,y];
+  });
+  var linePath='M'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' L');
+  var fillPath=linePath+' L'+w+','+h+' L0,'+h+' Z';
+  pathLine.setAttribute('d', linePath);
+  pathFill.setAttribute('d', fillPath);
+}
+
+// ══════════════════ LÍNEAS DE NEGOCIO (hoy) ══════════════════
+function renderLineasNegocio(){
+  var stackEl=document.getElementById('lineasStack');
+  var legendEl=document.getElementById('lineasLegend');
+  var cardEl=document.getElementById('cardLineasNegocio');
+  if(!stackEl||!legendEl||!cardEl) return;
+
+  var day=getDayData(currentDate);
+  var porLinea={};
+  (day.ventas||[]).forEach(function(v){
+    var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,monto:v.monto}];
+    items.forEach(function(it){
+      var prod=it.productoId?getProducto(it.productoId):null;
+      var linea=prod?(prod.linea||'Pollo'):'Sin línea';
+      if(!porLinea[linea]) porLinea[linea]=0;
+      porLinea[linea]+=it.monto;
+    });
+  });
+
+  var claves=Object.keys(porLinea).filter(function(k){return porLinea[k]>0;});
+  if(!claves.length){ cardEl.style.display='none'; return; }
+  cardEl.style.display='block';
+
+  var colores={Pollo:'#2EE6A8', Desechables:'#D9B368', Varios:'#5B9CFF', 'Sin línea':'#525C68'};
+  var iconos={Pollo:'🐔', Desechables:'🧴', Varios:'📦', 'Sin línea':'•'};
+  var total=claves.reduce(function(a,k){return a+porLinea[k];},0);
+
+  claves.sort(function(a,b){return porLinea[b]-porLinea[a];});
+
+  stackEl.innerHTML=claves.map(function(k){
+    var pct=(porLinea[k]/total)*100;
+    return '<div style="width:'+pct+'%;background:'+(colores[k]||'#525C68')+'"></div>';
+  }).join('');
+
+  legendEl.innerHTML=claves.map(function(k){
+    return '<div style="display:flex;align-items:center;gap:6px">'+
+      '<span style="width:8px;height:8px;border-radius:2px;background:'+(colores[k]||'#525C68')+'"></span>'+
+      '<span style="font-size:10.5px;color:var(--text2);font-weight:600">'+(iconos[k]||'')+' '+esc(k)+'</span>'+
+      '<span style="font-size:10.5px;color:var(--text);font-weight:700;font-family:\'Space Grotesk\',sans-serif">'+fmt(porLinea[k])+'</span>'+
+    '</div>';
+  }).join('');
 }
 
 function renderMesResumen(){
@@ -3901,7 +3978,7 @@ function renderSemana(){
     proyEl.innerHTML=
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
         '<span style="color:var(--text3)">📈 Proyección del mes</span>'+
-        '<span style="font-family:\'DM Mono\',monospace;font-weight:700;color:var(--primary)">'+fmt(proy.proyeccion)+'</span>'+
+        '<span style="font-family:\'Space Grotesk\',monospace;font-weight:700;color:var(--primary)">'+fmt(proy.proyeccion)+'</span>'+
       '</div>'+
       '<div style="height:5px;background:var(--surface2);border-radius:3px;margin-bottom:4px">'+
         '<div style="height:5px;border-radius:3px;background:var(--primary);width:'+pct+'%"></div>'+
@@ -3987,7 +4064,7 @@ function renderRankingVentas(){
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+
         '<div style="font-size:16px;font-weight:800;color:var(--text3);min-width:24px">#'+(i+1)+'</div>'+
         '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.nombre)+'</div></div>'+
-        '<div style="text-align:right"><div style="font-family:\'DM Mono\',monospace;font-size:13px;color:var(--green);font-weight:600">'+fmt(p.monto)+'</div>'+
+        '<div style="text-align:right"><div style="font-family:\'Space Grotesk\',monospace;font-size:13px;color:var(--green);font-weight:600">'+fmt(p.monto)+'</div>'+
         '<div style="font-size:10px;color:var(--text3)">'+p.cant.toFixed(p.cant%1===0?0:1)+' uds</div></div>'+
       '</div>'+
       '<div style="display:flex;align-items:center;gap:8px">'+
@@ -4026,7 +4103,7 @@ function renderList(tipo){
           var isActive=gastoFiltroActual===c;
           rh+='<div onclick="setGastoFiltro(\''+c+'\')" style="cursor:pointer;flex:1;min-width:80px;background:var(--surface2);border-radius:8px;padding:8px;border-left:3px solid '+ci.color+(isActive?';box-shadow:0 0 0 2px '+ci.color+' inset':'')+'">'+
             '<div style="font-size:10px;color:var(--text3)">'+ci.icon+' '+ci.label+'</div>'+
-            '<div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:600;color:'+ci.color+'">'+fmt(porCat[c])+'</div></div>';
+            '<div style="font-family:\'Space Grotesk\',monospace;font-size:14px;font-weight:600;color:'+ci.color+'">'+fmt(porCat[c])+'</div></div>';
         });
         rh+='</div>';
         resEl.innerHTML=rh;
@@ -4141,7 +4218,7 @@ function verDetalle(tipo, id){
           html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'+
             '<div><div style="font-size:13px;font-weight:500">'+esc(pr.desc)+'</div>'+
             '<div style="font-size:11px;color:var(--text3)">Cant: '+pr.cant+(pr.productoNombre?' · 📦 '+esc(pr.productoNombre):'')+'</div></div>'+
-            '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:'+pcolor+'">'+fmt(pr.monto)+'</div>'+
+            '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;font-weight:600;color:'+pcolor+'">'+fmt(pr.monto)+'</div>'+
           '</div>';
         });
       } else {
@@ -4176,7 +4253,7 @@ function verDetalle(tipo, id){
         html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">'+
           '<div><div style="font-size:13px;font-weight:500">'+esc(x.desc)+'</div>'+
           '<div style="font-size:11px;color:var(--text3)">Cant: '+x.cant+(x.productoNombre?' · 📦 '+esc(x.productoNombre):'')+'</div></div>'+
-          '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:var(--green)">'+fmt(x.monto)+'</div>'+
+          '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;font-weight:600;color:var(--green)">'+fmt(x.monto)+'</div>'+
         '</div>';
       });
     }
@@ -4184,7 +4261,7 @@ function verDetalle(tipo, id){
 
   var color=isV?'var(--green)':'var(--red)';
   html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--border)">'+
-    '<strong>Total</strong><span style="font-family:\'DM Mono\',monospace;font-size:18px;font-weight:700;color:'+color+'">'+fmt(it.monto)+'</span></div>';
+    '<strong>Total</strong><span style="font-family:\'Space Grotesk\',monospace;font-size:18px;font-weight:700;color:'+color+'">'+fmt(it.monto)+'</span></div>';
   html+='</div>';
   document.getElementById('detalleVentaBody').innerHTML=html;
   document.getElementById('detalleVentaModal').classList.add('open');
@@ -4210,7 +4287,7 @@ function verPedidosPorProveedor(proveedor, color){
 
   var html='<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px">'+
     '<span style="font-size:11px;color:var(--text3)">'+lista.length+' pedido'+(lista.length!==1?'s':'')+' hoy</span>'+
-    '<span style="font-family:\'DM Mono\',monospace;font-size:15px;font-weight:700;color:'+color+'">'+fmt(total)+'</span>'+
+    '<span style="font-family:\'Space Grotesk\',monospace;font-size:15px;font-weight:700;color:'+color+'">'+fmt(total)+'</span>'+
   '</div>';
 
   lista.forEach(function(p){
@@ -4229,7 +4306,7 @@ function verPedidosPorProveedor(proveedor, color){
         var cantStr=it.cant?(it.cant+' '+(it.unidad||'uds')):null;
         itemsHtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0">'+
           '<span style="font-size:12px;color:var(--text2)">↳ '+esc(it.desc||it.productoNombre||'')+(cantStr?' <span style="color:var(--text3)">· '+cantStr+'</span>':'')+'</span>'+
-          '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:'+color+';font-weight:600">'+fmt(it.monto)+'</span>'+
+          '<span style="font-family:\'Space Grotesk\',monospace;font-size:12px;color:'+color+';font-weight:600">'+fmt(it.monto)+'</span>'+
         '</div>';
       });
       itemsHtml+='</div>';
@@ -4245,7 +4322,7 @@ function verPedidosPorProveedor(proveedor, color){
           itemsHtml+
         '</div>'+
         '<div style="text-align:right;flex-shrink:0">'+
-          '<div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:700;color:'+color+'">'+fmt(p.monto)+'</div>'+
+          '<div style="font-family:\'Space Grotesk\',monospace;font-size:14px;font-weight:700;color:'+color+'">'+fmt(p.monto)+'</div>'+
           '<div style="display:inline-block;margin-top:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:'+sc+';color:'+tc+'">'+et+'</div>'+
         '</div>'+
       '</div>'+
@@ -4307,7 +4384,7 @@ function renderPedidos(){
       it.items.forEach(function(pr){
         prodLines+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0">'+
           '<span style="font-size:11px;color:var(--text2)">'+esc(pr.desc)+' × '+pr.cant+'</span>'+
-          '<span style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--orange)">'+fmt(pr.monto)+'</span>'+
+          '<span style="font-family:\'Space Grotesk\',monospace;font-size:11px;color:var(--orange)">'+fmt(pr.monto)+'</span>'+
         '</div>';
       });
       prodLines+='</div>';
@@ -4367,14 +4444,14 @@ function verDetallePedido(id){
           '<div style="font-size:13px;font-weight:500">'+esc(it.desc)+'</div>'+
           '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+' '+esc(it.unidad||'')+(it.productoNombre?' · '+esc(it.productoNombre):'')+'</div>'+
         '</div>'+
-        '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:var(--orange)">'+fmt(it.monto)+'</div>'+
+        '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;font-weight:600;color:var(--orange)">'+fmt(it.monto)+'</div>'+
       '</div>';
     });
   } else {
     html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:12px;color:var(--text3)">'+esc(ped.desc)+' · Cant: '+ped.cant+'</div>';
   }
   html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--border)">'+
-    '<strong>Total</strong><span style="font-family:\'DM Mono\',monospace;font-size:18px;font-weight:700;color:var(--orange)">'+fmt(ped.monto)+'</span></div>';
+    '<strong>Total</strong><span style="font-family:\'Space Grotesk\',monospace;font-size:18px;font-weight:700;color:var(--orange)">'+fmt(ped.monto)+'</span></div>';
   html+='</div>';
   document.getElementById('detalleVentaBody').innerHTML=html;
   document.getElementById('detalleVentaModal').classList.add('open');
@@ -4510,7 +4587,7 @@ function renderInventario(){
           '<div style="font-size:11.5px;color:var(--text3);margin-top:1px">'+p.cantidad+' '+esc(p.unidad)+' en stock</div>'+
         '</div>'+
         '<div style="text-align:right;flex-shrink:0">'+
-          '<div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:600;color:var(--green)">'+fmt(p.precioVenta)+'</div>'+
+          '<div style="font-family:\'Space Grotesk\',monospace;font-size:14px;font-weight:600;color:var(--green)">'+fmt(p.precioVenta)+'</div>'+
           '<span class="stock-badge '+sc+'" style="margin-top:2px;display:inline-block">'+sl+'</span>'+
         '</div>'+
         '<span class="inv-row-chevron" id="invChevron_'+p.id+'">▾</span>'+
@@ -4668,7 +4745,7 @@ function renderEncargoItems(){
         '<div style="font-size:13px;font-weight:500">📦 '+esc(it.productoNombre)+'</div>'+
         '<div style="font-size:11px;color:var(--text3)">'+it.cant+' × '+fmt(it.precioUnit)+'</div>'+
       '</div>'+
-      '<div style="font-family:\'DM Mono\',monospace;font-size:13px;color:var(--primary);font-weight:600">'+fmt(it.monto)+'</div>'+
+      '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;color:var(--primary);font-weight:600">'+fmt(it.monto)+'</div>'+
       '<button onclick="removeEncargoItem('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0">×</button>'+
     '</div>';
   });
@@ -4831,11 +4908,11 @@ function openCierreModal(){
   var tv=day.ventas.reduce(function(a,x){return a+x.monto;},0);
   var tg=day.gastos.reduce(function(a,x){return a+x.monto;},0);
   var html='<div style="display:flex;flex-direction:column;gap:8px">'+
-    '<div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text3)">Ventas del día</span><span style="font-family:\'DM Mono\',monospace;font-weight:600;color:var(--green)">'+fmt(tv)+'</span></div>'+
-    '<div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text3)">Gastos del día</span><span style="font-family:\'DM Mono\',monospace;font-weight:600;color:var(--red)">'+fmt(tg)+'</span></div>'+
+    '<div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text3)">Ventas del día</span><span style="font-family:\'Space Grotesk\',monospace;font-weight:600;color:var(--green)">'+fmt(tv)+'</span></div>'+
+    '<div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--text3)">Gastos del día</span><span style="font-family:\'Space Grotesk\',monospace;font-weight:600;color:var(--red)">'+fmt(tg)+'</span></div>'+
     '<div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center">'+
       '<span style="font-size:13px;font-weight:700">Caja según sistema</span>'+
-      '<span style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:700;color:var(--primary)">'+fmt(cajaCalculada)+'</span>'+
+      '<span style="font-family:\'Space Grotesk\',monospace;font-size:16px;font-weight:700;color:var(--primary)">'+fmt(cajaCalculada)+'</span>'+
     '</div>'+
     (cierreAnterior!=null?'<div style="font-size:11px;color:var(--green)">✓ Ya cerraste hoy con '+fmt(cierreAnterior.efectivo)+' en físico</div>':'')+
   '</div>';
@@ -4999,7 +5076,7 @@ function renderPreciosCliente(){
   clientePreciosBuffer.forEach(function(p,i){
     html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">'+
       '<div style="flex:1;min-width:0;font-size:13px;font-weight:500">📦 '+esc(p.productoNombre)+'</div>'+
-      '<div style="font-family:\'DM Mono\',monospace;font-size:13px;color:var(--primary);font-weight:600">'+fmt(p.precio)+'</div>'+
+      '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;color:var(--primary);font-weight:600">'+fmt(p.precio)+'</div>'+
       '<button onclick="removePrecioCliente('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0">×</button>'+
     '</div>';
   });
@@ -5153,7 +5230,7 @@ function renderPagosAdeudo(){
     var fechaD=p.fecha?p.fecha.split('-').reverse().join('/'):'';
     html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">'+
       '<div style="flex:1;font-size:12px;color:var(--text2)">📅 '+fechaD+'</div>'+
-      '<div style="font-family:\'DM Mono\',monospace;font-size:13px;color:var(--green);font-weight:600">'+fmt(p.monto)+'</div>'+
+      '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;color:var(--green);font-weight:600">'+fmt(p.monto)+'</div>'+
       '<button onclick="removePagoAdeudo('+idx+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0">×</button>'+
     '</div>';
   });
@@ -5318,7 +5395,7 @@ function renderClientes(){
     resumenEl.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center">'+
       '<div><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:2px">Total adeudado</div>'+
       '<div style="font-size:11px;color:var(--text3)">'+totalClientesConDeuda+' cliente'+(totalClientesConDeuda!==1?'s':'')+' con saldo pendiente</div></div>'+
-      '<div style="font-family:\'DM Mono\',monospace;font-size:22px;font-weight:700;color:'+(totalAdeudado>0?'var(--red)':'var(--green)')+'">'+fmt(totalAdeudado)+'</div>'+
+      '<div style="font-family:\'Space Grotesk\',monospace;font-size:22px;font-weight:700;color:'+(totalAdeudado>0?'var(--red)':'var(--green)')+'">'+fmt(totalAdeudado)+'</div>'+
     '</div>';
   }
 
@@ -5366,7 +5443,7 @@ function renderClientes(){
       // Estado de saldo (banda de color)
       '<div style="padding:10px 16px;background:'+(saldo>0?'#fdeee9':'#e8f7f1')+';display:flex;justify-content:space-between;align-items:center">'+
         '<span style="font-size:12px;font-weight:700;color:'+(saldo>0?'var(--red)':'var(--green)')+'">'+(saldo>0?'⚠️ Tiene adeudo pendiente':'✅ Sin adeudos pendientes')+'</span>'+
-        (saldo>0?'<span style="font-family:\'DM Mono\',monospace;font-size:15px;font-weight:700;color:var(--red)">'+fmt(saldo)+'</span>':'')+
+        (saldo>0?'<span style="font-family:\'Space Grotesk\',monospace;font-size:15px;font-weight:700;color:var(--red)">'+fmt(saldo)+'</span>':'')+
       '</div>';
 
     // Precios especiales por producto
@@ -5376,7 +5453,7 @@ function renderClientes(){
       c.precios.forEach(function(p){
         html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0">'+
           '<span style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:6px">📦 '+esc(p.productoNombre)+'</span>'+
-          '<span style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:700;color:var(--primary)">'+fmt(p.precio)+'</span>'+
+          '<span style="font-family:\'Space Grotesk\',monospace;font-size:13px;font-weight:700;color:var(--primary)">'+fmt(p.precio)+'</span>'+
         '</div>';
       });
       html+='</div>';
@@ -5404,7 +5481,7 @@ function renderClientes(){
               '<div style="font-size:11px;color:var(--text3);margin-top:2px">📅 Entrega: '+fE+(pagado&&fP?' · ✓ Pagado: '+fP:'')+(!pagado&&a.fechaPago?' · Compromiso: '+a.fechaPago.split('-').reverse().join('/'):'')+'</div>'+
             '</div>'+
             '<div style="text-align:right;flex-shrink:0">'+
-              '<div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:700;color:'+(pagado?'var(--green)':'var(--red)')+'">'+(pagado?'✓ '+fmt(a.monto):fmt(saldoA))+'</div>'+
+              '<div style="font-family:\'Space Grotesk\',monospace;font-size:14px;font-weight:700;color:'+(pagado?'var(--green)':'var(--red)')+'">'+(pagado?'✓ '+fmt(a.monto):fmt(saldoA))+'</div>'+
               (!pagado?'<div style="font-size:10px;color:var(--text3)">de '+fmt(a.monto)+'</div>':'')+
             '</div>'+
           '</div>'+
@@ -5719,7 +5796,7 @@ function renderPedidoItems(){
         '<div style="font-size:13px;font-weight:500">'+esc(it.desc)+prodLabel+'</div>'+
         '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+' '+esc(it.unidad)+'</div>'+
       '</div>'+
-      '<div style="font-family:\'DM Mono\',monospace;font-size:13px;color:var(--orange);font-weight:600;white-space:nowrap">'+fmt(it.monto)+'</div>'+
+      '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;color:var(--orange);font-weight:600;white-space:nowrap">'+fmt(it.monto)+'</div>'+
       '<button onclick="removePedidoItem('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0">×</button>'+
     '</div>';
   });
@@ -6921,7 +6998,6 @@ renderAll();
 _fbLoad(); // carga desde Firebase y sincroniza
 iniciarSesionOApp(); // gate de acceso Admin/Vendedor
 cargarCategoriasConfig(function(){ renderCategoriasAjustes(); });
-try{ setTema(localStorage.getItem('cvd_tema')==='dark'?'dark':'light'); }catch(e){}
 initDashSections();
 
 // ── PWA: registrar service worker para permitir instalación con ícono propio ──
@@ -6976,11 +7052,11 @@ if('serviceWorker' in navigator){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center">
           <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Cantidad</div>
-          <div id="vrCantDisplay" style="font-family:'DM Mono',monospace;font-size:26px;font-weight:700;color:var(--text)">0</div>
+          <div id="vrCantDisplay" style="font-family:'Space Grotesk',monospace;font-size:26px;font-weight:700;color:var(--text)">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:10px;padding:10px;text-align:center">
           <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Total</div>
-          <div id="vrTotalDisplay" style="font-family:'DM Mono',monospace;font-size:26px;font-weight:700;color:var(--green)">$0.00</div>
+          <div id="vrTotalDisplay" style="font-family:'Space Grotesk',monospace;font-size:26px;font-weight:700;color:var(--green)">$0.00</div>
         </div>
       </div>
       <!-- Teclado numérico grande -->
