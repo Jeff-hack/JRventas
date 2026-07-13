@@ -666,12 +666,22 @@ select.form-input option{background:var(--surface2);color:var(--text)}
         </div>
       </div>
       <div class="stats-row">
-        <div class="stat-card" style="cursor:pointer;grid-column:1/-1" onclick="showSection('operaciones',document.getElementById('navOps'));setOpsTab('extra')">
+        <div class="stat-card">
+          <div class="stat-label">
+            <div class="stat-icon" style="background:#e8f7f1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            Ganancia Neta Hoy
+          </div>
+          <div class="stat-value" id="gananciaNetaHoy" style="color:var(--green)">$0.00</div>
+          <div class="stat-sub" id="gananciaNetaHoySub">Bruta − gastos de hoy</div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="showSection('operaciones',document.getElementById('navOps'));setOpsTab('extra')">
           <div class="stat-label">
             <div class="stat-icon" style="background:#e8f7f1">
               <span style="font-size:12px">💵</span>
             </div>
-            Ingresos Extra Hoy <span style="font-weight:400;color:var(--text3)">(trabajos aparte del negocio)</span>
+            Ingresos Extra
           </div>
           <div class="stat-value" id="totalExtra" style="color:var(--green)">$0.00</div>
           <div class="stat-sub" id="cntExtra">0 registros</div>
@@ -2502,10 +2512,10 @@ function onProductoSelChange(){
   if(pid) seleccionarProductoVenta(pid);
 }
 
-// Calcular top 10 más vendidos desde historial
-function getTop10Vendidos(){
+// Cuenta unidades vendidas por producto dentro de una colección de "días" (objetos data[k])
+function contarVentasPorProducto(dias){
   var conteo={};
-  Object.values(data).forEach(function(dayD){
+  dias.forEach(function(dayD){
     (dayD.ventas||[]).forEach(function(v){
       var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant||1}];
       items.forEach(function(it){
@@ -2516,12 +2526,32 @@ function getTop10Vendidos(){
       });
     });
   });
-  // Ordenar por cantidad vendida desc, tomar top 10 que estén en inventario
   return Object.keys(conteo)
     .filter(function(pid){return getProducto(parseInt(pid));})
     .sort(function(a,b){return conteo[b]-conteo[a];})
     .slice(0,10)
     .map(function(pid){return getProducto(parseInt(pid));});
+}
+
+// Top 10 más vendidos HOY (se recalcula en cada render, así refleja las ventas del día en tiempo real)
+// Si hoy aún no hay ventas suficientes, se completa con el top histórico y luego con el inventario
+function getTop10Vendidos(){
+  var hoyKey=dateKey(new Date());
+  var dataHoy=data[hoyKey]?[data[hoyKey]]:[];
+  var topHoy=contarVentasPorProducto(dataHoy);
+  if(topHoy.length>=10) return topHoy;
+
+  var topHistorico=contarVentasPorProducto(Object.values(data));
+  var idsUsados={}; topHoy.forEach(function(p){idsUsados[p.id]=true;});
+  topHistorico.forEach(function(p){
+    if(topHoy.length<10 && !idsUsados[p.id]){ topHoy.push(p); idsUsados[p.id]=true; }
+  });
+  if(topHoy.length<10){
+    productos.forEach(function(p){
+      if(topHoy.length<10 && !idsUsados[p.id]){ topHoy.push(p); idsUsados[p.id]=true; }
+    });
+  }
+  return topHoy;
 }
 
 // Render top 10 botones
@@ -3717,7 +3747,40 @@ function renderResumen(){
     fondoInicialFechaEl.textContent='Aún no registrado';
   }
 
-  // Ganancia bruta y neta del mes actual
+  // Calcula ganancia bruta y gastos operativos de UN día (objeto data[k])
+  function calcularGananciaGastosDia(d){
+    var ganancia=0, gastos=0;
+    (d.ventas||[]).forEach(function(v){
+      if(v.items&&v.items.length){
+        v.items.forEach(function(it){
+          var prod=it.productoId?getProducto(it.productoId):null;
+          if(prod&&prod.precioCosto>0){
+            ganancia+=it.monto-(prod.precioCosto*(parseFloat(it.cant)||1));
+          } else if(it.productoId&&!prod){
+            // Producto eliminado: costo desconocido, no sumar
+          } else if(!it.productoId){
+            ganancia+=it.monto;
+          }
+        });
+      } else {
+        var prod=v.productoId?getProducto(v.productoId):null;
+        if(prod&&prod.precioCosto>0){
+          ganancia+=v.monto-(prod.precioCosto*(parseFloat(v.cant)||1));
+        } else if(v.productoId&&!prod){
+          // costo desconocido
+        } else {
+          ganancia+=v.monto;
+        }
+      }
+    });
+    (d.gastos||[]).forEach(function(g){
+      var esDePedido=g.pedidoId||(g.desc&&g.desc.indexOf('Pedido:')===0);
+      if(!esDePedido) gastos+=g.monto;
+    });
+    return {ganancia:ganancia, gastos:gastos};
+  }
+
+  // Ganancia bruta y neta (mes actual + hoy)
   // Lógica: ganancia = ventas - costo de productos vendidos - gastos operativos
   // Solo se resta costo cuando el producto está vinculado y tiene precioCosto > 0
   // Ventas manuales (sin producto) NO suman a ganancia bruta (no sabemos su costo)
@@ -3727,41 +3790,9 @@ function renderResumen(){
   var gastosTotal=0;
   Object.keys(data).forEach(function(k){
     if(k.substring(0,7)!==mesActual) return;
-    var d=data[k];
-    (d.ventas||[]).forEach(function(v){
-      if(v.items&&v.items.length){
-        v.items.forEach(function(it){
-          var prod=it.productoId?getProducto(it.productoId):null;
-          if(prod&&prod.precioCosto>0){
-            // Producto con costo conocido: ganancia = venta - costo
-            ganancia+=it.monto-(prod.precioCosto*(parseFloat(it.cant)||1));
-          } else if(it.productoId&&!prod){
-            // Producto eliminado: asumir ganancia 0 (no sabemos el costo)
-            // No sumar nada — más conservador y correcto
-          } else if(!it.productoId){
-            // Item sin producto vinculado (manual): suma margen completo
-            // solo si tiene precio de venta > costo (no sabemos costo, asumimos venta = ganancia)
-            ganancia+=it.monto;
-          }
-        });
-      } else {
-        var prod=v.productoId?getProducto(v.productoId):null;
-        if(prod&&prod.precioCosto>0){
-          // Venta con producto y costo conocido
-          ganancia+=v.monto-(prod.precioCosto*(parseFloat(v.cant)||1));
-        } else if(v.productoId&&!prod){
-          // Producto eliminado: no sumar (costo desconocido)
-        } else {
-          // Venta manual sin producto: suma completo (precio es lo que recibiste)
-          ganancia+=v.monto;
-        }
-      }
-    });
-    // Gastos operativos (excluir gastos de pedidos completados que ya bajan del costo)
-    (d.gastos||[]).forEach(function(g){
-      var esDePedido=g.pedidoId||(g.desc&&g.desc.indexOf('Pedido:')===0);
-      if(!esDePedido) gastosTotal+=g.monto;
-    });
+    var r=calcularGananciaGastosDia(data[k]);
+    ganancia+=r.ganancia;
+    gastosTotal+=r.gastos;
   });
   var gananciaNeta=ganancia-gastosTotal;
   var mesLabel=currentDate.toLocaleDateString('es-SV',{month:'long',year:'numeric'});
@@ -3773,6 +3804,13 @@ function renderResumen(){
   if(ganNetaEl){ ganNetaEl.textContent=fmt(gananciaNeta); ganNetaEl.style.color=gananciaNeta>=0?'var(--green)':'var(--red)'; }
   if(ganSub) ganSub.textContent='Mes: '+mesLabel;
   if(ganNetaSub) ganNetaSub.textContent='Mes: '+mesLabel;
+
+  // Ganancia neta de HOY (día real del sistema, independiente del mes que se esté navegando)
+  var hoyKey=dateKey(new Date());
+  var rHoy=data[hoyKey]?calcularGananciaGastosDia(data[hoyKey]):{ganancia:0,gastos:0};
+  var gananciaNetaHoy=rHoy.ganancia-rHoy.gastos;
+  var ganNetaHoyEl=document.getElementById('gananciaNetaHoy');
+  if(ganNetaHoyEl){ ganNetaHoyEl.textContent=fmt(gananciaNetaHoy); ganNetaHoyEl.style.color=gananciaNetaHoy>=0?'var(--green)':'var(--red)'; }
 
   // Semana
   renderSemana();
