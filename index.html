@@ -675,6 +675,7 @@ select.form-input option{background:var(--surface2);color:var(--text)}
           </div>
           <div class="stat-value" id="gananciaNetaHoy" style="color:var(--green)">$0.00</div>
           <div class="stat-sub" id="gananciaNetaHoySub">Bruta − gastos de hoy</div>
+          <svg id="sparkGananciaNeta" width="100%" height="24" viewBox="0 0 100 24" preserveAspectRatio="none" style="margin-top:6px;display:block"></svg>
         </div>
         <div class="stat-card" style="cursor:pointer" onclick="showSection('operaciones',document.getElementById('navOps'));setOpsTab('extra')">
           <div class="stat-label">
@@ -3805,12 +3806,46 @@ function renderResumen(){
   if(ganSub) ganSub.textContent='Mes: '+mesLabel;
   if(ganNetaSub) ganNetaSub.textContent='Mes: '+mesLabel;
 
+  // Dibuja un sparkline (mini-gráfica de línea) dentro de un <svg> por id.
+  // valores: array de números (ej. últimos 7 días). color: string hex/css.
+  function renderSparkline(svgId, valores, color){
+    var svg=document.getElementById(svgId);
+    if(!svg) return;
+    var w=100, h=24, pad=2;
+    var min=Math.min.apply(null,valores), max=Math.max.apply(null,valores);
+    if(min===max){ min-=1; max+=1; } // evita división por cero si todos los valores son iguales
+    var n=valores.length;
+    var pts=valores.map(function(v,i){
+      var x=pad+(i/(n-1))*(w-pad*2);
+      var y=h-pad-((v-min)/(max-min))*(h-pad*2);
+      return x.toFixed(1)+','+y.toFixed(1);
+    });
+    // Línea base en 0 (referencia de "sin ganancia") si 0 cae dentro del rango visible
+    var zeroLine='';
+    if(min<0 && max>0){
+      var yZero=h-pad-((0-min)/(max-min))*(h-pad*2);
+      zeroLine='<line x1="'+pad+'" y1="'+yZero.toFixed(1)+'" x2="'+(w-pad)+'" y2="'+yZero.toFixed(1)+'" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,2"/>';
+    }
+    svg.innerHTML=zeroLine+'<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+
   // Ganancia neta de HOY (día real del sistema, independiente del mes que se esté navegando)
   var hoyKey=dateKey(new Date());
   var rHoy=data[hoyKey]?calcularGananciaGastosDia(data[hoyKey]):{ganancia:0,gastos:0};
   var gananciaNetaHoy=rHoy.ganancia-rHoy.gastos;
   var ganNetaHoyEl=document.getElementById('gananciaNetaHoy');
   if(ganNetaHoyEl){ ganNetaHoyEl.textContent=fmt(gananciaNetaHoy); ganNetaHoyEl.style.color=gananciaNetaHoy>=0?'var(--green)':'var(--red)'; }
+
+  // Sparkline: ganancia neta de los últimos 7 días (incluye hoy)
+  var valoresSpark=[];
+  for(var sd=6; sd>=0; sd--){
+    var fechaSd=new Date();
+    fechaSd.setDate(fechaSd.getDate()-sd);
+    var keySd=dateKey(fechaSd);
+    var rSd=data[keySd]?calcularGananciaGastosDia(data[keySd]):{ganancia:0,gastos:0};
+    valoresSpark.push(rSd.ganancia-rSd.gastos);
+  }
+  renderSparkline('sparkGananciaNeta', valoresSpark, gananciaNetaHoy>=0?'#1d9e75':'#d44f2e');
 
   // Semana
   renderSemana();
