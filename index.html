@@ -1512,10 +1512,13 @@ select.form-input option{background:var(--surface2);color:var(--text)}
           <button class="tab-btn" id="ventaLineaVarios" onclick="setVentaLinea('Varios')" style="flex:0 0 auto;white-space:nowrap">📦 Varios</button>
         </div>
         <!-- Buscador arriba -->
-        <div style="position:relative;margin-bottom:8px">
-          <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none">🔍</span>
-          <input type="text" id="ventaProdBuscador" placeholder="Buscar producto..." oninput="renderVentaProdResultados()" autocomplete="off"
-            style="width:100%;padding:10px 14px 10px 34px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;box-sizing:border-box">
+        <div style="position:relative;margin-bottom:8px;display:flex;gap:6px">
+          <div style="position:relative;flex:1">
+            <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none">🔍</span>
+            <input type="text" id="ventaProdBuscador" placeholder="Buscar producto..." oninput="renderVentaProdResultados()" autocomplete="off"
+              style="width:100%;padding:10px 14px 10px 34px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;box-sizing:border-box">
+          </div>
+          <button type="button" onclick="abrirEscaner(function(codigo){ escanearYSeleccionarVenta(codigo); })" style="flex:0 0 auto;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;font-size:16px;cursor:pointer">📷</button>
         </div>
         <!-- Resultados de búsqueda (aparece al escribir) -->
         <div id="ventaProdResultados" style="display:none;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;margin-bottom:8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)"></div>
@@ -1563,10 +1566,13 @@ select.form-input option{background:var(--surface2);color:var(--text)}
         </div>
         <div style="margin-top:10px">
           <label class="form-label">Producto del inventario</label>
-          <div style="position:relative;margin-bottom:6px">
-            <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none">🔍</span>
-            <input type="text" id="pedidoProdBuscador" placeholder="Buscar producto..." oninput="renderPedidoProdResultados()" autocomplete="off"
-              style="width:100%;padding:10px 14px 10px 34px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;box-sizing:border-box">
+          <div style="position:relative;margin-bottom:6px;display:flex;gap:6px">
+            <div style="position:relative;flex:1">
+              <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none">🔍</span>
+              <input type="text" id="pedidoProdBuscador" placeholder="Buscar producto..." oninput="renderPedidoProdResultados()" autocomplete="off"
+                style="width:100%;padding:10px 14px 10px 34px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;box-sizing:border-box">
+            </div>
+            <button type="button" onclick="abrirEscaner(function(codigo){ escanearYSeleccionarPedido(codigo); })" style="flex:0 0 auto;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;font-size:16px;cursor:pointer">📷</button>
           </div>
           <!-- Resultados de búsqueda (aparece al escribir) -->
           <div id="pedidoProdResultados" style="display:none;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;margin-bottom:6px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)"></div>
@@ -1687,6 +1693,13 @@ select.form-input option{background:var(--surface2);color:var(--text)}
         <label class="form-label">Nombre del producto</label>
         <input class="form-input" type="text" id="pNombre" placeholder="Ej: Arroz, Pollo, Refresco...">
       </div>
+      <div>
+        <label class="form-label">Código de barras <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" type="text" id="pCodigoBarras" placeholder="Escanea o escribe el código" inputmode="numeric" style="flex:1">
+          <button type="button" onclick="abrirEscaner(function(codigo){ document.getElementById('pCodigoBarras').value=codigo; toast('✓ Código capturado'); })" style="flex:0 0 auto;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;font-size:16px;cursor:pointer">📷</button>
+        </div>
+      </div>
       <div class="form-row">
         <div>
           <label class="form-label">Cantidad inicial</label>
@@ -1762,6 +1775,22 @@ select.form-input option{background:var(--surface2);color:var(--text)}
       </div>
       <div id="pPrecioHistorial" style="display:none;background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px"></div>
       <button class="btn-primary" onclick="saveProducto()">✓ Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ESCÁNER DE CÓDIGO DE BARRAS ═══ -->
+<div class="modal-overlay" id="escanerModal" onclick="if(event.target===this) cerrarEscaner()" style="z-index:9999">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><button class="modal-back" onclick="cerrarEscaner()">‹</button><div class="modal-title">Escanear código</div></div>
+    <div class="form-section" style="align-items:center">
+      <div style="position:relative;width:100%;border-radius:var(--radius-sm);overflow:hidden;background:#000">
+        <video id="escanerVideo" autoplay playsinline muted style="width:100%;display:block"></video>
+        <div style="position:absolute;top:50%;left:10%;right:10%;height:2px;background:var(--primary);opacity:0.8;transform:translateY(-50%)"></div>
+      </div>
+      <div id="escanerEstado" style="font-size:12px;color:var(--text3);text-align:center;margin-top:10px">Apunta la cámara al código de barras</div>
+      <button type="button" onclick="cerrarEscaner()" style="width:100%;margin-top:12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Cancelar</button>
     </div>
   </div>
 </div>
@@ -2247,6 +2276,91 @@ function fmtShort(n){ return n>=1000?'$'+(n/1000).toFixed(1)+'k':fmt(n); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 function getProducto(id){ for(var i=0;i<productos.length;i++){if(productos[i].id===id)return productos[i];}return null; }
+function getProductoPorCodigoBarras(codigo){
+  codigo=(codigo||'').trim();
+  if(!codigo) return null;
+  for(var i=0;i<productos.length;i++){ if(productos[i].codigoBarras && productos[i].codigoBarras===codigo) return productos[i]; }
+  return null;
+}
+
+// ══════════════════════════════════════════
+//  ESCÁNER DE CÓDIGO DE BARRAS (cámara)
+// ══════════════════════════════════════════
+var _escanerStream=null, _escanerLoopId=null, _escanerCallback=null, _escanerDetector=null;
+function abrirEscaner(callback){
+  if(!('BarcodeDetector' in window)){
+    toast('⚠ Tu navegador no soporta escaneo de códigos. Actualiza Chrome o busca el producto manualmente.');
+    return;
+  }
+  _escanerCallback=callback;
+  document.getElementById('escanerEstado').textContent='Apunta la cámara al código de barras';
+  document.getElementById('escanerModal').classList.add('open');
+  try{
+    _escanerDetector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39']});
+  }catch(e){
+    _escanerDetector=new BarcodeDetector();
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
+    .then(function(stream){
+      _escanerStream=stream;
+      var video=document.getElementById('escanerVideo');
+      video.srcObject=stream;
+      _escanerLoopId=requestAnimationFrame(_escanerTick);
+    })
+    .catch(function(err){
+      console.error('Cámara no disponible:', err);
+      toast('⚠ No se pudo acceder a la cámara. Revisa los permisos.');
+      cerrarEscaner();
+    });
+}
+function _escanerTick(){
+  var video=document.getElementById('escanerVideo');
+  if(video && video.readyState>=2 && _escanerDetector){
+    _escanerDetector.detect(video).then(function(codigos){
+      if(codigos && codigos.length){
+        var valor=codigos[0].rawValue;
+        var cb=_escanerCallback;
+        cerrarEscaner();
+        if(cb) cb(valor);
+      } else {
+        _escanerLoopId=requestAnimationFrame(_escanerTick);
+      }
+    }).catch(function(){
+      _escanerLoopId=requestAnimationFrame(_escanerTick);
+    });
+  } else {
+    _escanerLoopId=requestAnimationFrame(_escanerTick);
+  }
+}
+function cerrarEscaner(){
+  if(_escanerLoopId) cancelAnimationFrame(_escanerLoopId);
+  _escanerLoopId=null;
+  if(_escanerStream){ _escanerStream.getTracks().forEach(function(t){t.stop();}); _escanerStream=null; }
+  _escanerCallback=null;
+  closeModal('escanerModal');
+}
+// Escaneo dentro del flujo de venta: busca el producto y lo selecciona igual que si lo hubieras
+// tocado en la lista de "Más vendidos" o buscador manual
+function escanearYSeleccionarVenta(codigo){
+  var p=getProductoPorCodigoBarras(codigo);
+  if(!p){ toast('⚠ Código no reconocido ('+codigo+'). Búscalo manualmente o asígnalo desde Inventario.'); return; }
+  seleccionarProductoVenta(p.id);
+  toast('✓ '+p.nombre);
+}
+function escanearYSeleccionarPedido(codigo){
+  var p=getProductoPorCodigoBarras(codigo);
+  if(!p){ toast('⚠ Código no reconocido ('+codigo+'). Búscalo manualmente o asígnalo desde Inventario.'); return; }
+  seleccionarProductoPedido(p.id);
+  toast('✓ '+p.nombre);
+}
+// Escaneo dentro de "⚡ Venta rápida": selecciona el producto igual que si tocaras su chip,
+// y deja el teclado numérico listo para digitar la cantidad
+function escanearYSeleccionarVentaRapida(codigo){
+  var p=getProductoPorCodigoBarras(codigo);
+  if(!p){ toast('⚠ Código no reconocido ('+codigo+'). Selecciónalo manualmente o asígnale un código desde Inventario.'); return; }
+  vrSelProd(p.id, null);
+  toast('✓ '+p.nombre+' — digita la cantidad');
+}
 function getPedido(id){ var nid=parseInt(id); for(var i=0;i<pedidosGlobal.length;i++){if(parseInt(pedidosGlobal[i].id)===nid)return pedidosGlobal[i];}return null; }
 
 // ── SEMANA ──
@@ -3323,6 +3437,7 @@ function openProductoModal(id){
     var p=getProducto(id);
     document.getElementById('productoModalTitle').textContent='Editar producto';
     document.getElementById('pNombre').value=p.nombre;
+    document.getElementById('pCodigoBarras').value=p.codigoBarras||'';
     document.getElementById('pCantidad').value=p.cantidad;
     document.getElementById('pUnidad').value=p.unidad;
     document.getElementById('pPrecioCosto').value=p.precioCosto;
@@ -3353,7 +3468,7 @@ function openProductoModal(id){
     }
   } else {
     document.getElementById('productoModalTitle').textContent='Nuevo producto';
-    ['pNombre','pNotas'].forEach(function(f){document.getElementById(f).value='';});
+    ['pNombre','pNotas','pCodigoBarras'].forEach(function(f){document.getElementById(f).value='';});
     document.getElementById('pCantidad').value='';
     document.getElementById('pUnidad').value='unidad';
     document.getElementById('pPrecioCosto').value='';
@@ -3370,6 +3485,7 @@ function openProductoModal(id){
 
 function saveProducto(){
   var nombre=document.getElementById('pNombre').value.trim();
+  var codigoBarras=document.getElementById('pCodigoBarras').value.trim();
   var cantidad=parseFloat(document.getElementById('pCantidad').value)||0;
   var unidad=document.getElementById('pUnidad').value;
   var precioCosto=parseFloat(document.getElementById('pPrecioCosto').value)||0;
@@ -3384,6 +3500,10 @@ function saveProducto(){
   var idExist=document.getElementById('pId').value;
   if(!nombre){toast('⚠ Ingresa el nombre del producto');return;}
   if(!fecha){toast('⚠ Selecciona la fecha de ingreso');return;}
+  if(codigoBarras){
+    var dup=getProductoPorCodigoBarras(codigoBarras);
+    if(dup && String(dup.id)!==String(idExist)){ toast('⚠ Ese código ya está asignado a "'+dup.nombre+'"'); return; }
+  }
   if(idExist){
     var p=getProducto(parseInt(idExist));
     if(p){
@@ -3397,10 +3517,10 @@ function saveProducto(){
         });
         if(p.precioHistorial.length>20) p.precioHistorial=p.precioHistorial.slice(-20); // máximo 20 registros
       }
-      p.nombre=nombre;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;p.linea=linea;p.categoria=categoria;p.proveedor=proveedor;p.stockMinimo=stockMinimo;p.cantidadReorden=cantidadReorden;
+      p.nombre=nombre;p.codigoBarras=codigoBarras||null;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;p.linea=linea;p.categoria=categoria;p.proveedor=proveedor;p.stockMinimo=stockMinimo;p.cantidadReorden=cantidadReorden;
     }
   } else {
-    productos.push({id:Date.now(),nombre:nombre,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas,linea:linea,categoria:categoria,proveedor:proveedor,stockMinimo:stockMinimo,cantidadReorden:cantidadReorden,precioHistorial:[]});
+    productos.push({id:Date.now(),nombre:nombre,codigoBarras:codigoBarras||null,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas,linea:linea,categoria:categoria,proveedor:proveedor,stockMinimo:stockMinimo,cantidadReorden:cantidadReorden,precioHistorial:[]});
   }
   saveProductos();
   closeModal('productoModal');
@@ -7137,6 +7257,7 @@ if('serviceWorker' in navigator){
     <div class="modal-header">
       <button class="modal-back" onclick="closeModal('ventaRapidaModal')">‹</button>
       <div class="modal-title">⚡ Venta rápida</div>
+      <button onclick="abrirEscaner(function(codigo){ escanearYSeleccionarVentaRapida(codigo); })" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:16px;cursor:pointer">📷</button>
     </div>
     <div class="form-section" style="padding:12px 16px">
       <!-- Producto seleccionado -->
