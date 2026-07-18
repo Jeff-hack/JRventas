@@ -1696,7 +1696,7 @@ select.form-input option{background:var(--surface2);color:var(--text)}
       <div>
         <label class="form-label">Código de barras <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
         <div style="display:flex;gap:6px">
-          <input class="form-input" type="text" id="pCodigoBarras" placeholder="Escanea o escribe el código" inputmode="numeric" style="flex:1">
+          <input class="form-input" type="text" id="pCodigoBarras" placeholder="Escanea o escribe el código" autocapitalize="characters" autocomplete="off" style="flex:1">
           <button type="button" onclick="abrirEscaner(function(codigo){ document.getElementById('pCodigoBarras').value=codigo; toast('✓ Código capturado'); })" style="flex:0 0 auto;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;font-size:16px;cursor:pointer">📷</button>
         </div>
       </div>
@@ -2277,9 +2277,9 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 function getProducto(id){ for(var i=0;i<productos.length;i++){if(productos[i].id===id)return productos[i];}return null; }
 function getProductoPorCodigoBarras(codigo){
-  codigo=(codigo||'').trim();
+  codigo=(codigo||'').trim().toUpperCase();
   if(!codigo) return null;
-  for(var i=0;i<productos.length;i++){ if(productos[i].codigoBarras && productos[i].codigoBarras===codigo) return productos[i]; }
+  for(var i=0;i<productos.length;i++){ if(productos[i].codigoBarras && productos[i].codigoBarras.toUpperCase()===codigo) return productos[i]; }
   return null;
 }
 
@@ -3485,7 +3485,7 @@ function openProductoModal(id){
 
 function saveProducto(){
   var nombre=document.getElementById('pNombre').value.trim();
-  var codigoBarras=document.getElementById('pCodigoBarras').value.trim();
+  var codigoBarras=document.getElementById('pCodigoBarras').value.trim().toUpperCase();
   var cantidad=parseFloat(document.getElementById('pCantidad').value)||0;
   var unidad=document.getElementById('pUnidad').value;
   var precioCosto=parseFloat(document.getElementById('pPrecioCosto').value)||0;
