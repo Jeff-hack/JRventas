@@ -843,6 +843,7 @@ select.form-input option{background:var(--surface2);color:var(--text)}
           <button class="tab-btn" id="gastoFiltroOtro" onclick="setGastoFiltro('otro')" style="flex:0 0 auto;white-space:nowrap">📋 Operativo</button>
           <button class="tab-btn" id="gastoFiltroPedido" onclick="setGastoFiltro('pedido')" style="flex:0 0 auto;white-space:nowrap">📦 Pedido</button>
           <button class="tab-btn" id="gastoFiltroMerma" onclick="setGastoFiltro('merma')" style="flex:0 0 auto;white-space:nowrap">🗑 Merma</button>
+          <button class="tab-btn" id="gastoFiltroAutoconsumo" onclick="setGastoFiltro('autoconsumo')" style="flex:0 0 auto;white-space:nowrap">🏠 Consumo</button>
         </div>
         <div class="card" style="padding:12px 16px;margin-bottom:8px" id="gastosCatResumen"></div>
         <div id="listaGastos"></div>
@@ -2350,6 +2351,12 @@ function escanearYSeleccionarVenta(codigo){
 function escanearYSeleccionarPedido(codigo){
   var p=getProductoPorCodigoBarras(codigo);
   if(!p){ toast('⚠ Código no reconocido ('+codigo+'). Búscalo manualmente o asígnalo desde Inventario.'); return; }
+  // Validar que el producto pertenezca al proveedor seleccionado para este pedido
+  // (el buscador manual y el Top 10 ya filtran por proveedor; el escáner debe respetar la misma regla)
+  if(pedidoFiltroProveedorActual && pedidoFiltroProveedorActual!=='Abuela' && p.proveedor!==pedidoFiltroProveedorActual){
+    toast('⚠ "'+p.nombre+'" es de '+(p.proveedor||'otro proveedor')+', no de '+pedidoFiltroProveedorActual+'. Cambia el proveedor del pedido o escanea un producto correcto.');
+    return;
+  }
   seleccionarProductoPedido(p.id);
   toast('✓ '+p.nombre);
 }
@@ -3537,16 +3544,40 @@ function eliminarProducto(id){
   toast('Producto eliminado');
 }
 
-// ── MERMA / PRODUCTOS DAÑADOS ──
-function openMermaModal(id){
+// ── MERMA / PRODUCTOS DAÑADOS / CONSUMO PERSONAL ──
+// Mismo mecanismo (descuenta stock + registra costo como gasto), pero con categoría distinta
+// para no mezclar pérdidas reales (merma) con retiros de producto en buen estado (autoconsumo)
+var MERMA_TIPOS={
+  merma:{titulo:'🗑 Registrar merma',icon:'🗑',color:'var(--red)',bg:'#fdeee9',
+    aviso:'Se descontará del stock y el costo del producto se registrará como gasto del día (categoría Merma), afectando la ganancia neta.',
+    labelCant:'Cantidad dañada',labelMotivo:'Motivo',placeholderMotivo:'Ej: Vencido, golpeado, humedad...',
+    btnTexto:'🗑 Registrar merma y descontar stock',descPrefijo:'Merma',categoria:'merma',toastTexto:'Merma registrada'},
+  autoconsumo:{titulo:'🏠 Consumo personal',icon:'🏠',color:'#7c3aed',bg:'#f1ecfc',
+    aviso:'Producto en buen estado que no se venderá (ej. empaque dañado). Se descontará del stock y su costo se registrará como gasto del día (categoría Consumo personal), afectando la ganancia neta.',
+    labelCant:'Cantidad a retirar',labelMotivo:'Motivo',placeholderMotivo:'Ej: Empaque roto, no vendible...',
+    btnTexto:'🏠 Registrar consumo y descontar stock',descPrefijo:'Consumo personal',categoria:'autoconsumo',toastTexto:'Consumo personal registrado'}
+};
+function openMermaModal(id,tipo){
+  tipo=tipo==='autoconsumo'?'autoconsumo':'merma';
   var p=getProducto(id);
   if(!p) return;
+  var cfg=MERMA_TIPOS[tipo];
+  document.getElementById('mermaTipo').value=tipo;
   document.getElementById('mermaProductoId').value=id;
   document.getElementById('mermaProductoLabel').textContent='📦 '+p.nombre+' — Stock actual: '+p.cantidad+' '+p.unidad;
   document.getElementById('mermaCantidad').value='';
   document.getElementById('mermaUnidad').value=p.unidad;
   document.getElementById('mermaCosto').value='';
   document.getElementById('mermaMotivo').value='';
+  document.getElementById('mermaMotivo').placeholder=cfg.placeholderMotivo;
+  document.getElementById('mermaTitulo').textContent=cfg.titulo;
+  document.getElementById('mermaTitulo').style.color=cfg.color;
+  document.getElementById('mermaAviso').textContent=cfg.aviso;
+  document.getElementById('mermaAviso').style.background=cfg.bg;
+  document.getElementById('mermaAviso').style.borderLeftColor=cfg.color;
+  document.getElementById('mermaLabelCant').textContent=cfg.labelCant;
+  document.getElementById('mermaBtnGuardar').textContent=cfg.btnTexto;
+  document.getElementById('mermaBtnGuardar').style.background=cfg.color;
   document.getElementById('mermaModal').classList.add('open');
 }
 
@@ -3559,20 +3590,22 @@ function updateMermaCosto(){
 }
 
 function saveMerma(){
+  var tipo=document.getElementById('mermaTipo').value==='autoconsumo'?'autoconsumo':'merma';
+  var cfg=MERMA_TIPOS[tipo];
   var pid=parseInt(document.getElementById('mermaProductoId').value);
   var p=getProducto(pid);
   if(!p){toast('⚠ Producto no encontrado');return;}
   var cant=parseFloat(document.getElementById('mermaCantidad').value)||0;
   var costo=parseFloat(document.getElementById('mermaCosto').value)||0;
   var motivo=document.getElementById('mermaMotivo').value.trim();
-  if(cant<=0){toast('⚠ Ingresa la cantidad dañada');return;}
-  if(cant>p.cantidad){toast('⚠ La cantidad dañada supera el stock actual ('+p.cantidad+' '+p.unidad+')');return;}
+  if(cant<=0){toast('⚠ Ingresa la cantidad');return;}
+  if(cant>p.cantidad){toast('⚠ La cantidad supera el stock actual ('+p.cantidad+' '+p.unidad+')');return;}
 
   // 1. Descontar del stock
   p.cantidad=Math.max(0, parseFloat((p.cantidad-cant).toFixed(4)));
   saveProductos();
 
-  // 2. Registrar como gasto del día (categoría merma)
+  // 2. Registrar como gasto del día (categoría merma o autoconsumo, según tipo)
   if(costo>0){
     var hoy=new Date();
     var hora=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
@@ -3580,10 +3613,10 @@ function saveMerma(){
     dayData.gastos.push({
       id:Date.now(),
       monto:costo,
-      desc:'Merma: '+p.nombre+' × '+cant+' '+p.unidad+(motivo?' ('+motivo+')':''),
+      desc:cfg.descPrefijo+': '+p.nombre+' × '+cant+' '+p.unidad+(motivo?' ('+motivo+')':''),
       cant:1,
       hora:hora,
-      categoria:'merma'
+      categoria:cfg.categoria
     });
     saveData();
   }
@@ -3591,7 +3624,7 @@ function saveMerma(){
   closeModal('mermaModal');
   checkStockAlertas();
   renderAll();
-  toast('✓ Merma registrada — stock ajustado'+(costo>0?', '+fmt(costo)+' registrado en gastos':''));
+  toast('✓ '+cfg.toastTexto+' — stock ajustado'+(costo>0?', '+fmt(costo)+' registrado en gastos':''));
 }
 
 // ── ALERTAS DE STOCK BAJO ──
@@ -4213,7 +4246,7 @@ function setVentaFiltro(f){
 }
 
 var gastoFiltroActual='todos';
-var GASTO_FILTRO_KEYS=['todos','pasaje','alimentacion','alcaldia','electricidad','personal','otro','pedido','merma'];
+var GASTO_FILTRO_KEYS=['todos','pasaje','alimentacion','alcaldia','electricidad','personal','otro','pedido','merma','autoconsumo'];
 function setGastoFiltro(f){
   gastoFiltroActual=f;
   GASTO_FILTRO_KEYS.forEach(function(k){
@@ -4297,7 +4330,7 @@ function renderList(tipo){
   var el=document.getElementById('lista'+cap(tipo));
   var badge=document.getElementById('badge'+cap(tipo));
   if(badge) badge.textContent=items.length;
-  var CATS={pasaje:{label:'Transporte',icon:'🚌',color:'#2563eb'},alimentacion:{label:'Alimentación',icon:'🍽',color:'#c4860a'},alcaldia:{label:'Alcaldía',icon:'🏛',color:'#7c3aed'},electricidad:{label:'Electricidad',icon:'⚡',color:'#d44f2e'},personal:{label:'Personal',icon:'👤',color:'#7c3aed'},otro:{label:'Operativo',icon:'📋',color:'#666'},pedido:{label:'Pedido',icon:'📦',color:'#e8a020'},merma:{label:'Merma',icon:'🗑',color:'#d44f2e'}};
+  var CATS={pasaje:{label:'Transporte',icon:'🚌',color:'#2563eb'},alimentacion:{label:'Alimentación',icon:'🍽',color:'#c4860a'},alcaldia:{label:'Alcaldía',icon:'🏛',color:'#7c3aed'},electricidad:{label:'Electricidad',icon:'⚡',color:'#d44f2e'},personal:{label:'Personal',icon:'👤',color:'#7c3aed'},otro:{label:'Operativo',icon:'📋',color:'#666'},pedido:{label:'Pedido',icon:'📦',color:'#e8a020'},merma:{label:'Merma',icon:'🗑',color:'#d44f2e'},autoconsumo:{label:'Consumo personal',icon:'🏠',color:'#7c3aed'}};
 
   // Resumen por categoría (solo gastos) — tarjetas clicables para filtrar
   if(tipo==='gastos'){
@@ -4394,7 +4427,7 @@ function verDetalle(tipo, id){
   if(!it) return;
   var isV=tipo==='ventas';
   var isExtra=tipo==='extra';
-  var CATS2={pasaje:'🚌 Pasajes/Transporte',alimentacion:'🍽 Alimentación',alcaldia:'🏛 Impuesto Alcaldía',electricidad:'⚡ Energía Eléctrica',personal:'👤 Gasto personal',otro:'📋 Gasto operativo',pedido:'📦 Pedido de proveedor',merma:'🗑 Merma / Producto dañado'};
+  var CATS2={pasaje:'🚌 Pasajes/Transporte',alimentacion:'🍽 Alimentación',alcaldia:'🏛 Impuesto Alcaldía',electricidad:'⚡ Energía Eléctrica',personal:'👤 Gasto personal',otro:'📋 Gasto operativo',pedido:'📦 Pedido de proveedor',merma:'🗑 Merma / Producto dañado',autoconsumo:'🏠 Consumo personal (producto en buen estado)'};
 
   // Dynamic modal title
   var titleEl=document.getElementById('detalleVentaTitle');
@@ -4820,7 +4853,8 @@ function renderInventario(){
           '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Margen: <strong style="color:var(--primary)">'+(margen!=='--'?margen+'%':'--')+'</strong> &nbsp;|&nbsp; Valor stock: <strong style="color:var(--text)">'+fmt(p.cantidad*p.precioCosto)+'</strong> &nbsp;|&nbsp; Ganancia esperada: <strong style="color:var(--green)">'+fmt((p.precioVenta-p.precioCosto)*p.cantidad)+'</strong></div>'+
           '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">'+
             '<button class="inv-btn inv-btn-danger" onclick="eliminarProducto('+p.id+')">Eliminar</button>'+
-            '<button class="inv-btn" style="background:#fdeee9;color:var(--red);border-color:#f3c4b3" onclick="openMermaModal('+p.id+')">🗑 Merma</button>'+
+            '<button class="inv-btn" style="background:#fdeee9;color:var(--red);border-color:#f3c4b3" onclick="openMermaModal('+p.id+',\'merma\')">🗑 Merma</button>'+
+            '<button class="inv-btn" style="background:#f1ecfc;color:#7c3aed;border-color:#dcc9f7" onclick="openMermaModal('+p.id+',\'autoconsumo\')">🏠 Consumo</button>'+
             '<button class="inv-btn" onclick="openStockModal('+p.id+')">Ajustar</button>'+
             '<button class="inv-btn inv-btn-primary" onclick="openProductoModal('+p.id+')">Editar</button>'+
           '</div>')+
@@ -7320,23 +7354,24 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 
-<!-- ═══ MODAL: MERMA / PRODUCTO DAÑADO ═══ -->
+<!-- ═══ MODAL: MERMA / CONSUMO PERSONAL ═══ -->
 <div class="modal-overlay" id="mermaModal" onclick="overlayClose(event,'mermaModal')">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-header">
       <button class="modal-back" onclick="closeModal('mermaModal')">‹</button>
-      <div class="modal-title" style="color:var(--red)">🗑 Registrar merma</div>
+      <div class="modal-title" id="mermaTitulo" style="color:var(--red)">🗑 Registrar merma</div>
     </div>
     <div class="form-section">
       <input type="hidden" id="mermaProductoId">
+      <input type="hidden" id="mermaTipo" value="merma">
       <div id="mermaProductoLabel" style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-weight:600;color:var(--text1)"></div>
-      <div style="font-size:12px;color:var(--text3);background:#fdeee9;border-radius:var(--radius-sm);padding:10px 14px;border-left:3px solid var(--red)">
+      <div id="mermaAviso" style="font-size:12px;color:var(--text3);background:#fdeee9;border-radius:var(--radius-sm);padding:10px 14px;border-left:3px solid var(--red)">
         Se descontará del stock y el costo del producto se registrará como gasto del día (categoría Merma), afectando la ganancia neta.
       </div>
       <div class="form-row">
         <div>
-          <label class="form-label">Cantidad dañada</label>
+          <label class="form-label" id="mermaLabelCant">Cantidad dañada</label>
           <input class="form-input" type="number" id="mermaCantidad" placeholder="0" min="0.01" step="0.01" oninput="updateMermaCosto()">
         </div>
         <div>
@@ -7345,7 +7380,7 @@ if('serviceWorker' in navigator){
         </div>
       </div>
       <div>
-        <label class="form-label">Costo de la merma ($)</label>
+        <label class="form-label">Costo ($)</label>
         <input class="form-input" type="number" id="mermaCosto" placeholder="0.00" step="0.01" min="0">
         <div style="font-size:11px;color:var(--text3);margin-top:4px">Se calcula automáticamente con el precio de costo. Puedes ajustarlo si es necesario.</div>
       </div>
@@ -7353,7 +7388,7 @@ if('serviceWorker' in navigator){
         <label class="form-label">Motivo <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
         <input class="form-input" type="text" id="mermaMotivo" placeholder="Ej: Vencido, golpeado, humedad...">
       </div>
-      <button class="btn-primary" style="background:var(--red)" onclick="saveMerma()">🗑 Registrar merma y descontar stock</button>
+      <button class="btn-primary" id="mermaBtnGuardar" style="background:var(--red)" onclick="saveMerma()">🗑 Registrar merma y descontar stock</button>
     </div>
   </div>
 </div>
