@@ -689,6 +689,23 @@ select.form-input option{background:var(--surface2);color:var(--text)}
         </div>
       </div>
       <div class="stats-row">
+        <div class="stat-card" style="grid-column:1/-1">
+          <div class="stat-label">
+            <div class="stat-icon" style="background:#e8f7f1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            Ganancia Neta Semanal <span style="font-weight:400;color:var(--text3)" id="gananciaNetaSemanaRango"></span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+            <div class="stat-value" id="gananciaNetaSemana" style="color:var(--green)">$0.00</div>
+            <div style="font-size:12px;color:var(--text3);background:var(--surface2);border-radius:6px;padding:4px 10px">
+              10% = <strong id="gananciaNetaSemana10" style="color:var(--gold)">$0.00</strong>
+            </div>
+          </div>
+          <div class="stat-sub">Lunes a domingo · útil para apartar ahorro/reinversión</div>
+        </div>
+      </div>
+      <div class="stats-row">
         <div class="stat-card" style="cursor:pointer" onclick="showSection('inventario',document.getElementById('navInv'));setInvMainTab('pedidos')">
           <div class="stat-label">
             <div class="stat-icon" style="background:#fef0d9">
@@ -1327,7 +1344,7 @@ select.form-input option{background:var(--surface2);color:var(--text)}
       <div class="form-row" style="margin-top:8px">
         <div>
           <label class="form-label">Cantidad</label>
-          <input class="form-input" type="number" id="encargoProdCant" placeholder="1" step="0.01" min="0.01" value="1">
+          <input class="form-input" type="number" id="encargoProdCant" placeholder="1" step="0.01" min="0.01" value="1" oninput="onEncargoProdChange()">
         </div>
         <div>
           <label class="form-label">Precio ($)</label>
@@ -1722,12 +1739,26 @@ select.form-input option{background:var(--surface2);color:var(--text)}
       <div class="form-row">
         <div>
           <label class="form-label">Precio costo ($)</label>
-          <input class="form-input" type="number" id="pPrecioCosto" placeholder="0.00" step="0.01" min="0">
+          <input class="form-input" type="number" id="pPrecioCosto" placeholder="0.00" step="0.01" min="0" oninput="actualizarMargenMayoreo()">
         </div>
         <div>
           <label class="form-label">Precio venta ($)</label>
-          <input class="form-input" type="number" id="pPrecioVenta" placeholder="0.00" step="0.01" min="0">
+          <input class="form-input" type="number" id="pPrecioVenta" placeholder="0.00" step="0.01" min="0" oninput="actualizarMargenMayoreo()">
         </div>
+      </div>
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px">
+        <label class="form-label" style="margin-bottom:8px">Precio por mayoreo <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+        <div class="form-row">
+          <div>
+            <label class="form-label" style="font-size:10px">A partir de (unidades)</label>
+            <input class="form-input" type="number" id="pCantidadMayoreo" placeholder="Ej: 10" min="1" step="1" oninput="actualizarMargenMayoreo()">
+          </div>
+          <div>
+            <label class="form-label" style="font-size:10px">Precio por unidad ($)</label>
+            <input class="form-input" type="number" id="pPrecioMayoreo" placeholder="0.00" step="0.01" min="0" oninput="actualizarMargenMayoreo()">
+          </div>
+        </div>
+        <div id="margenMayoreoInfo" style="font-size:11px;color:var(--text3);margin-top:6px">Si lo dejas vacío, siempre se cobra el precio de venta normal.</div>
       </div>
       <div class="form-row">
         <div>
@@ -2277,6 +2308,43 @@ function fmtShort(n){ return n>=1000?'$'+(n/1000).toFixed(1)+'k':fmt(n); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 function getProducto(id){ for(var i=0;i<productos.length;i++){if(productos[i].id===id)return productos[i];}return null; }
+
+// Devuelve el precio por unidad que corresponde según la cantidad vendida:
+// si el producto tiene precio de mayoreo configurado y la cantidad lo alcanza, usa ese precio.
+function getPrecioEfectivo(p, cantidad){
+  if(p.precioMayoreo>0 && p.cantidadMayoreo>0 && cantidad>=p.cantidadMayoreo){
+    return p.precioMayoreo;
+  }
+  return p.precioVenta;
+}
+
+// Feedback en vivo en el formulario de producto: muestra el margen resultante del precio de mayoreo,
+// y advierte si quedaría por debajo del costo (venta con pérdida).
+function actualizarMargenMayoreo(){
+  var info=document.getElementById('margenMayoreoInfo');
+  if(!info) return;
+  var costo=parseFloat(document.getElementById('pPrecioCosto').value)||0;
+  var cantMayoreo=parseFloat(document.getElementById('pCantidadMayoreo').value)||0;
+  var precioMayoreo=parseFloat(document.getElementById('pPrecioMayoreo').value)||0;
+  if(!cantMayoreo && !precioMayoreo){
+    info.textContent='Si lo dejas vacío, siempre se cobra el precio de venta normal.';
+    info.style.color='var(--text3)';
+    return;
+  }
+  if(!cantMayoreo || !precioMayoreo){
+    info.textContent='⚠ Completa ambos campos para activar el precio de mayoreo.';
+    info.style.color='var(--gold)';
+    return;
+  }
+  if(costo>0 && precioMayoreo<costo){
+    info.textContent='⚠ Este precio está por debajo de tu costo ('+fmt(costo)+') — venderías con pérdida.';
+    info.style.color='var(--red)';
+    return;
+  }
+  var margen=costo>0?(((precioMayoreo-costo)/costo)*100).toFixed(0):null;
+  info.textContent='✓ A partir de '+cantMayoreo+' unidades se cobrará '+fmt(precioMayoreo)+' c/u'+(margen!==null?' (margen: '+margen+'%)':'')+'.';
+  info.style.color='var(--green)';
+}
 function getProductoPorCodigoBarras(codigo){
   codigo=(codigo||'').trim().toUpperCase();
   if(!codigo) return null;
@@ -2755,15 +2823,17 @@ function vrKey(k){
 function vrActualizar(){
   var cant=parseFloat(vrCantStr)||0;
   document.getElementById('vrCantDisplay').textContent=vrCantStr;
-  document.getElementById('vrTotalDisplay').textContent=fmt(cant*vrPrecio);
   var p=vrProdId?getProducto(parseInt(vrProdId)):null;
+  var precioEfectivo=p?getPrecioEfectivo(p,cant):vrPrecio;
+  document.getElementById('vrTotalDisplay').textContent=fmt(cant*precioEfectivo);
   var excedeStock=p&&cant>p.cantidad;
   var cantEl=document.getElementById('vrCantDisplay');
   if(cantEl) cantEl.style.color=excedeStock?'var(--red)':'';
   var precioEl=document.getElementById('vrPrecio');
   if(precioEl&&p){
-    precioEl.textContent='Precio: '+fmt(p.precioVenta)+' · Stock: '+p.cantidad+' '+p.unidad+(excedeStock?' ⚠ No hay suficiente':'');
-    precioEl.style.color=excedeStock?'var(--red)':'';
+    var esMayoreo=precioEfectivo!==p.precioVenta;
+    precioEl.textContent='Precio: '+fmt(precioEfectivo)+(esMayoreo?' (mayoreo)':'')+' · Stock: '+p.cantidad+' '+p.unidad+(excedeStock?' ⚠ No hay suficiente':'');
+    precioEl.style.color=excedeStock?'var(--red)':(esMayoreo?'#7c3aed':'');
   }
   var ok=vrProdId&&cant>0&&!excedeStock;
   document.getElementById('vrConfirmar').disabled=!ok;
@@ -2780,7 +2850,7 @@ function vrConfirmar(){
     toast('⚠ Stock insuficiente — solo hay '+p.cantidad+' '+p.unidad+' disponibles');
     return;
   }
-  var monto=cant*vrPrecio;
+  var monto=cant*getPrecioEfectivo(p,cant);
   var hora=new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
   var day=getDayData(currentDate);
   day.ventas.push({id:Date.now(),monto:monto,desc:p.nombre,cant:cant,hora:hora,productoId:p.id,productoNombre:p.nombre,items:[{productoId:p.id,productoNombre:p.nombre,desc:p.nombre,cant:cant,monto:monto}]});
@@ -3036,7 +3106,17 @@ function onCantChange(){
   var cant=parseFloat(document.getElementById('fCant').value)||1;
   // Venta: usa precioVenta
   var pidV=parseInt(document.getElementById('ventaProductoSel').value);
-  if(pidV){ var pV=getProducto(pidV); if(pV){ document.getElementById('fMonto').value=(pV.precioVenta*cant).toFixed(2); return; } }
+  if(pidV){ var pV=getProducto(pidV); if(pV){
+    var precioAplicado=getPrecioEfectivo(pV,cant);
+    document.getElementById('fMonto').value=(precioAplicado*cant).toFixed(2);
+    var infoV=document.getElementById('ventaStockInfo');
+    if(infoV){
+      var esMayoreo=precioAplicado!==pV.precioVenta;
+      infoV.innerHTML='Precio: <strong>'+fmt(precioAplicado)+(esMayoreo?' <span style="color:#7c3aed">(mayoreo)</span>':'')+'</strong> &nbsp;·&nbsp; Stock: <strong>'+pV.cantidad+' '+pV.unidad+'</strong>'+
+        (!esMayoreo&&pV.precioMayoreo>0&&pV.cantidadMayoreo>0?' &nbsp;·&nbsp; <span style="color:var(--text3)">mayoreo desde '+pV.cantidadMayoreo+': '+fmt(pV.precioMayoreo)+'</span>':'');
+    }
+    return;
+  } }
   // Pedido: usa precioCosto del selector de producto
   if(selectedTipo==='pedido'){
     var pedSel=document.getElementById('pedidoProdSel');
@@ -3449,6 +3529,8 @@ function openProductoModal(id){
     document.getElementById('pUnidad').value=p.unidad;
     document.getElementById('pPrecioCosto').value=p.precioCosto;
     document.getElementById('pPrecioVenta').value=p.precioVenta;
+    document.getElementById('pCantidadMayoreo').value=p.cantidadMayoreo!=null?p.cantidadMayoreo:'';
+    document.getElementById('pPrecioMayoreo').value=p.precioMayoreo!=null?p.precioMayoreo:'';
     document.getElementById('pFecha').value=p.fecha;
     document.getElementById('pNotas').value=p.notas||'';
     document.getElementById('pLinea').value=p.linea||'Pollo';
@@ -3480,6 +3562,8 @@ function openProductoModal(id){
     document.getElementById('pUnidad').value='unidad';
     document.getElementById('pPrecioCosto').value='';
     document.getElementById('pPrecioVenta').value='';
+    document.getElementById('pCantidadMayoreo').value='';
+    document.getElementById('pPrecioMayoreo').value='';
     document.getElementById('pFecha').value=dateKey(new Date());
     document.getElementById('pLinea').value='Pollo';
     onLineaChange();
@@ -3488,6 +3572,7 @@ function openProductoModal(id){
     document.getElementById('pCantidadReorden').value='';
   }
   document.getElementById('productoModal').classList.add('open');
+  actualizarMargenMayoreo();
 }
 
 function saveProducto(){
@@ -3497,6 +3582,8 @@ function saveProducto(){
   var unidad=document.getElementById('pUnidad').value;
   var precioCosto=parseFloat(document.getElementById('pPrecioCosto').value)||0;
   var precioVenta=parseFloat(document.getElementById('pPrecioVenta').value)||0;
+  var cantidadMayoreo=parseFloat(document.getElementById('pCantidadMayoreo').value)||0;
+  var precioMayoreo=parseFloat(document.getElementById('pPrecioMayoreo').value)||0;
   var fecha=document.getElementById('pFecha').value;
   var notas=document.getElementById('pNotas').value.trim();
   var linea=document.getElementById('pLinea').value||'Pollo';
@@ -3511,6 +3598,18 @@ function saveProducto(){
     var dup=getProductoPorCodigoBarras(codigoBarras);
     if(dup && String(dup.id)!==String(idExist)){ toast('⚠ Ese código ya está asignado a "'+dup.nombre+'"'); return; }
   }
+  if((cantidadMayoreo>0)!==(precioMayoreo>0)){
+    toast('⚠ Completa cantidad Y precio de mayoreo, o deja ambos vacíos');
+    return;
+  }
+  if(precioMayoreo>0 && precioCosto>0 && precioMayoreo<precioCosto){
+    toast('⚠ El precio de mayoreo ('+fmt(precioMayoreo)+') es menor al costo ('+fmt(precioCosto)+') — estarías vendiendo con pérdida');
+    return;
+  }
+  if(precioMayoreo>0 && precioMayoreo>=precioVenta){
+    toast('⚠ El precio de mayoreo debe ser menor al precio de venta normal');
+    return;
+  }
   if(idExist){
     var p=getProducto(parseInt(idExist));
     if(p){
@@ -3524,10 +3623,10 @@ function saveProducto(){
         });
         if(p.precioHistorial.length>20) p.precioHistorial=p.precioHistorial.slice(-20); // máximo 20 registros
       }
-      p.nombre=nombre;p.codigoBarras=codigoBarras||null;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;p.linea=linea;p.categoria=categoria;p.proveedor=proveedor;p.stockMinimo=stockMinimo;p.cantidadReorden=cantidadReorden;
+      p.nombre=nombre;p.codigoBarras=codigoBarras||null;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.cantidadMayoreo=cantidadMayoreo||null;p.precioMayoreo=precioMayoreo||null;p.fecha=fecha;p.notas=notas;p.linea=linea;p.categoria=categoria;p.proveedor=proveedor;p.stockMinimo=stockMinimo;p.cantidadReorden=cantidadReorden;
     }
   } else {
-    productos.push({id:Date.now(),nombre:nombre,codigoBarras:codigoBarras||null,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas,linea:linea,categoria:categoria,proveedor:proveedor,stockMinimo:stockMinimo,cantidadReorden:cantidadReorden,precioHistorial:[]});
+    productos.push({id:Date.now(),nombre:nombre,codigoBarras:codigoBarras||null,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,cantidadMayoreo:cantidadMayoreo||null,precioMayoreo:precioMayoreo||null,fecha:fecha,notas:notas,linea:linea,categoria:categoria,proveedor:proveedor,stockMinimo:stockMinimo,cantidadReorden:cantidadReorden,precioHistorial:[]});
   }
   saveProductos();
   closeModal('productoModal');
@@ -3567,7 +3666,7 @@ function openMermaModal(id,tipo){
   document.getElementById('mermaProductoLabel').textContent='📦 '+p.nombre+' — Stock actual: '+p.cantidad+' '+p.unidad;
   document.getElementById('mermaCantidad').value='';
   document.getElementById('mermaUnidad').value=p.unidad;
-  document.getElementById('mermaCosto').value='';
+  document.getElementById('mermaCosto').value=p.precioCosto>0?p.precioCosto.toFixed(2):'';
   document.getElementById('mermaMotivo').value='';
   document.getElementById('mermaMotivo').placeholder=cfg.placeholderMotivo;
   document.getElementById('mermaTitulo').textContent=cfg.titulo;
@@ -3999,6 +4098,32 @@ function renderResumen(){
     valoresSpark.push(rSd.ganancia-rSd.gastos);
   }
   renderSparkline('sparkGananciaNeta', valoresSpark, gananciaNetaHoy>=0?'#1d9e75':'#d44f2e');
+
+  // Ganancia neta SEMANAL (semana actual, lunes a domingo, día real del sistema)
+  var hoyReal=new Date();
+  var diaSemana=hoyReal.getDay(); // 0=domingo, 1=lunes... 6=sábado
+  var offsetLunes=diaSemana===0?6:diaSemana-1; // días desde el lunes de esta semana
+  var lunesSemana=new Date(hoyReal);
+  lunesSemana.setDate(hoyReal.getDate()-offsetLunes);
+  var gananciaSemana=0, gastosSemana=0;
+  for(var sw=0; sw<7; sw++){
+    var fechaSw=new Date(lunesSemana);
+    fechaSw.setDate(lunesSemana.getDate()+sw);
+    var keySw=dateKey(fechaSw);
+    var rSw=data[keySw]?calcularGananciaGastosDia(data[keySw]):{ganancia:0,gastos:0};
+    gananciaSemana+=rSw.ganancia;
+    gastosSemana+=rSw.gastos;
+  }
+  var gananciaNetaSemana=gananciaSemana-gastosSemana;
+  var domingoSemana=new Date(lunesSemana);
+  domingoSemana.setDate(lunesSemana.getDate()+6);
+  var fmtCorto=function(d){ return d.toLocaleDateString('es-SV',{day:'numeric',month:'short'}); };
+  var ganSemEl=document.getElementById('gananciaNetaSemana');
+  var gan10El=document.getElementById('gananciaNetaSemana10');
+  var ganSemRangoEl=document.getElementById('gananciaNetaSemanaRango');
+  if(ganSemEl){ ganSemEl.textContent=fmt(gananciaNetaSemana); ganSemEl.style.color=gananciaNetaSemana>=0?'var(--green)':'var(--red)'; }
+  if(gan10El) gan10El.textContent=fmt(Math.max(0,gananciaNetaSemana)*0.10);
+  if(ganSemRangoEl) ganSemRangoEl.textContent='('+fmtCorto(lunesSemana)+' – '+fmtCorto(domingoSemana)+')';
 
   // Semana
   renderSemana();
@@ -4849,6 +4974,7 @@ function renderInventario(){
             '<div class="inv-stat"><div class="inv-stat-label">Venta</div><div class="inv-stat-value" style="color:var(--green)">'+fmt(p.precioVenta)+'</div></div>'+
           '</div>'+
           '<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Ingreso: '+esc(fd)+(p.notas?' &middot; '+esc(p.notas):'')+(bajoPorMinimo&&p.cantidadReorden?' &middot; Pedir '+p.cantidadReorden+' '+esc(p.unidad):'')+'</div>'+
+          (p.precioMayoreo>0&&p.cantidadMayoreo>0?'<div style="font-size:11px;color:#7c3aed;margin-bottom:8px">🏷 Mayoreo desde '+p.cantidadMayoreo+' '+esc(p.unidad)+': <strong>'+fmt(p.precioMayoreo)+'</strong> c/u</div>':'')+
           (esVendedor?'':
           '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Margen: <strong style="color:var(--primary)">'+(margen!=='--'?margen+'%':'--')+'</strong> &nbsp;|&nbsp; Valor stock: <strong style="color:var(--text)">'+fmt(p.cantidad*p.precioCosto)+'</strong> &nbsp;|&nbsp; Ganancia esperada: <strong style="color:var(--green)">'+fmt((p.precioVenta-p.precioCosto)*p.cantidad)+'</strong></div>'+
           '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">'+
@@ -4946,8 +5072,9 @@ function onEncargoProdChange(){
   if(!pid) return;
   var prod=getProducto(pid);
   if(!prod) return;
-  var precio=prod.precioVenta||0;
-  // Si el cliente seleccionado tiene precio especial para este producto, usarlo
+  var cant=parseFloat(document.getElementById('encargoProdCant').value)||1;
+  var precio=getPrecioEfectivo(prod,cant);
+  // Si el cliente seleccionado tiene precio especial para este producto, ese manda sobre el mayoreo
   if(encargoClienteActualId){
     var c=getCliente(encargoClienteActualId);
     if(c && c.precios){
@@ -5380,7 +5507,9 @@ function onAdeudoProductoChange(){
   info.style.color=excede?'var(--red)':'var(--text3)';
   info.textContent='Stock disponible: '+p.cantidad+' '+p.unidad+(excede?' ⚠ No hay suficiente':'');
   if(cant>0){
-    document.getElementById('adeudoMonto').value=(cant*p.precioVenta).toFixed(2);
+    var precioAdeudo=getPrecioEfectivo(p,cant);
+    document.getElementById('adeudoMonto').value=(cant*precioAdeudo).toFixed(2);
+    if(precioAdeudo!==p.precioVenta){ info.textContent+=' · Precio mayoreo aplicado: '+fmt(precioAdeudo); }
     renderPagosAdeudo();
   }
   if(!document.getElementById('adeudoDesc').value.trim()){
