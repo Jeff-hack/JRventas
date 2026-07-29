@@ -457,6 +457,134 @@ select.form-input option{background:var(--surface2);color:var(--text)}
 [data-rol="vendedor"] #rolBadge{background:rgba(91,141,239,.18)!important;color:#5b8def!important}
 </style>
 
+<style id="glass-neon-theme">
+/* ═══ GLASSMORPHISM + NEON — capa visual, no modifica lógica de negocio ═══ */
+:root{
+  --radius:26px; --radius-sm:18px;
+  --glass-bg:rgba(22,26,36,.55);
+  --glass-border:rgba(255,255,255,.08);
+}
+
+/* Fondo oscuro degradado con halos de neón (cian / morado / menta) */
+body{
+  background:
+    radial-gradient(circle at 10% 6%, rgba(155,107,255,.16), transparent 42%),
+    radial-gradient(circle at 92% 2%, rgba(46,230,168,.12), transparent 46%),
+    radial-gradient(circle at 50% 105%, rgba(62,190,232,.10), transparent 55%),
+    linear-gradient(180deg,#05070B,#020304 60%)!important;
+  background-attachment:fixed!important;
+}
+[data-rol="vendedor"] body{
+  background:
+    radial-gradient(circle at 10% 6%, rgba(91,141,239,.16), transparent 42%),
+    radial-gradient(circle at 92% 2%, rgba(46,230,168,.08), transparent 46%),
+    radial-gradient(circle at 50% 105%, rgba(62,190,232,.10), transparent 55%),
+    linear-gradient(180deg,#05070B,#020304 60%)!important;
+}
+
+/* Paneles de vidrio: tarjetas, listas, chips */
+.card,.stat-card,.semana-card,.inv-card,.ped-card,.tx-item,.pedido-item,
+.rpt-btn,.info-box,.hist-chip,.semana-stat,.pedido-item{
+  background:var(--glass-bg)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  backdrop-filter:blur(18px) saturate(160%);
+  border:1px solid var(--glass-border)!important;
+  box-shadow:0 8px 28px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.04)!important;
+  border-radius:var(--radius)!important;
+}
+.stat-card,.semana-stat,.tx-item,.pedido-item{border-radius:var(--radius-sm)!important}
+
+.header{
+  background:rgba(10,13,18,.55)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  backdrop-filter:blur(20px) saturate(160%);
+  border-bottom:1px solid var(--glass-border)!important;
+}
+[data-rol="vendedor"] .header{background:rgba(10,13,18,.55)!important}
+
+.bottom-nav{
+  background:rgba(10,13,18,.6)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  backdrop-filter:blur(20px) saturate(160%);
+  border-top:1px solid var(--glass-border)!important;
+}
+
+.balance-card{
+  background:linear-gradient(155deg,rgba(46,230,168,.16),rgba(15,20,28,.65))!important;
+  -webkit-backdrop-filter:blur(20px) saturate(170%);
+  backdrop-filter:blur(20px) saturate(170%);
+  border:1px solid rgba(46,230,168,.25)!important;
+  box-shadow:0 12px 36px rgba(0,0,0,.5), 0 0 40px rgba(46,230,168,.08)!important;
+}
+[data-rol="vendedor"] .balance-card{
+  background:linear-gradient(155deg,rgba(91,141,239,.16),rgba(15,20,28,.65))!important;
+  border:1px solid rgba(91,141,239,.25)!important;
+  box-shadow:0 12px 36px rgba(0,0,0,.5), 0 0 40px rgba(91,141,239,.1)!important;
+}
+
+.modal{
+  background:rgba(14,17,23,.88)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(160%);
+  backdrop-filter:blur(24px) saturate(160%);
+  border:1px solid var(--glass-border)!important;
+  border-radius:28px 28px 0 0!important;
+}
+@media(min-width:640px){.modal{border-radius:28px!important}}
+.modal-overlay.open{background:rgba(0,0,0,.55)!important;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.modal-header{background:transparent!important;border-bottom:1px solid var(--glass-border)!important}
+
+/* Resplandor de acento en logo y botón flotante */
+.logo{box-shadow:0 0 16px rgba(46,230,168,.45)}
+[data-rol="vendedor"] .logo{box-shadow:0 0 16px rgba(91,141,239,.45)}
+.fab{box-shadow:0 8px 26px rgba(46,230,168,.4), 0 0 22px rgba(46,230,168,.35)!important}
+[data-rol="vendedor"] .fab{box-shadow:0 8px 26px rgba(91,141,239,.4), 0 0 22px rgba(91,141,239,.35)!important}
+
+/* Inputs de vidrio */
+.form-input{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--glass-border)!important;
+  border-radius:var(--radius-sm)!important;
+}
+.form-input:focus{border-color:var(--primary)!important;box-shadow:0 0 0 3px rgba(46,230,168,.12)}
+
+/* Tabs de vidrio con resaltado neón */
+.tabs,.v2-section-tabs{background:rgba(255,255,255,.04)!important;border-radius:var(--radius-sm)!important}
+.tab-btn.active,.v2-stab.active{
+  background:rgba(46,230,168,.14)!important;color:var(--primary)!important;
+  box-shadow:0 0 0 1px rgba(46,230,168,.25), 0 0 14px rgba(46,230,168,.2)!important;
+}
+[data-rol="vendedor"] .tab-btn.active,[data-rol="vendedor"] .v2-stab.active{
+  background:rgba(91,141,239,.14)!important;color:#5b8def!important;
+  box-shadow:0 0 0 1px rgba(91,141,239,.25), 0 0 14px rgba(91,141,239,.2)!important;
+}
+
+/* Animaciones suaves al tocar botones/tarjetas */
+.btn-primary,.ped-btn,.inv-btn,.type-btn,.tab-btn,.v2-stab,.date-btn,.rpt-btn,
+.nav-btn,.fab,.vr-key,.card,.stat-card,.tx-item,.ped-card,.inv-card{
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
+}
+.btn-primary:active,.ped-btn:active,.inv-btn:active,.type-btn:active,.rpt-btn:active{transform:scale(.96)}
+.nav-btn:active{transform:scale(.9)}
+.fab:active{transform:scale(.88)}
+.tx-item:active,.ped-card:active,.inv-card:active,.card:active{transform:translateY(1px)}
+
+.btn-primary{
+  background:linear-gradient(135deg,var(--primary),#0D8F68)!important;
+  box-shadow:0 6px 20px rgba(46,230,168,.28)!important;
+}
+[data-rol="vendedor"] .btn-primary{
+  background:linear-gradient(135deg,#5b8def,#1e3a6e)!important;
+  box-shadow:0 6px 20px rgba(91,141,239,.28)!important;
+}
+
+/* Pills y badges más redondeados */
+.stock-badge,.ped-status,.badge,.hist-chip,.balance-tag{border-radius:20px!important}
+
+/* Scrollbars sutiles (desktop) */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:10px}
+</style>
+
 </head>
 <body>
 
