@@ -2066,52 +2066,204 @@ function _fbSync(){
   _fbTimer = setTimeout(function(){ _fbWrite(); }, 500);
 }
 
+// ══════════════════ MERGE (fusión) EN VEZ DE SOBRESCRITURA ══════════════════
+// Todos los registros de la app (ventas, gastos, pedidos, extras, productos,
+// pedidosGlobal, encargos, clientes) llevan un campo id numérico (Date.now()).
+// En vez de que un dispositivo pise el documento entero de Firebase con su
+// copia local, cada escritura primero trae la versión más reciente del
+// servidor y fusiona por id: la unión de ambos lados, sin perder registros
+// que el otro dispositivo haya creado mientras tanto.
+function _mergeArraysById(localArr, remoteArr){
+  var map = {}, order = [];
+  (remoteArr||[]).forEach(function(item){
+    if(item && item.id!=null && !(item.id in map)){ order.push(item.id); }
+    if(item && item.id!=null) map[item.id]=item;
+  });
+  (localArr||[]).forEach(function(item){
+    if(item && item.id!=null && !(item.id in map)){ order.push(item.id); }
+    if(item && item.id!=null) map[item.id]=item; // el local gana si hay conflicto de mismo id (edición más reciente en este dispositivo)
+  });
+  order.sort(function(a,b){ return a-b; });
+  return order.map(function(id){ return map[id]; });
+}
+
+function _mergeDayData(localDay, remoteDay){
+  localDay = localDay || {};
+  remoteDay = remoteDay || {};
+  return {
+    ventas: _mergeArraysById(localDay.ventas, remoteDay.ventas),
+    gastos: _mergeArraysById(localDay.gastos, remoteDay.gastos),
+    pedidos: _mergeArraysById(localDay.pedidos, remoteDay.pedidos),
+    extra: _mergeArraysById(localDay.extra, remoteDay.extra)
+  };
+}
+
+function _mergeDataObj(localData, remoteData){
+  localData = localData || {};
+  remoteData = remoteData || {};
+  var keys = {};
+  Object.keys(remoteData).forEach(function(k){ keys[k]=1; });
+  Object.keys(localData).forEach(function(k){ keys[k]=1; });
+  var merged = {};
+  Object.keys(keys).forEach(function(k){
+    merged[k] = _mergeDayData(localData[k], remoteData[k]);
+  });
+  return merged;
+}
+
+function _mergeFlatObj(localObj, remoteObj){
+  // fusión simple para objetos plano clave→valor (ej. fondos por fecha)
+  var merged = {};
+  Object.assign(merged, remoteObj||{}, localObj||{}); // local gana en empates
+  return merged;
+}
+
+var _fbWriting = false;
 function _fbWrite(){
   if(!fbOnline) return;
-  var payload = {
-    data: JSON.stringify(data),
-    productos: JSON.stringify(productos),
-    pedidos: JSON.stringify(pedidosGlobal),
-    encargos: JSON.stringify(encargos),
-    clientes: JSON.stringify(clientes),
-    fondos: JSON.stringify(fondos),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
-  db.doc(DB_DOC).set(payload).then(function(){
+  _fbWriting = true;
+  db.doc(DB_DOC).get().then(function(doc){
+    var remote = doc.exists ? doc.data() : {};
+    var remoteData={}, remoteProductos=[], remotePedidos=[], remoteEncargos=[], remoteClientes=[], remoteFondos={};
+    try{ if(remote.data) remoteData=JSON.parse(remote.data); }catch(e){}
+    try{ if(remote.productos) remoteProductos=JSON.parse(remote.productos); }catch(e){}
+    try{ if(remote.pedidos) remotePedidos=JSON.parse(remote.pedidos); }catch(e){}
+    try{ if(remote.encargos) remoteEncargos=JSON.parse(remote.encargos); }catch(e){}
+    try{ if(remote.clientes) remoteClientes=JSON.parse(remote.clientes); }catch(e){}
+    try{ if(remote.fondos) remoteFondos=JSON.parse(remote.fondos); }catch(e){}
+
+    // Fusionar remoto + local (unión por id, no reemplazo)
+    data = _mergeDataObj(data, remoteData);
+    productos = _mergeArraysById(productos, remoteProductos);
+    pedidosGlobal = _mergeArraysById(pedidosGlobal, remotePedidos);
+    encargos = _mergeArraysById(encargos, remoteEncargos);
+    clientes = _mergeArraysById(clientes, remoteClientes);
+    fondos = _mergeFlatObj(fondos, remoteFondos);
+
+    // Persistir la fusión localmente y reflejarla en pantalla
+    _lsSave('cvd_data', data);
+    _lsSave('cvd_productos', productos);
+    _lsSave('cvd_pedidos', pedidosGlobal);
+    _lsSave('cvd_encargos', encargos);
+    _lsSave('cvd_clientes', clientes);
+    _lsSave('cvd_fondos', fondos);
+    renderAll();
+
+    var payload = {
+      data: JSON.stringify(data),
+      productos: JSON.stringify(productos),
+      pedidos: JSON.stringify(pedidosGlobal),
+      encargos: JSON.stringify(encargos),
+      clientes: JSON.stringify(clientes),
+      fondos: JSON.stringify(fondos),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    return db.doc(DB_DOC).set(payload);
+  }).then(function(){
     syncPending = false;
+    _fbWriting = false;
     updateSyncIndicator();
   }).catch(function(err){
     console.error('Firebase write error:', err);
+    _fbWriting = false;
     updateSyncIndicator();
   });
 }
 
-// Carga desde Firebase (sobrescribe localStorage si Firebase tiene datos más recientes)
+// Carga inicial desde Firebase (fusiona, no sobrescribe) y activa escucha en tiempo real
 function _fbLoad(){
   db.doc(DB_DOC).get().then(function(doc){
     fbOnline = true;
     if(doc.exists){
       var d = doc.data();
-      // Solo sobrescribir si Firebase tiene datos
-      try{ if(d.data) { data=JSON.parse(d.data); localStorage.setItem('cvd_data',d.data); } }catch(e){}
-      try{ if(d.productos) { productos=JSON.parse(d.productos); localStorage.setItem('cvd_productos',d.productos); } }catch(e){}
-      try{ if(d.pedidos) { pedidosGlobal=JSON.parse(d.pedidos); localStorage.setItem('cvd_pedidos',d.pedidos); } }catch(e){}
-      try{ if(d.encargos) { encargos=JSON.parse(d.encargos); localStorage.setItem('cvd_encargos',d.encargos); } }catch(e){}
-      try{ if(d.clientes) { clientes=JSON.parse(d.clientes); localStorage.setItem('cvd_clientes',d.clientes); } }catch(e){}
-      try{ if(d.fondos) { fondos=JSON.parse(d.fondos); localStorage.setItem('cvd_fondos',d.fondos); } }catch(e){}
+      var remoteData={}, remoteProductos=[], remotePedidos=[], remoteEncargos=[], remoteClientes=[], remoteFondos={};
+      try{ if(d.data) remoteData=JSON.parse(d.data); }catch(e){}
+      try{ if(d.productos) remoteProductos=JSON.parse(d.productos); }catch(e){}
+      try{ if(d.pedidos) remotePedidos=JSON.parse(d.pedidos); }catch(e){}
+      try{ if(d.encargos) remoteEncargos=JSON.parse(d.encargos); }catch(e){}
+      try{ if(d.clientes) remoteClientes=JSON.parse(d.clientes); }catch(e){}
+      try{ if(d.fondos) remoteFondos=JSON.parse(d.fondos); }catch(e){}
+
+      data = _mergeDataObj(data, remoteData);
+      productos = _mergeArraysById(productos, remoteProductos);
+      pedidosGlobal = _mergeArraysById(pedidosGlobal, remotePedidos);
+      encargos = _mergeArraysById(encargos, remoteEncargos);
+      clientes = _mergeArraysById(clientes, remoteClientes);
+      fondos = _mergeFlatObj(fondos, remoteFondos);
+
+      _lsSave('cvd_data', data);
+      _lsSave('cvd_productos', productos);
+      _lsSave('cvd_pedidos', pedidosGlobal);
+      _lsSave('cvd_encargos', encargos);
+      _lsSave('cvd_clientes', clientes);
+      _lsSave('cvd_fondos', fondos);
+
       renderAll();
       updateSyncIndicator();
-      migrarDatos(true); // migrar silenciosamente y escribir de vuelta a Firebase
+      migrarDatos(true); // migrar silenciosamente y escribir de vuelta a Firebase (ya fusionado)
       toast('☁ Sincronizado');
     } else {
       // Firebase vacío → subir los datos locales existentes
       _fbWrite();
       toast('☁ Datos locales migrados a la nube');
     }
+    _fbAttachListener();
   }).catch(function(err){
     fbOnline = false;
     console.warn('Firebase no disponible, usando datos locales:', err);
     updateSyncIndicator();
+  });
+}
+
+// Escucha en tiempo real: si el otro dispositivo (admin/vendedor) escribe,
+// este dispositivo fusiona esos cambios en su copia local automáticamente,
+// sin esperar a recargar la página.
+var _fbListenerAttached = false;
+function _fbAttachListener(){
+  if(_fbListenerAttached) return;
+  _fbListenerAttached = true;
+  db.doc(DB_DOC).onSnapshot(function(doc){
+    // Ignorar el eco de nuestras propias escrituras (aún no confirmadas por el servidor)
+    if(doc.metadata.hasPendingWrites) return;
+    if(_fbWriting) return; // ya estamos en medio de una fusión/escritura propia
+    if(!doc.exists) return;
+    var d = doc.data();
+    var remoteData={}, remoteProductos=[], remotePedidos=[], remoteEncargos=[], remoteClientes=[], remoteFondos={};
+    try{ if(d.data) remoteData=JSON.parse(d.data); }catch(e){}
+    try{ if(d.productos) remoteProductos=JSON.parse(d.productos); }catch(e){}
+    try{ if(d.pedidos) remotePedidos=JSON.parse(d.pedidos); }catch(e){}
+    try{ if(d.encargos) remoteEncargos=JSON.parse(d.encargos); }catch(e){}
+    try{ if(d.clientes) remoteClientes=JSON.parse(d.clientes); }catch(e){}
+    try{ if(d.fondos) remoteFondos=JSON.parse(d.fondos); }catch(e){}
+
+    var mergedData = _mergeDataObj(data, remoteData);
+    var mergedProductos = _mergeArraysById(productos, remoteProductos);
+    var mergedPedidos = _mergeArraysById(pedidosGlobal, remotePedidos);
+    var mergedEncargos = _mergeArraysById(encargos, remoteEncargos);
+    var mergedClientes = _mergeArraysById(clientes, remoteClientes);
+    var mergedFondos = _mergeFlatObj(fondos, remoteFondos);
+
+    // Solo actualizar si realmente cambió algo (evita re-render innecesario)
+    var cambio = JSON.stringify(mergedData)!==JSON.stringify(data) ||
+      JSON.stringify(mergedProductos)!==JSON.stringify(productos) ||
+      JSON.stringify(mergedPedidos)!==JSON.stringify(pedidosGlobal) ||
+      JSON.stringify(mergedEncargos)!==JSON.stringify(encargos) ||
+      JSON.stringify(mergedClientes)!==JSON.stringify(clientes) ||
+      JSON.stringify(mergedFondos)!==JSON.stringify(fondos);
+    if(!cambio) return;
+
+    data=mergedData; productos=mergedProductos; pedidosGlobal=mergedPedidos;
+    encargos=mergedEncargos; clientes=mergedClientes; fondos=mergedFondos;
+    _lsSave('cvd_data', data);
+    _lsSave('cvd_productos', productos);
+    _lsSave('cvd_pedidos', pedidosGlobal);
+    _lsSave('cvd_encargos', encargos);
+    _lsSave('cvd_clientes', clientes);
+    _lsSave('cvd_fondos', fondos);
+    renderAll();
+    toast('☁ Datos actualizados desde otro dispositivo');
+  }, function(err){
+    console.warn('Error en escucha en tiempo real:', err);
   });
 }
 
