@@ -5166,6 +5166,25 @@ function verDetalle(tipo, id){
   var color=isV?'var(--green)':'var(--red)';
   html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--border)">'+
     '<strong>Total</strong><span style="font-family:\'Space Grotesk\',monospace;font-size:18px;font-weight:700;color:'+color+'">'+fmt(it.monto)+'</span></div>';
+
+  // ── Ganancia neta de la venta (venta − costo del producto) ──
+  if(isV && !it.esCobroAdeudo){
+    var lineas=(it.items&&it.items.length)?it.items:[{productoId:it.productoId,cant:it.cant,monto:it.monto}];
+    var ganancia=0, sinCosto=false;
+    lineas.forEach(function(x){
+      var prodG=x.productoId?getProducto(x.productoId):null;
+      if(prodG && prodG.precioCosto>0){
+        ganancia += x.monto - (prodG.precioCosto*(parseFloat(x.cant)||1));
+      } else {
+        ganancia += x.monto; // sin producto vinculado o sin costo registrado: no se puede descontar costo
+        sinCosto=true;
+      }
+    });
+    var gColor = ganancia>=0 ? 'var(--primary)' : 'var(--red)';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">'+
+      '<strong style="font-size:12px;color:var(--text2)">Ganancia neta'+(sinCosto?' <span style="font-size:10px;color:var(--text3);font-weight:400">(costo no registrado en algún ítem)</span>':'')+'</strong>'+
+      '<span style="font-family:\'Space Grotesk\',monospace;font-size:15px;font-weight:700;color:'+gColor+'">'+fmt(ganancia)+'</span></div>';
+  }
   html+='</div>';
   document.getElementById('detalleVentaBody').innerHTML=html;
   document.getElementById('detalleVentaModal').classList.add('open');
@@ -5286,15 +5305,17 @@ function renderPedidos(){
     if(it.items&&it.items.length){
       prodLines='<div style="margin-top:6px;border-top:1px solid var(--border);padding-top:6px">';
       it.items.forEach(function(pr){
+        var vLbl=pr.vencimiento?' <span style="color:var(--orange)">· Vence '+fmtDate(pr.vencimiento)+'</span>':'';
         prodLines+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0">'+
-          '<span style="font-size:11px;color:var(--text2)">'+esc(pr.desc)+' × '+pr.cant+'</span>'+
+          '<span style="font-size:11px;color:var(--text2)">'+esc(pr.desc)+' × '+pr.cant+vLbl+'</span>'+
           '<span style="font-family:\'Space Grotesk\',monospace;font-size:11px;color:var(--orange)">'+fmt(pr.monto)+'</span>'+
         '</div>';
       });
       prodLines+='</div>';
     } else {
       var prod=it.productoId?getProducto(it.productoId):null;
-      prodLines='<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(prod?'📦 '+esc(prod.nombre):esc(it.desc)+' · Cant: '+it.cant)+'</div>';
+      var vLblManual=it.vencimiento?' · Vence '+fmtDate(it.vencimiento):'';
+      prodLines='<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(prod?'📦 '+esc(prod.nombre):esc(it.desc)+' · Cant: '+it.cant)+vLblManual+'</div>';
     }
 
     html+='<div class="ped-card">'+
@@ -5343,16 +5364,19 @@ function verDetallePedido(id){
   if(ped.items&&ped.items.length){
     html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3)">Productos pedidos</div>';
     ped.items.forEach(function(it){
+      var vLine=it.vencimiento?'<div style="font-size:11px;color:var(--orange);margin-top:2px">⏳ Vence: '+fmtDate(it.vencimiento)+'</div>':'';
       html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'+
         '<div>'+
           '<div style="font-size:13px;font-weight:500">'+esc(it.desc)+'</div>'+
           '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+' '+esc(it.unidad||'')+(it.productoNombre?' · '+esc(it.productoNombre):'')+'</div>'+
+          vLine+
         '</div>'+
         '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;font-weight:600;color:var(--orange)">'+fmt(it.monto)+'</div>'+
       '</div>';
     });
   } else {
-    html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:12px;color:var(--text3)">'+esc(ped.desc)+' · Cant: '+ped.cant+'</div>';
+    var vLineManual=ped.vencimiento?'<div style="font-size:11px;color:var(--orange);margin-top:4px">⏳ Vence: '+fmtDate(ped.vencimiento)+'</div>':'';
+    html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:12px;color:var(--text3)">'+esc(ped.desc)+' · Cant: '+ped.cant+vLineManual+'</div>';
   }
   html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--border)">'+
     '<strong>Total</strong><span style="font-family:\'Space Grotesk\',monospace;font-size:18px;font-weight:700;color:var(--orange)">'+fmt(ped.monto)+'</span></div>';
