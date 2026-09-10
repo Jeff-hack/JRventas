@@ -2723,9 +2723,19 @@ function getDayData(d){ var k=dateKey(d); if(!data[k])data[k]={ventas:[],gastos:
 // sin que el usuario tenga que volver a digitar nada cada día.
 function getCajaAcumulada(hastaFecha){
   var hastaKey=dateKey(hastaFecha);
-  var total=fondos['efectivoApertura']||0;
+  // Buscar el cierre físico (conteo real en efectivo) más reciente ANTERIOR a la fecha pedida.
+  // Ese cierre se vuelve el nuevo punto de partida, en vez de seguir sumando desde el
+  // efectivoApertura original ignorando lo que realmente se contó en caja cada cierre.
+  var baseFecha=null;
+  Object.keys(fondos).forEach(function(k){
+    if(k.indexOf('cierre_')!==0) return;
+    var fecha=k.substring(7);
+    if(fecha<hastaKey && (baseFecha===null || fecha>baseFecha)) baseFecha=fecha;
+  });
+  var total = baseFecha ? fondos['cierre_'+baseFecha].efectivo : (fondos['efectivoApertura']||0);
   Object.keys(data).forEach(function(k){
     if(k>hastaKey) return; // solo días hasta la fecha indicada (inclusive)
+    if(baseFecha && k<=baseFecha) return; // ya están incluidos en el cierre que se usó como base
     var d=data[k];
     var v=(d.ventas||[]).reduce(function(a,x){return a+x.monto;},0);
     var g=(d.gastos||[]).reduce(function(a,x){return a+x.monto;},0);
@@ -3043,6 +3053,7 @@ function openAddModal(){
   var pedidoTipoSel=document.getElementById('pedidoTipo');
   if(pedidoTipoSel) pedidoTipoSel.selectedIndex=0;
   pedidoFiltroProveedorActual=pedidoTipoSel?pedidoTipoSel.value:null;
+  document.getElementById('pedidoProdSel').value=''; // evita que un pedido nuevo quede ligado al producto de un pedido anterior
   document.getElementById('pedidoProdBuscador').value='';
   document.getElementById('pedidoProdResultados').style.display='none';
   document.getElementById('pedidoProdTop').style.display='block';
@@ -5777,6 +5788,7 @@ function saveEncargo(){
   var productosDesc=encargoItemsBuffer.length===1?encargoItemsBuffer[0].productoNombre:encargoItemsBuffer[0].productoNombre+' + '+(encargoItemsBuffer.length-1)+' más';
 
   var estadoAnterior=null;
+  var encargoIdFinal=idExist?parseInt(idExist):null;
 
   if(idExist){
     var idx=encargos.findIndex(function(x){return x.id===parseInt(idExist);});
@@ -5786,11 +5798,14 @@ function saveEncargo(){
       encargos[idx]={id:encargos[idx].id,clienteId:clienteId,cliente:clienteNombre,items:encargoItemsBuffer.slice(),productos:productosDesc,fecha:fecha,costo:costo,anticipo:anticipo,estado:estado,notas:notas};
     }
   } else {
-    encargos.push({id:Date.now(),clienteId:clienteId,cliente:clienteNombre,items:encargoItemsBuffer.slice(),productos:productosDesc,fecha:fecha,costo:costo,anticipo:anticipo,estado:estado,notas:notas});
+    encargoIdFinal=Date.now();
+    encargos.push({id:encargoIdFinal,clienteId:clienteId,cliente:clienteNombre,items:encargoItemsBuffer.slice(),productos:productosDesc,fecha:fecha,costo:costo,anticipo:anticipo,estado:estado,notas:notas});
   }
 
-  // Si cambió a "entregado" → registrar venta + descontar inventario
-  if(estado==='entregado' && estadoAnterior && estadoAnterior!=='entregado'){
+  // Si quedó en "entregado" → registrar venta + descontar inventario.
+  // Cubre tanto el cambio de estado de un encargo existente como un encargo NUEVO
+  // que se crea directamente como entregado (antes, estadoAnterior era null y no entraba aquí).
+  if(estado==='entregado' && estadoAnterior!=='entregado'){
     var hoy=new Date();
     var hora=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
     var day=getDayData(hoy);
@@ -5801,7 +5816,7 @@ function saveEncargo(){
       cant:1,
       hora:hora,
       items:encargoItemsBuffer.map(function(it){return {productoId:it.productoId,productoNombre:it.productoNombre,desc:it.productoNombre,cant:it.cant,monto:it.monto};}),
-      encargoId:parseInt(idExist)||null,
+      encargoId:encargoIdFinal,
       notas:notas
     });
     saveData();
