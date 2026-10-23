@@ -2169,12 +2169,18 @@ function _mergeProductos(localArr, remoteArr){
     map[item.id]=merged;
   });
   order.sort(function(a,b){ return a-b; });
-  var result = order.map(function(id){ return map[id]; });
-  // El estado recién fusionado es el nuevo punto de partida para el próximo cálculo de delta.
-  var newBaseline={};
-  result.forEach(function(p){ if(p&&p.id!=null) newBaseline[p.id]=p.cantidad; });
-  _setBaselineCantidades(newBaseline);
-  return result;
+  // IMPORTANTE: esta función ya NO modifica la baseline. Antes la adelantaba aquí mismo,
+  // y si pasaba un snapshot del servidor entre tu venta y la escritura (500ms de debounce),
+  // el delta quedaba en 0 y la venta/compra se perdía. Ahora la baseline solo se mueve
+  // con _baselineDesdeLista(), cuando sabemos qué tiene realmente el servidor.
+  return order.map(function(id){ return map[id]; });
+}
+// Baseline = cantidades que el servidor tenía la última vez que este dispositivo las incorporó.
+// delta pendiente = cantidad local − baseline.
+function _baselineDesdeLista(arr){
+  var b={};
+  (arr||[]).forEach(function(p){ if(p&&p.id!=null&&typeof p.cantidad==='number') b[p.id]=p.cantidad; });
+  _setBaselineCantidades(b);
 }
 
 function _mergeDayData(localDay, remoteDay){
@@ -2247,6 +2253,8 @@ function _aplicarEliminados(){
 }
 
 var _fbWriting = false;
+var fbErrorSync = null;
+var _remotoProdUltimo = [];
 function _fbWrite(){
   if(!fbOnline) return;
   _fbWriting = true;
@@ -2270,6 +2278,8 @@ function _fbWrite(){
     fondos = _mergeFlatObj(fondos, remoteFondos);
     eliminadosGlobal = _mergeEliminados(eliminadosGlobal, remoteEliminados);
     _aplicarEliminados(); // vuelve a filtrar todo con las tumbas ya fusionadas
+    _remotoProdUltimo = remoteProductos;
+    _baselineDesdeLista(productos); // lo que vamos a escribir pasa a ser la referencia del servidor
 
     // Persistir la fusión localmente y reflejarla en pantalla
     _lsSave('cvd_data', data);
@@ -2291,15 +2301,22 @@ function _fbWrite(){
       eliminados: JSON.stringify(eliminadosGlobal),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+    var tam = payload.data.length+payload.productos.length+payload.pedidos.length+payload.encargos.length+payload.clientes.length+payload.fondos.length+payload.eliminados.length;
+    if(tam>900000) toast('⚠ Los datos están cerca del límite de Firebase (1 MB). Hay que dividirlos en varios documentos.');
     return db.doc(DB_DOC).set(payload);
   }).then(function(){
     syncPending = false;
     _fbWriting = false;
+    fbErrorSync = null;
     updateSyncIndicator();
   }).catch(function(err){
     console.error('Firebase write error:', err);
+    // La escritura no llegó al servidor: volver a la baseline del servidor para que el delta no se pierda al reintentar
+    _baselineDesdeLista(_remotoProdUltimo);
     _fbWriting = false;
+    fbErrorSync = (err && (err.code||err.message)) || 'error';
     updateSyncIndicator();
+    toast('⚠ No se pudo sincronizar: '+fbErrorSync);
   });
 }
 
@@ -2326,6 +2343,7 @@ function _fbLoad(){
       fondos = _mergeFlatObj(fondos, remoteFondos);
       eliminadosGlobal = _mergeEliminados(eliminadosGlobal, remoteEliminados);
       _aplicarEliminados();
+      _baselineDesdeLista(remoteProductos); // el servidor ya está incorporado; el delta local sigue pendiente
 
       _lsSave('cvd_data', data);
       _lsSave('cvd_productos', productos);
@@ -2347,8 +2365,10 @@ function _fbLoad(){
     _fbAttachListener();
   }).catch(function(err){
     fbOnline = false;
+    fbErrorSync = (err && (err.code||err.message)) || 'error';
     console.warn('Firebase no disponible, usando datos locales:', err);
     updateSyncIndicator();
+    toast('⚠ Sin conexión a la nube ('+fbErrorSync+'). Los datos solo se guardan en este dispositivo.');
   });
 }
 
@@ -2377,6 +2397,7 @@ function _fbAttachListener(){
     var mergedEliminados = _mergeEliminados(eliminadosGlobal, remoteEliminados);
     var mergedData = _mergeDataObj(data, remoteData);
     var mergedProductos = _mergeProductos(productos, remoteProductos);
+    _baselineDesdeLista(remoteProductos); // referencia = lo que tiene el servidor, no el resultado fusionado
     var mergedPedidos = _mergeArraysById(pedidosGlobal, remotePedidos);
     var mergedEncargos = _mergeArraysById(encargos, remoteEncargos);
     var mergedClientes = _mergeArraysById(clientes, remoteClientes);
@@ -2422,8 +2443,11 @@ function updateSyncIndicator(){
   var el = document.getElementById('syncIndicator');
   if(!el) return;
   if(!fbOnline){
-    el.textContent = '⚡ Local';
-    el.style.color = 'var(--text3)';
+    el.textContent = fbErrorSync ? '⚠ Local ('+fbErrorSync+')' : '⚡ Local';
+    el.style.color = fbErrorSync ? 'var(--red)' : 'var(--text3)';
+  } else if(fbErrorSync){
+    el.textContent = '⚠ Error sync';
+    el.style.color = 'var(--red)';
   } else if(syncPending){
     el.textContent = '↑ Sync...';
     el.style.color = 'var(--orange)';
