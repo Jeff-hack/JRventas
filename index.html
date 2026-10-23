@@ -2255,64 +2255,127 @@ function _aplicarEliminados(){
 var _fbWriting = false;
 var fbErrorSync = null;
 var _remotoProdUltimo = [];
+var _baselineAdelantada = false;
+
+// ══════════════════ DATA EN VARIOS DOCUMENTOS (límite de 1 MB por documento) ══════════════════
+// Firestore rechaza (invalid-argument) cualquier documento de más de 1 MiB. El historial de ventas/gastos
+// ('data') es lo que más crece, así que se reparte en documentos negocio/datos_0, datos_1, ...
+// y el documento principal solo guarda cuántos trozos hay (dataChunks). Todo se escribe en un batch atómico.
+var DATA_CHUNK_SIZE = 300000;   // caracteres por trozo (muy por debajo de 1 MiB, incluso con UTF-8 de 3 bytes)
+var _dataSyncStr = null;        // último JSON de 'data' que sabemos que está en el servidor
+var _dataSyncN = 0;             // cuántos trozos hay en el servidor
+var _revPropia = null;          // identifica nuestra última escritura para ignorar su eco en el listener
+
+function _parseRemoto(d){
+  var r={productos:[],pedidos:[],encargos:[],clientes:[],fondos:{},eliminados:{}};
+  try{ if(d.productos) r.productos=JSON.parse(d.productos); }catch(e){}
+  try{ if(d.pedidos) r.pedidos=JSON.parse(d.pedidos); }catch(e){}
+  try{ if(d.encargos) r.encargos=JSON.parse(d.encargos); }catch(e){}
+  try{ if(d.clientes) r.clientes=JSON.parse(d.clientes); }catch(e){}
+  try{ if(d.fondos) r.fondos=JSON.parse(d.fondos); }catch(e){}
+  try{ if(d.eliminados) r.eliminados=JSON.parse(d.eliminados); }catch(e){}
+  return r;
+}
+
+// Devuelve una Promise con el objeto 'data' remoto. Si falta un trozo o el JSON está dañado, LANZA error
+// (así nunca se fusiona con "vacío" y se borra el historial del servidor).
+function _leerDataRemota(d){
+  if(d.data){ // formato antiguo: todo dentro del documento principal
+    _dataSyncStr=null; _dataSyncN=0;
+    try{ return Promise.resolve(JSON.parse(d.data)); }catch(e){ return Promise.reject(new Error('data-corrupta')); }
+  }
+  var n=d.dataChunks||0;
+  if(!n){ _dataSyncStr=null; _dataSyncN=0; return Promise.resolve({}); }
+  var ps=[];
+  for(var i=0;i<n;i++) ps.push(db.doc('negocio/datos_'+i).get());
+  return Promise.all(ps).then(function(docs){
+    var str='';
+    docs.forEach(function(x){ if(!x.exists) throw new Error('trozo-faltante'); str+=(x.data().p||''); });
+    var obj;
+    try{ obj=JSON.parse(str); }catch(e){ throw new Error('data-corrupta'); }
+    _dataSyncStr=str; _dataSyncN=n;
+    return obj;
+  });
+}
+
+function _escribirData(str){
+  if(str===_dataSyncStr) return Promise.resolve(_dataSyncN); // sin cambios: no escribir
+  var chunks=[], pos=0;
+  while(pos<str.length){
+    var end=Math.min(pos+DATA_CHUNK_SIZE, str.length);
+    // no cortar un par sustituto (emoji) por la mitad
+    if(end<str.length){ var cc=str.charCodeAt(end-1); if(cc>=0xD800&&cc<=0xDBFF) end--; }
+    chunks.push(str.substring(pos,end)); pos=end;
+  }
+  if(!chunks.length) chunks.push('');
+  var batch=db.batch();
+  chunks.forEach(function(c,i){ batch.set(db.doc('negocio/datos_'+i),{p:c}); });
+  for(var j=chunks.length;j<_dataSyncN;j++) batch.delete(db.doc('negocio/datos_'+j));
+  return batch.commit().then(function(){
+    _dataSyncStr=str; _dataSyncN=chunks.length;
+    return chunks.length;
+  });
+}
+
 function _fbWrite(){
   if(!fbOnline) return;
   _fbWriting = true;
   db.doc(DB_DOC).get().then(function(doc){
     var remote = doc.exists ? doc.data() : {};
-    var remoteData={}, remoteProductos=[], remotePedidos=[], remoteEncargos=[], remoteClientes=[], remoteFondos={}, remoteEliminados={};
-    try{ if(remote.data) remoteData=JSON.parse(remote.data); }catch(e){}
-    try{ if(remote.productos) remoteProductos=JSON.parse(remote.productos); }catch(e){}
-    try{ if(remote.pedidos) remotePedidos=JSON.parse(remote.pedidos); }catch(e){}
-    try{ if(remote.encargos) remoteEncargos=JSON.parse(remote.encargos); }catch(e){}
-    try{ if(remote.clientes) remoteClientes=JSON.parse(remote.clientes); }catch(e){}
-    try{ if(remote.fondos) remoteFondos=JSON.parse(remote.fondos); }catch(e){}
-    try{ if(remote.eliminados) remoteEliminados=JSON.parse(remote.eliminados); }catch(e){}
+    var rp = _parseRemoto(remote);
+    return _leerDataRemota(remote).then(function(remoteData){
+      // Fusionar remoto + local (unión por id, no reemplazo)
+      data = _mergeDataObj(data, remoteData);
+      productos = _mergeProductos(productos, rp.productos);
+      pedidosGlobal = _mergeArraysById(pedidosGlobal, rp.pedidos);
+      encargos = _mergeArraysById(encargos, rp.encargos);
+      clientes = _mergeArraysById(clientes, rp.clientes);
+      fondos = _mergeFlatObj(fondos, rp.fondos);
+      eliminadosGlobal = _mergeEliminados(eliminadosGlobal, rp.eliminados);
+      _aplicarEliminados(); // vuelve a filtrar todo con las tumbas ya fusionadas
+      _remotoProdUltimo = rp.productos;
+      _baselineDesdeLista(productos); _baselineAdelantada = true; // lo que vamos a escribir pasa a ser la referencia del servidor
 
-    // Fusionar remoto + local (unión por id, no reemplazo)
-    data = _mergeDataObj(data, remoteData);
-    productos = _mergeProductos(productos, remoteProductos);
-    pedidosGlobal = _mergeArraysById(pedidosGlobal, remotePedidos);
-    encargos = _mergeArraysById(encargos, remoteEncargos);
-    clientes = _mergeArraysById(clientes, remoteClientes);
-    fondos = _mergeFlatObj(fondos, remoteFondos);
-    eliminadosGlobal = _mergeEliminados(eliminadosGlobal, remoteEliminados);
-    _aplicarEliminados(); // vuelve a filtrar todo con las tumbas ya fusionadas
-    _remotoProdUltimo = remoteProductos;
-    _baselineDesdeLista(productos); // lo que vamos a escribir pasa a ser la referencia del servidor
+      // Persistir la fusión localmente y reflejarla en pantalla
+      _lsSave('cvd_data', data);
+      _lsSave('cvd_productos', productos);
+      _lsSave('cvd_pedidos', pedidosGlobal);
+      _lsSave('cvd_encargos', encargos);
+      _lsSave('cvd_clientes', clientes);
+      _lsSave('cvd_fondos', fondos);
+      _lsSave('cvd_eliminados', eliminadosGlobal);
+      renderAll();
 
-    // Persistir la fusión localmente y reflejarla en pantalla
-    _lsSave('cvd_data', data);
-    _lsSave('cvd_productos', productos);
-    _lsSave('cvd_pedidos', pedidosGlobal);
-    _lsSave('cvd_encargos', encargos);
-    _lsSave('cvd_clientes', clientes);
-    _lsSave('cvd_fondos', fondos);
-    _lsSave('cvd_eliminados', eliminadosGlobal);
-    renderAll();
-
-    var payload = {
-      data: JSON.stringify(data),
-      productos: JSON.stringify(productos),
-      pedidos: JSON.stringify(pedidosGlobal),
-      encargos: JSON.stringify(encargos),
-      clientes: JSON.stringify(clientes),
-      fondos: JSON.stringify(fondos),
-      eliminados: JSON.stringify(eliminadosGlobal),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    var tam = payload.data.length+payload.productos.length+payload.pedidos.length+payload.encargos.length+payload.clientes.length+payload.fondos.length+payload.eliminados.length;
-    if(tam>900000) toast('⚠ Los datos están cerca del límite de Firebase (1 MB). Hay que dividirlos en varios documentos.');
-    return db.doc(DB_DOC).set(payload);
+      var dataStr = JSON.stringify(data);
+      _revPropia = Date.now()+'-'+Math.random().toString(36).slice(2);
+      var payload = {
+        productos: JSON.stringify(productos),
+        pedidos: JSON.stringify(pedidosGlobal),
+        encargos: JSON.stringify(encargos),
+        clientes: JSON.stringify(clientes),
+        fondos: JSON.stringify(fondos),
+        eliminados: JSON.stringify(eliminadosGlobal),
+        rev: _revPropia,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      var tam = payload.productos.length+payload.pedidos.length+payload.encargos.length+payload.clientes.length+payload.fondos.length+payload.eliminados.length;
+      if(tam>800000) toast('⚠ Productos/pedidos/clientes se acercan al límite de 1 MB de Firebase.');
+      // 1) trozos de 'data' (batch atómico)  2) documento principal con el número de trozos
+      return _escribirData(dataStr).then(function(n){
+        payload.dataChunks = n;
+        return db.doc(DB_DOC).set(payload);
+      });
+    });
   }).then(function(){
     syncPending = false;
     _fbWriting = false;
+    _baselineAdelantada = false;
     fbErrorSync = null;
     updateSyncIndicator();
   }).catch(function(err){
     console.error('Firebase write error:', err);
     // La escritura no llegó al servidor: volver a la baseline del servidor para que el delta no se pierda al reintentar
-    _baselineDesdeLista(_remotoProdUltimo);
+    if(_baselineAdelantada){ _baselineDesdeLista(_remotoProdUltimo); _baselineAdelantada = false; }
     _fbWriting = false;
     fbErrorSync = (err && (err.code||err.message)) || 'error';
     updateSyncIndicator();
@@ -2326,42 +2389,37 @@ function _fbLoad(){
     fbOnline = true;
     if(doc.exists){
       var d = doc.data();
-      var remoteData={}, remoteProductos=[], remotePedidos=[], remoteEncargos=[], remoteClientes=[], remoteFondos={}, remoteEliminados={};
-      try{ if(d.data) remoteData=JSON.parse(d.data); }catch(e){}
-      try{ if(d.productos) remoteProductos=JSON.parse(d.productos); }catch(e){}
-      try{ if(d.pedidos) remotePedidos=JSON.parse(d.pedidos); }catch(e){}
-      try{ if(d.encargos) remoteEncargos=JSON.parse(d.encargos); }catch(e){}
-      try{ if(d.clientes) remoteClientes=JSON.parse(d.clientes); }catch(e){}
-      try{ if(d.fondos) remoteFondos=JSON.parse(d.fondos); }catch(e){}
-      try{ if(d.eliminados) remoteEliminados=JSON.parse(d.eliminados); }catch(e){}
+      var rp = _parseRemoto(d);
+      return _leerDataRemota(d).then(function(remoteData){
+        data = _mergeDataObj(data, remoteData);
+        productos = _mergeProductos(productos, rp.productos);
+        pedidosGlobal = _mergeArraysById(pedidosGlobal, rp.pedidos);
+        encargos = _mergeArraysById(encargos, rp.encargos);
+        clientes = _mergeArraysById(clientes, rp.clientes);
+        fondos = _mergeFlatObj(fondos, rp.fondos);
+        eliminadosGlobal = _mergeEliminados(eliminadosGlobal, rp.eliminados);
+        _aplicarEliminados();
+        _baselineDesdeLista(rp.productos); // el servidor ya está incorporado; el delta local sigue pendiente
 
-      data = _mergeDataObj(data, remoteData);
-      productos = _mergeProductos(productos, remoteProductos);
-      pedidosGlobal = _mergeArraysById(pedidosGlobal, remotePedidos);
-      encargos = _mergeArraysById(encargos, remoteEncargos);
-      clientes = _mergeArraysById(clientes, remoteClientes);
-      fondos = _mergeFlatObj(fondos, remoteFondos);
-      eliminadosGlobal = _mergeEliminados(eliminadosGlobal, remoteEliminados);
-      _aplicarEliminados();
-      _baselineDesdeLista(remoteProductos); // el servidor ya está incorporado; el delta local sigue pendiente
+        _lsSave('cvd_data', data);
+        _lsSave('cvd_productos', productos);
+        _lsSave('cvd_pedidos', pedidosGlobal);
+        _lsSave('cvd_encargos', encargos);
+        _lsSave('cvd_clientes', clientes);
+        _lsSave('cvd_fondos', fondos);
+        _lsSave('cvd_eliminados', eliminadosGlobal);
 
-      _lsSave('cvd_data', data);
-      _lsSave('cvd_productos', productos);
-      _lsSave('cvd_pedidos', pedidosGlobal);
-      _lsSave('cvd_encargos', encargos);
-      _lsSave('cvd_clientes', clientes);
-      _lsSave('cvd_fondos', fondos);
-      _lsSave('cvd_eliminados', eliminadosGlobal);
-
-      renderAll();
-      updateSyncIndicator();
-      migrarDatos(true); // migrar silenciosamente y escribir de vuelta a Firebase (ya fusionado)
-      toast('☁ Sincronizado');
+        renderAll();
+        updateSyncIndicator();
+        migrarDatos(true); // migrar silenciosamente y escribir de vuelta a Firebase (ya fusionado)
+        toast('☁ Sincronizado');
+      });
     } else {
       // Firebase vacío → subir los datos locales existentes
       _fbWrite();
       toast('☁ Datos locales migrados a la nube');
     }
+  }).then(function(){
     _fbAttachListener();
   }).catch(function(err){
     fbOnline = false;
@@ -2385,55 +2443,54 @@ function _fbAttachListener(){
     if(_fbWriting) return; // ya estamos en medio de una fusión/escritura propia
     if(!doc.exists) return;
     var d = doc.data();
-    var remoteData={}, remoteProductos=[], remotePedidos=[], remoteEncargos=[], remoteClientes=[], remoteFondos={}, remoteEliminados={};
-    try{ if(d.data) remoteData=JSON.parse(d.data); }catch(e){}
-    try{ if(d.productos) remoteProductos=JSON.parse(d.productos); }catch(e){}
-    try{ if(d.pedidos) remotePedidos=JSON.parse(d.pedidos); }catch(e){}
-    try{ if(d.encargos) remoteEncargos=JSON.parse(d.encargos); }catch(e){}
-    try{ if(d.clientes) remoteClientes=JSON.parse(d.clientes); }catch(e){}
-    try{ if(d.fondos) remoteFondos=JSON.parse(d.fondos); }catch(e){}
-    try{ if(d.eliminados) remoteEliminados=JSON.parse(d.eliminados); }catch(e){}
+    if(d.rev && d.rev===_revPropia) return; // eco confirmado de nuestra propia escritura
+    var rp = _parseRemoto(d);
+    _leerDataRemota(d).then(function(remoteData){
+      if(_fbWriting) return; // empezó una escritura propia mientras leíamos los trozos
 
-    var mergedEliminados = _mergeEliminados(eliminadosGlobal, remoteEliminados);
-    var mergedData = _mergeDataObj(data, remoteData);
-    var mergedProductos = _mergeProductos(productos, remoteProductos);
-    _baselineDesdeLista(remoteProductos); // referencia = lo que tiene el servidor, no el resultado fusionado
-    var mergedPedidos = _mergeArraysById(pedidosGlobal, remotePedidos);
-    var mergedEncargos = _mergeArraysById(encargos, remoteEncargos);
-    var mergedClientes = _mergeArraysById(clientes, remoteClientes);
-    var mergedFondos = _mergeFlatObj(fondos, remoteFondos);
+      var mergedEliminados = _mergeEliminados(eliminadosGlobal, rp.eliminados);
+      var mergedData = _mergeDataObj(data, remoteData);
+      var mergedProductos = _mergeProductos(productos, rp.productos);
+      _baselineDesdeLista(rp.productos); // referencia = lo que tiene el servidor, no el resultado fusionado
+      var mergedPedidos = _mergeArraysById(pedidosGlobal, rp.pedidos);
+      var mergedEncargos = _mergeArraysById(encargos, rp.encargos);
+      var mergedClientes = _mergeArraysById(clientes, rp.clientes);
+      var mergedFondos = _mergeFlatObj(fondos, rp.fondos);
 
-    // Aplicar tumbas antes de comparar, para que un registro borrado en el otro dispositivo
-    // no cuente como "cambio" que lo trae de vuelta.
-    var eliminadosSetTmp = mergedEliminados;
-    mergedData = _filtrarEliminadosDataObj(mergedData, eliminadosSetTmp);
-    mergedProductos = _filtrarEliminadosArr(mergedProductos, 'producto:', eliminadosSetTmp);
-    mergedPedidos = _filtrarEliminadosArr(mergedPedidos, 'pedidoGlobal:', eliminadosSetTmp);
-    mergedEncargos = _filtrarEliminadosArr(mergedEncargos, 'encargo:', eliminadosSetTmp);
-    mergedClientes = _filtrarEliminadosArr(mergedClientes, 'cliente:', eliminadosSetTmp);
+      // Aplicar tumbas antes de comparar, para que un registro borrado en el otro dispositivo
+      // no cuente como "cambio" que lo trae de vuelta.
+      var eliminadosSetTmp = mergedEliminados;
+      mergedData = _filtrarEliminadosDataObj(mergedData, eliminadosSetTmp);
+      mergedProductos = _filtrarEliminadosArr(mergedProductos, 'producto:', eliminadosSetTmp);
+      mergedPedidos = _filtrarEliminadosArr(mergedPedidos, 'pedidoGlobal:', eliminadosSetTmp);
+      mergedEncargos = _filtrarEliminadosArr(mergedEncargos, 'encargo:', eliminadosSetTmp);
+      mergedClientes = _filtrarEliminadosArr(mergedClientes, 'cliente:', eliminadosSetTmp);
 
-    // Solo actualizar si realmente cambió algo (evita re-render innecesario)
-    var cambio = JSON.stringify(mergedData)!==JSON.stringify(data) ||
-      JSON.stringify(mergedProductos)!==JSON.stringify(productos) ||
-      JSON.stringify(mergedPedidos)!==JSON.stringify(pedidosGlobal) ||
-      JSON.stringify(mergedEncargos)!==JSON.stringify(encargos) ||
-      JSON.stringify(mergedClientes)!==JSON.stringify(clientes) ||
-      JSON.stringify(mergedFondos)!==JSON.stringify(fondos) ||
-      JSON.stringify(mergedEliminados)!==JSON.stringify(eliminadosGlobal);
-    if(!cambio) return;
+      // Solo actualizar si realmente cambió algo (evita re-render innecesario)
+      var cambio = JSON.stringify(mergedData)!==JSON.stringify(data) ||
+        JSON.stringify(mergedProductos)!==JSON.stringify(productos) ||
+        JSON.stringify(mergedPedidos)!==JSON.stringify(pedidosGlobal) ||
+        JSON.stringify(mergedEncargos)!==JSON.stringify(encargos) ||
+        JSON.stringify(mergedClientes)!==JSON.stringify(clientes) ||
+        JSON.stringify(mergedFondos)!==JSON.stringify(fondos) ||
+        JSON.stringify(mergedEliminados)!==JSON.stringify(eliminadosGlobal);
+      if(!cambio) return;
 
-    data=mergedData; productos=mergedProductos; pedidosGlobal=mergedPedidos;
-    encargos=mergedEncargos; clientes=mergedClientes; fondos=mergedFondos;
-    eliminadosGlobal=mergedEliminados;
-    _lsSave('cvd_data', data);
-    _lsSave('cvd_productos', productos);
-    _lsSave('cvd_pedidos', pedidosGlobal);
-    _lsSave('cvd_encargos', encargos);
-    _lsSave('cvd_clientes', clientes);
-    _lsSave('cvd_fondos', fondos);
-    _lsSave('cvd_eliminados', eliminadosGlobal);
-    renderAll();
-    toast('☁ Datos actualizados desde otro dispositivo');
+      data=mergedData; productos=mergedProductos; pedidosGlobal=mergedPedidos;
+      encargos=mergedEncargos; clientes=mergedClientes; fondos=mergedFondos;
+      eliminadosGlobal=mergedEliminados;
+      _lsSave('cvd_data', data);
+      _lsSave('cvd_productos', productos);
+      _lsSave('cvd_pedidos', pedidosGlobal);
+      _lsSave('cvd_encargos', encargos);
+      _lsSave('cvd_clientes', clientes);
+      _lsSave('cvd_fondos', fondos);
+      _lsSave('cvd_eliminados', eliminadosGlobal);
+      renderAll();
+      toast('☁ Datos actualizados desde otro dispositivo');
+    }).catch(function(err){
+      console.warn('Error leyendo datos remotos:', err);
+    });
   }, function(err){
     console.warn('Error en escucha en tiempo real:', err);
   });
