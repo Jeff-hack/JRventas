@@ -38,15 +38,7 @@
   --text:#F5F7F9; --text2:#8B95A3; --text3:#525C68;
   --border:#212832;
   --green:#2EE6A8; --red:#FF6259; --orange:#F0A93E; --gold:#D9B368; --blue:#5B9CFF;
-  --purple:#a78bfa;
-  --radius:18px; --radius-sm:12px; --radius-xs:7px;
-  /* Fondos "traslúcidos" para badges de estado: mismo color del texto pero a baja opacidad,
-     para que el badge se integre al fondo oscuro en vez de verse como un parche claro pegado encima. */
-  --green-tint:rgba(46,230,168,.14); --green-tint-b:rgba(46,230,168,.24);
-  --red-tint:rgba(255,98,89,.14); --red-tint-b:rgba(255,98,89,.28);
-  --orange-tint:rgba(240,169,62,.14); --orange-tint-b:rgba(240,169,62,.28);
-  --purple-tint:rgba(167,139,250,.14); --purple-tint-b:rgba(167,139,250,.28);
-  --blue-tint:rgba(91,156,255,.14); --blue-tint-b:rgba(91,156,255,.28);
+  --radius:18px; --radius-sm:12px;
 }
 html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 #app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto}
@@ -71,7 +63,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat-card{background:var(--surface);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border);min-width:0;overflow:hidden}
 .stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
-.stat-icon{width:20px;height:20px;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center}
+.stat-icon{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center}
 .stat-value{font-family:'Space Grotesk',monospace;font-size:clamp(15px,4.5vw,22px);font-weight:500;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat-sub{font-size:10px;color:var(--text3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
@@ -81,11 +73,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .semana-title{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:6px}
 .semana-body{display:grid;grid-template-columns:1fr 1fr 1fr;padding:12px 16px 14px;gap:6px}
 .semana-stat{text-align:center;padding:8px 4px;border-radius:var(--radius-sm);background:var(--surface2)}
-.semana-stat-label{font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.semana-stat-label{font-size:9px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
 .semana-stat-value{font-family:'Space Grotesk',monospace;font-size:16px;font-weight:500}
 .semana-days{display:flex;gap:3px;padding:0 16px 12px}
 .semana-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
-.semana-day-label{font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:600}
+.semana-day-label{font-size:8px;color:var(--text3);text-transform:uppercase;font-weight:600}
 .semana-day-bar-wrap{height:36px;display:flex;align-items:flex-end}
 .semana-day-bar{width:10px;border-radius:2px 2px 0 0;min-height:3px}
 .semana-day-dot{width:6px;height:6px;border-radius:50%;margin-top:2px}
@@ -109,8 +101,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .chart-title{font-size:12px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2);margin-bottom:14px}
 .bar-chart{display:flex;align-items:flex-end;gap:6px;height:90px}
 .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.bar{width:100%;border-radius:var(--radius-xs) 4px 0 0;min-height:4px;transition:height 0.4s}
-.bar-label{font-size:10px;color:var(--text3);text-align:center}
+.bar{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:height 0.4s}
+.bar-label{font-size:9px;color:var(--text3);text-align:center}
 
 /* TX LIST */
 .tx-list{display:flex;flex-direction:column;gap:8px}
@@ -120,7 +112,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .tx-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx-meta{font-size:11px;color:var(--text3);margin-top:2px}
 .tx-amount{font-family:'Space Grotesk',monospace;font-size:14px;font-weight:500;flex-shrink:0}
-.tx-del{background:none;border:none;color:var(--text3);cursor:pointer;padding:6px;font-size:18px;line-height:1;border-radius:var(--radius-xs);flex-shrink:0}
+.tx-del{background:none;border:none;color:var(--text3);cursor:pointer;padding:6px;font-size:18px;line-height:1;border-radius:4px;flex-shrink:0}
 .tx-del:active{color:var(--red)}
 
 /* PEDIDO ESPECIAL CARD */
@@ -130,15 +122,15 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .ped-card-name{font-size:15px;font-weight:600;margin-bottom:3px}
 .ped-card-meta{font-size:11px;color:var(--text3);line-height:1.5}
 .ped-card-amount{font-family:'Space Grotesk',monospace;font-size:16px;font-weight:500;flex-shrink:0}
-.ped-status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--radius-xs);font-size:11px;font-weight:600;margin-top:4px}
-.ped-status-pending{background:var(--orange-tint);color:var(--orange);border:1px solid var(--orange-tint-b)}
-.ped-status-done{background:var(--green-tint);color:var(--primary);border:1px solid var(--green-tint-b)}
-.ped-status-cancelled{background:var(--red-tint);color:var(--red);border:1px solid var(--red-tint-b);text-decoration:line-through;opacity:0.7}
+.ped-status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-top:4px}
+.ped-status-pending{background:#fef9e7;color:#b7791f;border:1px solid #f6e05e}
+.ped-status-done{background:#e8f7f1;color:#0f6e56;border:1px solid #9ae6b4}
+.ped-status-cancelled{background:#fdeee9;color:#993c1d;border:1px solid #fca5a5;text-decoration:line-through;opacity:0.7}
 .ped-actions{display:flex;gap:8px;padding:10px 16px;background:var(--surface2);border-top:1px solid var(--border)}
 .ped-btn{flex:1;padding:9px 6px;border-radius:var(--radius-sm);border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:opacity 0.2s}
 .ped-btn:active{opacity:0.8}
-.ped-btn-complete{background:var(--green-tint);color:var(--primary);border:1px solid var(--green-tint-b)}
-.ped-btn-cancel{background:var(--red-tint);color:var(--red);border:1px solid var(--red-tint-b)}
+.ped-btn-complete{background:#e8f7f1;color:#0f6e56;border:1px solid #9ae6b4}
+.ped-btn-cancel{background:#fdeee9;color:#993c1d;border:1px solid #fca5a5}
 .ped-btn-del{background:var(--surface);color:var(--text3);border:1px solid var(--border)}
 
 /* PRODUCTO CARD */
@@ -148,13 +140,13 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .inv-card-date{font-size:11px;color:var(--text3);margin-top:2px}
 .inv-card-body{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .inv-stat{text-align:center}
-.inv-stat-label{font-size:10px;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.inv-stat-label{font-size:9px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
 .inv-stat-value{font-family:'Space Grotesk',monospace;font-size:15px;font-weight:500}
 .inv-card-footer{padding:8px 16px;background:var(--surface2);display:flex;gap:8px;justify-content:flex-end}
 .inv-btn{padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2)}
-.inv-btn-danger{border-color:var(--red-tint-b);color:var(--red);background:var(--red-tint)}
-.inv-btn-primary{border-color:var(--primary);color:var(--primary);background:var(--green-tint)}
-.stock-badge{padding:3px 10px;border-radius:var(--radius-xs);font-size:11px;font-weight:600}
+.inv-btn-danger{border-color:#fca5a5;color:var(--red);background:#fff5f5}
+.inv-btn-primary{border-color:var(--primary);color:var(--primary);background:#e8f7f1}
+.stock-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
 .dash-section-head{display:flex;align-items:center;justify-content:space-between;padding:14px 2px 8px;cursor:pointer}
 .dash-section-head-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
 .dash-section-chevron{font-size:12px;color:var(--text3);transition:transform .2s}
@@ -166,9 +158,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .inv-row-chevron.open{transform:rotate(180deg)}
 .inv-row-detail{max-height:0;overflow:hidden;transition:max-height .25s ease}
 .inv-row-detail.open{max-height:340px}
-.stock-ok{background:var(--green-tint);color:var(--primary)}
-.stock-low{background:var(--orange-tint);color:var(--orange)}
-.stock-out{background:var(--red-tint);color:var(--red)}
+.stock-ok{background:#e8f7f1;color:#0f6e56}
+.stock-low{background:#fef0d9;color:#854f0b}
+.stock-out{background:#fdeee9;color:#993c1d}
 
 /* EMPTY */
 .empty{text-align:center;padding:40px 20px;color:var(--text3)}
@@ -177,7 +169,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 
 /* TABS */
 .tabs{display:flex;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;gap:2px;margin-bottom:4px}
-.tab-btn{flex:1;padding:7px 4px;border:none;border-radius:var(--radius-xs);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;transition:all 0.2s}
+.tab-btn{flex:1;padding:7px 4px;border:none;border-radius:6px;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;transition:all 0.2s}
 .tab-btn.active{background:var(--surface);color:var(--primary);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
 
 /* FORM */
@@ -203,7 +195,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .bottom-nav{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:6px 0 max(6px, env(safe-area-inset-bottom));flex-shrink:0}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text3);transition:color 0.2s}
 .nav-btn svg{width:21px;height:21px;stroke-width:1.8}
-.nav-btn span{font-size:10px;letter-spacing:0.4px;text-transform:uppercase;font-weight:600}
+.nav-btn span{font-size:8px;letter-spacing:0.4px;text-transform:uppercase;font-weight:600}
 .nav-btn.active{color:var(--primary)}
 
 /* FAB */
@@ -309,7 +301,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 /* ── Venta Rápida teclado ── */
 .vr-key{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;font-size:22px;font-weight:600;padding:14px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text);transition:all 0.1s;-webkit-tap-highlight-color:transparent}
 .vr-key:active{background:var(--primary);color:#fff;border-color:var(--primary);transform:scale(0.95)}
-.vr-key-del{background:var(--red-tint);border-color:var(--red-tint-b);color:var(--red)}
+.vr-key-del{background:#fdeee9;border-color:#f3c4b3;color:var(--red)}
 
 
 .v2-section{display:none;position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -317,7 +309,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .v2-section .page{position:static;overflow:visible;padding:16px 16px 80px;display:flex;flex-direction:column;gap:12px}
 .v2-section .page.active{display:flex}
 .v2-section-tabs{display:flex;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;gap:2px;margin:0 0 8px;flex-shrink:0}
-.v2-stab{flex:1;padding:9px 4px;border:none;border-radius:var(--radius-xs);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;transition:all 0.2s}
+.v2-stab{flex:1;padding:9px 4px;border:none;border-radius:6px;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;transition:all 0.2s}
 .v2-stab.active{background:var(--surface);color:var(--primary);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
 /* Dash hero card */
 .balance-card{position:relative}
@@ -351,19 +343,19 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .rpt-title { font-size:18px; font-weight:700; color:#0a3d2e; }
 .rpt-subtitle { font-size:10px; color:#777; text-align:right; }
 /* Summary strip — replaces KPI cards */
-.rpt-strip { display:flex; border:1px solid #d0cfc9; border-radius:var(--radius-xs); overflow:hidden; margin-bottom:14px; }
+.rpt-strip { display:flex; border:1px solid #d0cfc9; border-radius:5px; overflow:hidden; margin-bottom:14px; }
 .rpt-strip-cell { flex:1; padding:8px 10px; border-right:1px solid #d0cfc9; }
 .rpt-strip-cell:last-child { border-right:none; }
-.rpt-strip-label { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#999; margin-bottom:2px; font-weight:700; }
+.rpt-strip-label { font-size:8px; letter-spacing:1px; text-transform:uppercase; color:#999; margin-bottom:2px; font-weight:700; }
 .rpt-strip-value { font-size:15px; font-weight:700; font-family:'Courier New',Courier,monospace; line-height:1; }
-.rpt-strip-sub { font-size:10px; color:#aaa; margin-top:1px; }
+.rpt-strip-sub { font-size:9px; color:#aaa; margin-top:1px; }
 /* Section */
 .rpt-section { margin-bottom:14px; }
-.rpt-sh { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#fff; background:#0a3d2e; padding:4px 9px; border-radius:3px 3px 0 0; display:flex; justify-content:space-between; align-items:center; }
+.rpt-sh { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#fff; background:#0a3d2e; padding:4px 9px; border-radius:3px 3px 0 0; display:flex; justify-content:space-between; align-items:center; }
 /* Tables */
 .rpt-table-wrap { overflow-x:auto; }
 .rpt-table { width:100%; border-collapse:collapse; font-size:11px; }
-.rpt-table th { background:#f0ede7; color:#4a4a4a; padding:4px 7px; text-align:left; font-size:10px; letter-spacing:0.3px; text-transform:uppercase; font-weight:700; border-bottom:1.5px solid #ccc; }
+.rpt-table th { background:#f0ede7; color:#4a4a4a; padding:4px 7px; text-align:left; font-size:9px; letter-spacing:0.3px; text-transform:uppercase; font-weight:700; border-bottom:1.5px solid #ccc; }
 .rpt-table th.r { text-align:right; }
 .rpt-table th.c { text-align:center; }
 .rpt-table td { padding:4px 7px; border-bottom:1px solid #ede9e3; vertical-align:top; }
@@ -375,13 +367,13 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 /* Day divider */
 .rpt-day-head { font-size:10px; font-weight:700; color:#0a3d2e; padding:4px 7px; background:#f0ede7; border-radius:3px; margin:8px 0 3px; display:flex; justify-content:space-between; }
 /* Tags */
-.rpt-tag { display:inline-block; padding:1px 5px; border-radius:8px; font-size:10px; font-weight:700; }
-.rpt-tag-green { background:var(--green-tint); color:var(--primary); }
-.rpt-tag-red { background:var(--red-tint); color:var(--red); }
-.rpt-tag-yellow { background:var(--orange-tint); color:var(--orange); }
+.rpt-tag { display:inline-block; padding:1px 5px; border-radius:8px; font-size:9px; font-weight:700; }
+.rpt-tag-green { background:#e8f7f1; color:#0f6e56; }
+.rpt-tag-red { background:#fdeee9; color:#993c1d; }
+.rpt-tag-yellow { background:#fef9e7; color:#b7791f; }
 .rpt-tag-grey { background:#f0f0f0; color:#666; }
 /* Footer */
-.rpt-footer { display:flex; justify-content:space-between; margin-top:16px; padding-top:7px; border-top:1px solid #e0ddd8; font-size:10px; color:#bbb; }
+.rpt-footer { display:flex; justify-content:space-between; margin-top:16px; padding-top:7px; border-top:1px solid #e0ddd8; font-size:9px; color:#bbb; }
 .no-break { page-break-inside:avoid; }
 /* App report buttons */
 .rpt-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
@@ -635,7 +627,7 @@ body{
     <div style="display:flex;align-items:center;gap:8px">
       <button onclick="abrirNotificaciones()" id="notifBellBtn" title="Notificaciones" style="position:relative;background:none;border:none;font-size:17px;cursor:pointer;padding:4px;display:flex;align-items:center;line-height:1">
         🔔
-        <span id="notifBadge" style="display:none;position:absolute;top:0;right:0;background:var(--red);color:#fff;border-radius:50%;min-width:15px;height:15px;font-size:10px;font-weight:700;align-items:center;justify-content:center;padding:0 3px;line-height:1">0</span>
+        <span id="notifBadge" style="display:none;position:absolute;top:0;right:0;background:var(--red);color:#fff;border-radius:50%;min-width:15px;height:15px;font-size:9px;font-weight:700;align-items:center;justify-content:center;padding:0 3px;line-height:1">0</span>
       </button>
       <span id="syncIndicator" style="font-size:10px;font-weight:600;color:var(--text3)">⚡ Local</span>
       <button onclick="cerrarSesion()" id="rolBadge" title="Cambiar de usuario" style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:none;border-radius:20px;padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer">
@@ -710,7 +702,7 @@ body{
       <!-- Líneas de negocio — hoy -->
       <div class="card" id="cardLineasNegocio" style="margin-top:12px;padding:16px 18px;display:none">
         <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:12px">Líneas de negocio · hoy</div>
-        <div style="display:flex;height:10px;border-radius:var(--radius-xs);overflow:hidden;margin-bottom:12px" id="lineasStack"></div>
+        <div style="display:flex;height:10px;border-radius:6px;overflow:hidden;margin-bottom:12px" id="lineasStack"></div>
         <div style="display:flex;justify-content:space-between" id="lineasLegend"></div>
       </div>
 
@@ -725,20 +717,20 @@ body{
       <div class="stats-row">
         <div class="stat-card" id="fondoInicialCard">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--purple-tint)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            <div class="stat-icon" style="background:#f3e8ff">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
             </div>
             Patrimonio
           </div>
-          <div class="stat-value" style="color:var(--purple);font-size:clamp(13px,3.8vw,18px)" id="fondoInicialDisplay">—</div>
+          <div class="stat-value" style="color:#7c3aed;font-size:clamp(13px,3.8vw,18px)" id="fondoInicialDisplay">—</div>
           <div class="stat-sub" id="fondoInicialFecha">Aún no registrado</div>
           <div id="fondoInicialAccion" style="margin-top:6px">
-            <button onclick="openFondoInicialModal()" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-xs);padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer">Registrar</button>
+            <button onclick="openFondoInicialModal()" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer">Registrar</button>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--green-tint)">
+            <div class="stat-icon" style="background:#e8f7f1">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             </div>
             Ganancia Neta
@@ -752,7 +744,7 @@ body{
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--blue-tint)">
+            <div class="stat-icon" style="background:#e8f0fe">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
             Inventario
@@ -762,7 +754,7 @@ body{
         </div>
         <div class="stat-card">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--orange-tint)">
+            <div class="stat-icon" style="background:#fef0d9">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4860a" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             </div>
             Ganancia Bruta
@@ -782,7 +774,7 @@ body{
       <div class="stats-row">
         <div class="stat-card" style="cursor:pointer" onclick="showSection('operaciones',document.getElementById('navOps'));setOpsTab('ventas')">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--green-tint)">
+            <div class="stat-icon" style="background:#e8f7f1">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             Ventas Hoy
@@ -792,8 +784,8 @@ body{
         </div>
         <div class="stat-card" style="cursor:pointer" onclick="showSection('operaciones',document.getElementById('navOps'));setOpsTab('gastos')">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--red-tint)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <div class="stat-icon" style="background:#fdeee9">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d44f2e" stroke-width="2.5"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
             Gastos Hoy
           </div>
@@ -804,18 +796,18 @@ body{
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--green-tint)">
+            <div class="stat-icon" style="background:#e8f7f1">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             </div>
             Ganancia Neta Hoy
           </div>
           <div class="stat-value" id="gananciaNetaHoy" style="color:var(--green)">$0.00</div>
-          <div class="stat-sub" id="gananciaNetaHoySub">Ventas − costo de lo vendido − gastos operativos (las compras de mercancía no se restan: ya van en el costo)</div>
+          <div class="stat-sub" id="gananciaNetaHoySub">Bruta − gastos de hoy</div>
           <svg id="sparkGananciaNeta" width="100%" height="24" viewBox="0 0 100 24" preserveAspectRatio="none" style="margin-top:6px;display:block"></svg>
         </div>
         <div class="stat-card" style="cursor:pointer" onclick="showSection('operaciones',document.getElementById('navOps'));setOpsTab('extra')">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--green-tint)">
+            <div class="stat-icon" style="background:#e8f7f1">
               <span style="font-size:12px">💵</span>
             </div>
             Ingresos Extra
@@ -827,14 +819,14 @@ body{
       <div class="stats-row">
         <div class="stat-card" style="grid-column:1/-1">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--green-tint)">
+            <div class="stat-icon" style="background:#e8f7f1">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             </div>
             Ganancia Neta Semanal <span style="font-weight:400;color:var(--text3)" id="gananciaNetaSemanaRango"></span>
           </div>
           <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
             <div class="stat-value" id="gananciaNetaSemana" style="color:var(--green)">$0.00</div>
-            <div style="font-size:12px;color:var(--text3);background:var(--surface2);border-radius:var(--radius-xs);padding:4px 10px">
+            <div style="font-size:12px;color:var(--text3);background:var(--surface2);border-radius:6px;padding:4px 10px">
               10% = <strong id="gananciaNetaSemana10" style="color:var(--gold)">$0.00</strong>
             </div>
           </div>
@@ -844,7 +836,7 @@ body{
       <div class="stats-row">
         <div class="stat-card" style="cursor:pointer" onclick="showSection('inventario',document.getElementById('navInv'));setInvMainTab('pedidos')">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--orange-tint)">
+            <div class="stat-icon" style="background:#fef0d9">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e8a020" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
             </div>
             Pedidos
@@ -854,7 +846,7 @@ body{
         </div>
         <div class="stat-card" style="cursor:pointer" onclick="showSection('ordenes',document.getElementById('navOrd'))">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--blue-tint)">
+            <div class="stat-icon" style="background:#e8f0fe">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
             </div>
             Encargos
@@ -866,8 +858,8 @@ body{
       <div class="stats-row">
         <div class="stat-card" style="cursor:pointer" onclick="showSection('ordenes',document.getElementById('navOrd'));setOrdMainTab('clientes')">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--red-tint)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <div class="stat-icon" style="background:#fdeee9">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d44f2e" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             Adeudo clientes
           </div>
@@ -876,7 +868,7 @@ body{
         </div>
         <div class="stat-card" style="cursor:pointer" onclick="generarReporte('deudaProveedores')">
           <div class="stat-label">
-            <div class="stat-icon" style="background:var(--orange-tint)">
+            <div class="stat-icon" style="background:#fef0d9">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e8a020" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
             Deuda proveedores
@@ -978,7 +970,7 @@ body{
         <div class="tabs" style="margin-bottom:8px">
           <button class="tab-btn active" id="ventaFiltroLista" onclick="setVentaFiltro('lista')">📋 Lista</button>
           <button class="tab-btn" id="ventaFiltroRanking" onclick="setVentaFiltro('ranking')">🏆 Más vendidos</button>
-          <button class="tab-btn" onclick="repetirUltimaVenta()" style="color:var(--purple)">🔁 Repetir</button>
+          <button class="tab-btn" onclick="repetirUltimaVenta()" style="color:#7c3aed">🔁 Repetir</button>
         </div>
         <div id="listaVentas"></div>
       </div>
@@ -1069,26 +1061,26 @@ body{
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px">
             <div style="text-align:center;cursor:pointer" onclick="verPedidosPorProveedor('Pollo Rico','#e8a020')">
-              <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#e8a020;margin-bottom:3px">Pollo Rico ›</div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#e8a020;margin-bottom:3px">Pollo Rico ›</div>
               <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:#e8a020" id="pedDiaPR">$0.00</div>
             </div>
-            <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);cursor:pointer" onclick="verPedidosPorProveedor('Pollo Indio','var(--red)')">
-              <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--red);margin-bottom:3px">Pollo Indio ›</div>
+            <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);cursor:pointer" onclick="verPedidosPorProveedor('Pollo Indio','#d44f2e')">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--red);margin-bottom:3px">Pollo Indio ›</div>
               <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:var(--red)" id="pedDiaPI">$0.00</div>
             </div>
             <div style="text-align:center;cursor:pointer" onclick="verPedidosPorProveedor('Sello de Oro','#c4860a')">
-              <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:3px">Sello de Oro ›</div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:3px">Sello de Oro ›</div>
               <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="pedDiaSO">$0.00</div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px;margin-top:8px">
             <div style="text-align:center;cursor:pointer" onclick="verPedidosPorProveedor('Superior','#6366f1')">
-              <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#6366f1;margin-bottom:3px">Superior ›</div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#6366f1;margin-bottom:3px">Superior ›</div>
               <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:#6366f1" id="pedDiaSup">$0.00</div>
             </div>
-            <div style="text-align:center;border-left:1px solid var(--border);cursor:pointer" onclick="verPedidosPorProveedor('Abuela','var(--primary)')">
-              <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--primary);margin-bottom:3px">Abuela ›</div>
-              <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:var(--primary)" id="pedDiaAb">$0.00</div>
+            <div style="text-align:center;border-left:1px solid var(--border);cursor:pointer" onclick="verPedidosPorProveedor('Abuela','#0f6e56')">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#0f6e56;margin-bottom:3px">Abuela ›</div>
+              <div style="font-family:'Space Grotesk',monospace;font-size:14px;font-weight:600;color:#0f6e56" id="pedDiaAb">$0.00</div>
             </div>
           </div>
         </div>
@@ -1253,19 +1245,6 @@ body{
         </button>
       </div>
 
-      <!-- GASTOS -->
-      <div class="rpt-section-header" style="--c:#d44f2e">
-        <span class="rpt-section-icon">🧾</span>
-        <span>Gastos</span>
-      </div>
-      <div class="rpt-grid">
-        <button class="rpt-btn" onclick="generarReporte('gastosRubro')" style="--c:#d44f2e;grid-column:span 2">
-          <span class="rpt-btn-period">📊</span>
-          <span class="rpt-btn-label">Operativos y personales (mes)</span>
-          <span class="rpt-btn-arrow">→</span>
-        </button>
-      </div>
-
       <!-- INVENTARIO -->
       <div class="rpt-section-header" style="--c:#2563eb">
         <span class="rpt-section-icon">🗄</span>
@@ -1315,7 +1294,7 @@ body{
       <!-- Clientes y Deudas -->
       <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:12px 0 6px;padding-left:2px">👤 Clientes</div>
       <div class="rpt-grid">
-        <button class="rpt-btn" onclick="generarReporte('clientesAdeudos')" style="--c:var(--purple);grid-column:span 2">
+        <button class="rpt-btn" onclick="generarReporte('clientesAdeudos')" style="--c:#7c3aed;grid-column:span 2">
           <span class="rpt-btn-period">📋</span>
           <span class="rpt-btn-label">Lista de cobros</span>
           <span class="rpt-btn-arrow">→</span>
@@ -1338,27 +1317,27 @@ body{
         <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:4px 0 6px;padding-left:2px">🔒 Respaldo de datos</div>
         <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
           <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-            <div style="width:32px;height:32px;border-radius:8px;background:var(--purple-tint);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔧</div>
+            <div style="width:32px;height:32px;border-radius:8px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔧</div>
             <div style="flex:1"><div style="font-size:13px;font-weight:600">Migrar datos históricos</div><div style="font-size:11px;color:var(--text3)">Clasifica gastos y corrige ganancia neta</div></div>
-            <button onclick="migrarDatos()" style="background:var(--purple);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Migrar</button>
+            <button onclick="migrarDatos()" style="background:#7c3aed;color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Migrar</button>
           </div>
           <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-            <div style="width:32px;height:32px;border-radius:8px;background:var(--blue-tint);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">☁️</div>
+            <div style="width:32px;height:32px;border-radius:8px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">☁️</div>
             <div style="flex:1"><div style="font-size:13px;font-weight:600">Sincronizar ahora</div><div style="font-size:11px;color:var(--text3)">Fuerza la sincronización con Firebase</div></div>
             <button onclick="_fbWrite();toast('☁ Sincronizando...')" style="background:#2563eb;color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Sync</button>
           </div>
           <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-            <div style="width:32px;height:32px;border-radius:8px;background:var(--green-tint);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬇️</div>
+            <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬇️</div>
             <div style="flex:1"><div style="font-size:13px;font-weight:600">Exportar datos</div><div style="font-size:11px;color:var(--text3)">Descarga un .json con todos tus registros</div></div>
             <button onclick="exportarDatos()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Exportar</button>
           </div>
           <div style="padding:14px 16px;display:flex;align-items:center;gap:10px">
-            <div style="width:32px;height:32px;border-radius:8px;background:var(--purple-tint);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👁️</div>
+            <div style="width:32px;height:32px;border-radius:8px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👁️</div>
             <div style="flex:1"><div style="font-size:13px;font-weight:600">Modo solo lectura</div><div style="font-size:11px;color:var(--text3)" id="modoLecturaBtn">Compartir sin permitir edición</div></div>
-            <button onclick="toggleModoLectura()" style="background:var(--purple);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Activar</button>
+            <button onclick="toggleModoLectura()" style="background:#7c3aed;color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Activar</button>
           </div>
           <div style="padding:14px 16px;display:flex;align-items:center;gap:10px">
-            <div style="width:32px;height:32px;border-radius:8px;background:var(--orange-tint);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬆️</div>
+            <div style="width:32px;height:32px;border-radius:8px;background:#fef0d9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬆️</div>
             <div style="flex:1"><div style="font-size:13px;font-weight:600">Importar datos</div><div style="font-size:11px;color:var(--text3)">Restaura desde un archivo .json exportado</div></div>
             <label style="background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Importar<input type="file" accept=".json" onchange="importarDatos(event)" style="display:none"></label>
           </div>
@@ -1696,7 +1675,7 @@ body{
         </div>
         <!-- Campo oculto para mantener compatibilidad con el resto del código -->
         <input type="hidden" id="ventaProductoSel">
-        <div id="ventaStockInfo" style="font-size:12px;color:var(--text3);margin-top:6px;padding:6px 10px;background:var(--surface2);border-radius:var(--radius-xs);display:none"></div>
+        <div id="ventaStockInfo" style="font-size:12px;color:var(--text3);margin-top:6px;padding:6px 10px;background:var(--surface2);border-radius:6px;display:none"></div>
       </div>
 
       <!-- GASTO: categoría -->
@@ -1751,7 +1730,7 @@ body{
           <!-- Campo oculto: mantiene compatibilidad con el resto del código -->
           <input type="hidden" id="pedidoProdSel">
         </div>
-        <div id="pedidoProdInfo" style="display:none;font-size:11px;color:var(--text3);padding:6px 10px;background:var(--surface2);border-radius:var(--radius-xs);margin-top:6px"></div>
+        <div id="pedidoProdInfo" style="display:none;font-size:11px;color:var(--text3);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-top:6px"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;margin-bottom:6px">
           <label class="form-label" style="margin:0">Productos del pedido</label>
           <button type="button" onclick="agregarItemPedido()" style="background:var(--orange);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Agregar</button>
@@ -1789,11 +1768,6 @@ body{
           <label class="form-label">Monto ($)</label>
           <input class="form-input" type="number" id="fMonto" placeholder="0.00" step="0.01" min="0.01">
         </div>
-      </div>
-      <div id="fVencimientoWrap" style="display:none;margin-top:10px">
-        <label class="form-label">Fecha de vencimiento (opcional)</label>
-        <input class="form-input" type="date" id="fVencimiento">
-        <div style="font-size:11px;color:var(--text3);margin-top:4px">Si la agregas, recibirás una alerta 5 días antes de que venza.</div>
       </div>
 
       <!-- MULTI-PRODUCTO: lista para ventas -->
@@ -2041,9 +2015,6 @@ var encargos = [];
 var clientes = [];
 // fondos diarios {YYYY-MM-DD: monto}
 var fondos = {};
-// registro de eliminaciones ("tumbas"): clave→timestamp, para que un registro borrado
-// en un dispositivo no "resucite" al fusionarse con la copia vieja de otro dispositivo
-var eliminadosGlobal = {};
 // items temporales de venta multi-producto
 var ventaItems = [];
 // items temporales de pedido multi-producto
@@ -2072,20 +2043,15 @@ function loadData() {
   try { var s=localStorage.getItem('cvd_encargos'); if(s) encargos=JSON.parse(s); } catch(e){encargos=[];}
   try { var s=localStorage.getItem('cvd_clientes'); if(s) clientes=JSON.parse(s); } catch(e){clientes=[];}
   try { var s=localStorage.getItem('cvd_fondos'); if(s) fondos=JSON.parse(s); } catch(e){fondos={};}
-  try { var s=localStorage.getItem('cvd_eliminados'); if(s) eliminadosGlobal=JSON.parse(s); } catch(e){eliminadosGlobal={};}
 }
 
 // Guarda en localStorage Y programa sync a Firebase
 function saveData(){ _lsSave('cvd_data', data); _fbSync(); }
-function saveProductos(){ _sellar(productos,_HASH_KEYS.productos); _lsSave('cvd_productos', productos); _fbSync(); }
-function savePedidos(){ _sellar(pedidosGlobal,_HASH_KEYS.pedidos); _lsSave('cvd_pedidos', pedidosGlobal); _fbSync(); }
-function saveEncargos(){ _sellar(encargos,_HASH_KEYS.encargos); _lsSave('cvd_encargos', encargos); _fbSync(); }
-function saveClientes(){ _sellar(clientes,_HASH_KEYS.clientes); _lsSave('cvd_clientes', clientes); _fbSync(); }
+function saveProductos(){ _lsSave('cvd_productos', productos); _fbSync(); }
+function savePedidos(){ _lsSave('cvd_pedidos', pedidosGlobal); _fbSync(); }
+function saveEncargos(){ _lsSave('cvd_encargos', encargos); _fbSync(); }
+function saveClientes(){ _lsSave('cvd_clientes', clientes); _fbSync(); }
 function saveFondos(){ _lsSave('cvd_fondos', fondos); _fbSync(); }
-// Registro de "tumbas": ids eliminados que NUNCA deben volver a aparecer, aunque el otro
-// dispositivo todavía tenga una copia local vieja del registro cuando sincronice.
-function saveEliminados(){ _lsSave('cvd_eliminados', eliminadosGlobal); _fbSync(); }
-function marcarEliminado(clave){ eliminadosGlobal[clave]=Date.now(); }
 
 function _lsSave(key, val){
   try{ localStorage.setItem(key, JSON.stringify(val)); } catch(e){ toast('⚠ Error al guardar localmente'); }
@@ -2100,527 +2066,272 @@ function _fbSync(){
   _fbTimer = setTimeout(function(){ _fbWrite(); }, 500);
 }
 
-// ══════════════════ MERGE (fusión) EN VEZ DE SOBRESCRITURA ══════════════════
-// Todos los registros de la app (ventas, gastos, pedidos, extras, productos,
-// pedidosGlobal, encargos, clientes) llevan un campo id numérico (Date.now()).
-// En vez de que un dispositivo pise el documento entero de Firebase con su
-// copia local, cada escritura primero trae la versión más reciente del
-// servidor y fusiona por id: la unión de ambos lados, sin perder registros
-// que el otro dispositivo haya creado mientras tanto.
-function _mergeArraysById(localArr, remoteArr){
-  var map = {}, order = [];
-  (remoteArr||[]).forEach(function(item){
-    if(item && item.id!=null && !(item.id in map)){ order.push(item.id); }
-    if(item && item.id!=null) map[item.id]=item;
-  });
-  (localArr||[]).forEach(function(item){
-    if(item && item.id!=null && !(item.id in map)){ order.push(item.id); }
-    if(item && item.id!=null) map[item.id]=(item.id in map)?_masNuevo(item,map[item.id]):item; // gana el más reciente (_ts); sin sello, gana el local
-  });
-  order.sort(function(a,b){ return a-b; });
-  return order.map(function(id){ return map[id]; });
+// ══════════════════ SINCRONIZACIÓN 3 VÍAS (base · local · remoto) ══════════════════
+// Problema que resuelve: dos dispositivos (admin / vendedor) escriben sobre el mismo documento.
+//  - Registros nuevos (ventas, gastos, pedidos, clientes...): se unen por id, nadie pisa a nadie.
+//  - Borrados: se detectan comparando contra la "base" (último estado sincronizado) y NO reviven.
+//  - Stock (cantidad de productos): se suma/resta el CAMBIO (delta) de cada dispositivo sobre el
+//    valor del servidor, así dos ventas simultáneas descuentan las dos unidades.
+//  - Escritura dentro de una transacción de Firestore: lee → fusiona → escribe de forma atómica.
+var SYNC_BASE_KEY = 'cvd_syncBase';
+var _syncBaseStr = null;
+try{ _syncBaseStr = localStorage.getItem(SYNC_BASE_KEY); }catch(e){}
+
+function _getLocalState(){
+  return {data:data, productos:productos, pedidos:pedidosGlobal, encargos:encargos, clientes:clientes, fondos:fondos};
+}
+function _setLocalState(s){
+  data=s.data||{}; productos=s.productos||[]; pedidosGlobal=s.pedidos||[];
+  encargos=s.encargos||[]; clientes=s.clientes||[]; fondos=s.fondos||{};
+}
+function _persistLocalState(){
+  _lsSave('cvd_data', data); _lsSave('cvd_productos', productos); _lsSave('cvd_pedidos', pedidosGlobal);
+  _lsSave('cvd_encargos', encargos); _lsSave('cvd_clientes', clientes); _lsSave('cvd_fondos', fondos);
+}
+function _parseRemote(d){
+  function p(s,def){ try{ return s?JSON.parse(s):def; }catch(e){ return def; } }
+  d=d||{};
+  return {data:p(d.data,{}), productos:p(d.productos,[]), pedidos:p(d.pedidos,[]),
+          encargos:p(d.encargos,[]), clientes:p(d.clientes,[]), fondos:p(d.fondos,{})};
+}
+function _readBase(){ try{ return _syncBaseStr?JSON.parse(_syncBaseStr):null; }catch(e){ return null; } }
+function _writeBase(str){ _syncBaseStr=str; try{ localStorage.setItem(SYNC_BASE_KEY,str); }catch(e){} }
+function _refreshViews(){
+  renderAll();
+  try{ renderPage(currentPage); }catch(e){}
 }
 
-// ══════════════════ MERGE DE INVENTARIO POR DELTA (evita distorsión de stock) ══════════════════
-// A diferencia de ventas/pedidos (registros nuevos con id único, donde "unir por id" basta),
-// "productos" es un array de estado mutable: dos dispositivos (Admin y Vendedor) pueden restar
-// stock al MISMO producto casi al mismo tiempo. Si se fusiona "objeto completo, el local gana",
-// el último dispositivo en escribir borra la resta que hizo el otro → esto es lo que estaba
-// distorsionando el inventario. La solución: en vez de reemplazar 'cantidad', se calcula CUÁNTO
-// cambió cada producto en este dispositivo desde el último sync (delta) y ese delta se aplica
-// sobre el valor más reciente del servidor. Así ambas restas/sumas concurrentes se conservan.
-function _getBaselineCantidades(){
-  try{ var s=localStorage.getItem('cvd_productos_baseline'); if(s) return JSON.parse(s); }catch(e){}
-  return {};
+function _jeq(a,b){ return JSON.stringify(a)===JSON.stringify(b); }
+function _idMap(arr){
+  var m={};
+  (arr||[]).forEach(function(x){ if(x && x.id!=null) m[x.id]=x; });
+  return m;
 }
-function _setBaselineCantidades(map){
-  try{ localStorage.setItem('cvd_productos_baseline', JSON.stringify(map)); }catch(e){}
-}
-function _mergeProductos(localArr, remoteArr){
-  var baseline = _getBaselineCantidades();
-  var map = {}, order = [];
-  (remoteArr||[]).forEach(function(item){
-    if(item && item.id!=null && !(item.id in map)){ order.push(item.id); }
-    if(item && item.id!=null) map[item.id]=item;
-  });
-  (localArr||[]).forEach(function(item){
-    if(!item || item.id==null) return;
-    if(!(item.id in map)){
-      // Producto nuevo (creado en este dispositivo, el servidor aún no lo tiene)
-      order.push(item.id);
-      map[item.id]=item;
+
+// Fusiona un registro editado en ambos lados, campo por campo.
+function _mergeRecord(l,r,b,deltaKeys){
+  if(_jeq(l,b)) return r;   // local no cambió → vale lo del servidor
+  if(_jeq(r,b)) return l;   // servidor no cambió → vale lo local
+  var out={}, keys={};
+  [l,r,b].forEach(function(o){ Object.keys(o).forEach(function(k){ keys[k]=1; }); });
+  Object.keys(keys).forEach(function(k){
+    var lv=l[k], rv=r[k], bv=b[k];
+    if(deltaKeys && deltaKeys.indexOf(k)!==-1 && typeof lv==='number' && typeof rv==='number' && typeof bv==='number'){
+      out[k]=Math.max(0, parseFloat((rv+(lv-bv)).toFixed(4)));
       return;
     }
-    var remoteItem = map[item.id];
-    // Campos descriptivos (nombre, precio, mínimo, proveedor, etc.): el local gana, como antes.
-    var merged = ((remoteItem._ts||0)>(item._ts||0)) ? Object.assign({}, item, remoteItem) : Object.assign({}, remoteItem, item);
-    // 'cantidad' se fusiona por delta en vez de sobre-escritura directa.
-    var base = baseline[item.id];
-    var remoteCant = (typeof remoteItem.cantidad==='number')?remoteItem.cantidad:0;
-    var localCant = (typeof item.cantidad==='number')?item.cantidad:0;
-    if(base!=null){
-      var deltaLocal = localCant - base;
-      merged.cantidad = Math.max(0, remoteCant + deltaLocal);
-    } else {
-      // Sin punto de referencia todavía (primera sincronización de este producto en este
-      // dispositivo): se usa el valor local tal cual, y a partir de aquí ya queda una baseline.
-      merged.cantidad = localCant;
-    }
-    map[item.id]=merged;
-  });
-  order.sort(function(a,b){ return a-b; });
-  // IMPORTANTE: esta función ya NO modifica la baseline. Antes la adelantaba aquí mismo,
-  // y si pasaba un snapshot del servidor entre tu venta y la escritura (500ms de debounce),
-  // el delta quedaba en 0 y la venta/compra se perdía. Ahora la baseline solo se mueve
-  // con _baselineDesdeLista(), cuando sabemos qué tiene realmente el servidor.
-  return order.map(function(id){ return map[id]; });
-}
-// Baseline = cantidades que el servidor tenía la última vez que este dispositivo las incorporó.
-// delta pendiente = cantidad local − baseline.
-function _baselineDesdeLista(arr){
-  var b={};
-  (arr||[]).forEach(function(p){ if(p&&p.id!=null&&typeof p.cantidad==='number') b[p.id]=p.cantidad; });
-  _setBaselineCantidades(b);
-}
-
-function _mergeDayData(localDay, remoteDay){
-  localDay = localDay || {};
-  remoteDay = remoteDay || {};
-  return {
-    ventas: _mergeArraysById(localDay.ventas, remoteDay.ventas),
-    gastos: _mergeArraysById(localDay.gastos, remoteDay.gastos),
-    pedidos: _mergeArraysById(localDay.pedidos, remoteDay.pedidos),
-    extra: _mergeArraysById(localDay.extra, remoteDay.extra)
-  };
-}
-
-function _mergeDataObj(localData, remoteData){
-  localData = localData || {};
-  remoteData = remoteData || {};
-  var keys = {};
-  Object.keys(remoteData).forEach(function(k){ keys[k]=1; });
-  Object.keys(localData).forEach(function(k){ keys[k]=1; });
-  var merged = {};
-  Object.keys(keys).forEach(function(k){
-    merged[k] = _mergeDayData(localData[k], remoteData[k]);
-  });
-  return merged;
-}
-
-function _mergeFlatObj(localObj, remoteObj){
-  // fusión simple para objetos plano clave→valor (ej. fondos por fecha)
-  var merged = {};
-  Object.assign(merged, remoteObj||{}, localObj||{}); // local gana en empates
-  return merged;
-}
-
-// ══════════════════ TUMBAS DE ELIMINACIÓN ══════════════════
-// Todos los merges anteriores son "unión": si un dispositivo borra un registro pero el otro
-// todavía tiene una copia local vieja (no ha recibido el borrado en tiempo real), al fusionar
-// ese registro "resucita". Para evitarlo, cada eliminación deja una marca (tumba) que se
-// sincroniza igual que el resto de los datos, y se aplica como filtro final después de cada
-// fusión, sin importar en qué dispositivo o en qué orden ocurran los cambios.
-function _mergeEliminados(localObj, remoteObj){
-  var merged = {};
-  Object.assign(merged, remoteObj||{}, localObj||{});
-  return merged;
-}
-function _filtrarEliminadosArr(arr, prefix, eliminadosSet){
-  return (arr||[]).filter(function(item){
-    return item && item.id!=null && !eliminadosSet[prefix+item.id];
-  });
-}
-function _filtrarEliminadosDataObj(dataObj, eliminadosSet){
-  var out = {};
-  Object.keys(dataObj||{}).forEach(function(fecha){
-    var day = dataObj[fecha] || {ventas:[],gastos:[],pedidos:[],extra:[]};
-    out[fecha] = {
-      ventas: (day.ventas||[]).filter(function(x){return x&&x.id!=null&&!eliminadosSet['dia:'+fecha+':ventas:'+x.id];}),
-      gastos: (day.gastos||[]).filter(function(x){return x&&x.id!=null&&!eliminadosSet['dia:'+fecha+':gastos:'+x.id];}),
-      pedidos: (day.pedidos||[]).filter(function(x){return x&&x.id!=null&&!eliminadosSet['dia:'+fecha+':pedidos:'+x.id];}),
-      extra: (day.extra||[]).filter(function(x){return x&&x.id!=null&&!eliminadosSet['dia:'+fecha+':extra:'+x.id];})
-    };
+    var v=_jeq(lv,bv)?rv:lv;
+    if(v!==undefined) out[k]=v;
   });
   return out;
 }
-// Aplica las tumbas fusionadas sobre todas las colecciones a la vez (llamar tras cada merge)
-function _aplicarEliminados(){
-  data = _filtrarEliminadosDataObj(data, eliminadosGlobal);
-  productos = _filtrarEliminadosArr(productos, 'producto:', eliminadosGlobal);
-  pedidosGlobal = _filtrarEliminadosArr(pedidosGlobal, 'pedidoGlobal:', eliminadosGlobal);
-  encargos = _filtrarEliminadosArr(encargos, 'encargo:', eliminadosGlobal);
-  clientes = _filtrarEliminadosArr(clientes, 'cliente:', eliminadosGlobal);
-}
 
-var _fbWriting = false;
-var fbErrorSync = null;
-var _remotoProdUltimo = [];
-var _baselineAdelantada = false;
+// Fusión 3 vías de un arreglo de registros con id. B===null → no hay base (el servidor manda en empates).
+function _merge3Arr(L,R,B,opts){
+  opts=opts||{}; L=L||[]; R=R||[];
+  var hasB=(B!==null && B!==undefined); B=B||[];
+  var mR=_idMap(R), mB=_idMap(B), mL=_idMap(L);
+  var sinIdL={}, sinIdB={}, out=[];
+  L.forEach(function(x){ if(!x||x.id==null) sinIdL[JSON.stringify(x)]=1; });
+  B.forEach(function(x){ if(!x||x.id==null) sinIdB[JSON.stringify(x)]=1; });
 
-// ══════════════════ DATA EN VARIOS DOCUMENTOS (límite de 1 MB por documento) ══════════════════
-// Firestore rechaza (invalid-argument) cualquier documento de más de 1 MiB. El historial de ventas/gastos
-// ('data') es lo que más crece, así que se reparte en documentos negocio/datos_0, datos_1, ...
-// y el documento principal solo guarda cuántos trozos hay (dataChunks). Todo se escribe en un batch atómico.
-var DATA_CHUNK_SIZE = 300000;   // caracteres por trozo (muy por debajo de 1 MiB, incluso con UTF-8 de 3 bytes)
-var _dataSyncStr = null;        // último JSON de 'data' que sabemos que está en el servidor
-var _dataSyncN = 0;             // cuántos trozos hay en el servidor
-var _revPropia = null;          // identifica nuestra última escritura para ignorar su eco en el listener
-
-function _parseRemoto(d){
-  var r={productos:[],pedidos:[],encargos:[],clientes:[],fondos:{},eliminados:{}};
-  try{ if(d.productos) r.productos=JSON.parse(d.productos); }catch(e){}
-  try{ if(d.pedidos) r.pedidos=JSON.parse(d.pedidos); }catch(e){}
-  try{ if(d.encargos) r.encargos=JSON.parse(d.encargos); }catch(e){}
-  try{ if(d.clientes) r.clientes=JSON.parse(d.clientes); }catch(e){}
-  try{ if(d.fondos) r.fondos=JSON.parse(d.fondos); }catch(e){}
-  try{ if(d.eliminados) r.eliminados=JSON.parse(d.eliminados); }catch(e){}
-  return r;
-}
-
-// Devuelve una Promise con el objeto 'data' remoto. Si falta un trozo o el JSON está dañado, LANZA error
-// (así nunca se fusiona con "vacío" y se borra el historial del servidor).
-function _leerDataRemota(d){
-  if(d.data){ // formato antiguo: todo dentro del documento principal
-    _dataSyncStr=null; _dataSyncN=0;
-    try{ return Promise.resolve(JSON.parse(d.data)); }catch(e){ return Promise.reject(new Error('data-corrupta')); }
-  }
-  var n=d.dataChunks||0;
-  if(!n){ _dataSyncStr=null; _dataSyncN=0; return Promise.resolve({}); }
-  var ps=[];
-  for(var i=0;i<n;i++) ps.push(db.doc('negocio/datos_'+i).get());
-  return Promise.all(ps).then(function(docs){
-    var str='';
-    docs.forEach(function(x){ if(!x.exists) throw new Error('trozo-faltante'); str+=(x.data().p||''); });
-    var obj;
-    try{ obj=JSON.parse(str); }catch(e){ throw new Error('data-corrupta'); }
-    _dataSyncStr=str; _dataSyncN=n;
-    return obj;
+  L.forEach(function(l){
+    if(!l || l.id==null){ out.push(l); return; }
+    var r=mR[l.id], b=mB[l.id];
+    if(r===undefined){
+      if(hasB && b!==undefined && _jeq(l,b)) return; // lo borró el otro dispositivo
+      out.push(l); return;                            // registro nuevo local
+    }
+    if(!hasB){ out.push(r); return; }
+    if(b===undefined){ out.push(l); return; }
+    out.push(_mergeRecord(l,r,b,opts.deltaKeys));
   });
-}
-
-function _escribirData(str){
-  if(str===_dataSyncStr) return Promise.resolve(_dataSyncN); // sin cambios: no escribir
-  var chunks=[], pos=0;
-  while(pos<str.length){
-    var end=Math.min(pos+DATA_CHUNK_SIZE, str.length);
-    // no cortar un par sustituto (emoji) por la mitad
-    if(end<str.length){ var cc=str.charCodeAt(end-1); if(cc>=0xD800&&cc<=0xDBFF) end--; }
-    chunks.push(str.substring(pos,end)); pos=end;
-  }
-  if(!chunks.length) chunks.push('');
-  var batch=db.batch();
-  chunks.forEach(function(c,i){ batch.set(db.doc('negocio/datos_'+i),{p:c}); });
-  for(var j=chunks.length;j<_dataSyncN;j++) batch.delete(db.doc('negocio/datos_'+j));
-  return batch.commit().then(function(){
-    _dataSyncStr=str; _dataSyncN=chunks.length;
-    return chunks.length;
+  R.forEach(function(r){
+    if(!r || r.id==null){
+      var s=JSON.stringify(r);
+      if(!sinIdL[s] && !sinIdB[s]) out.push(r);
+      return;
+    }
+    if(mL[r.id]!==undefined) return;
+    var b=mB[r.id];
+    if(hasB && b!==undefined && _jeq(r,b)) return;   // lo borré yo: no revivir
+    out.push(r);                                      // nuevo desde el otro dispositivo
   });
-}
-
-// ══════════════════ SELLOS DE TIEMPO (_ts) ══════════════════
-// Problema que resuelve: antes, al fusionar dos dispositivos, la copia LOCAL de un registro
-// existente siempre ganaba. Si en el celular B marcabas un pedido como "completado" y el
-// celular A todavía tenía la copia vieja ("pendiente"), A la volvía a subir y deshacía tu cambio
-// (y el cambio de B nunca llegaba a A). Ahora cada vez que un pedido/encargo/cliente/producto
-// cambia, se le pone _ts = hora del cambio, y al fusionar gana el más reciente.
-var _HASH_KEYS = {productos:'cvd_h_productos', pedidos:'cvd_h_pedidos', encargos:'cvd_h_encargos', clientes:'cvd_h_clientes'};
-function _h32(s){ var h=5381; for(var i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))|0; } return h.toString(36); }
-// Si soloRegistrar=false: sella con _ts los registros que cambiaron desde la última vez.
-// Si soloRegistrar=true: solo memoriza el estado actual (se usa tras aceptar datos del servidor).
-function _sellar(arr, hk, soloRegistrar){
-  var prev=null;
-  try{ var s=localStorage.getItem(hk); if(s) prev=JSON.parse(s); }catch(e){}
-  var next={}, ahora=Date.now();
-  (arr||[]).forEach(function(it){
-    if(!it||it.id==null) return;
-    var c=Object.assign({},it); delete c._ts;
-    if(hk===_HASH_KEYS.productos) delete c.cantidad; // la cantidad se fusiona por delta, no por sello
-    var h=_h32(JSON.stringify(c));
-    if(!soloRegistrar && prev && prev[it.id]!==h) it._ts=ahora;
-    next[it.id]=h;
-  });
-  try{ localStorage.setItem(hk, JSON.stringify(next)); }catch(e){}
-}
-function _registrarSellos(){
-  _sellar(productos,_HASH_KEYS.productos,true);
-  _sellar(pedidosGlobal,_HASH_KEYS.pedidos,true);
-  _sellar(encargos,_HASH_KEYS.encargos,true);
-  _sellar(clientes,_HASH_KEYS.clientes,true);
-}
-function _masNuevo(loc, rem){ return ((rem&&rem._ts)||0) > ((loc&&loc._ts)||0) ? rem : loc; }
-function _persistirTodo(){
-  _lsSave('cvd_data', data);
-  _lsSave('cvd_productos', productos);
-  _lsSave('cvd_pedidos', pedidosGlobal);
-  _lsSave('cvd_encargos', encargos);
-  _lsSave('cvd_clientes', clientes);
-  _lsSave('cvd_fondos', fondos);
-  _lsSave('cvd_eliminados', eliminadosGlobal);
-}
-
-// ══════════════════ ESCRITURA A FIREBASE (en cola + transacción) ══════════════════
-// Antes: si hacías dos ventas seguidas y la primera aún se estaba subiendo, la segunda escritura
-// empezaba en paralelo, leía el servidor ANTES de que terminara la primera y la pisaba → el stock
-// de la primera venta se perdía (la venta quedaba, pero el inventario no bajaba).
-// Ahora: (1) solo hay UNA escritura a la vez; las demás esperan en cola. (2) La lectura, fusión y
-// escritura ocurren dentro de una transacción de Firestore: si el otro celular escribe justo en ese
-// momento, Firestore repite la operación con los datos nuevos en vez de pisarlos.
-var _fbQueued = false;
-var _fbRetryT = null;
-
-function _trocear(str){
-  var chunks=[], pos=0;
-  while(pos<str.length){
-    var end=Math.min(pos+DATA_CHUNK_SIZE, str.length);
-    if(end<str.length){ var cc=str.charCodeAt(end-1); if(cc>=0xD800&&cc<=0xDBFF) end--; }
-    chunks.push(str.substring(pos,end)); pos=end;
+  if(opts.sort && out.every(function(x){ return x && typeof x.id==='number'; })){
+    out.sort(function(a,b){ return a.id-b.id; });
   }
-  if(!chunks.length) chunks.push('');
-  return chunks;
+  return out;
 }
 
-// Lectura de 'data' DENTRO de la transacción
-function _txLeerData(tx, remote){
-  if(remote.data){ // formato antiguo: todo dentro del documento principal
-    try{ return Promise.resolve({obj:JSON.parse(remote.data), str:null, n:0}); }
-    catch(e){ return Promise.reject(new Error('data-corrupta')); }
-  }
-  var n=remote.dataChunks||0;
-  if(!n) return Promise.resolve({obj:{}, str:'', n:0});
-  var ps=[];
-  for(var i=0;i<n;i++) ps.push(tx.get(db.doc('negocio/datos_'+i)));
-  return Promise.all(ps).then(function(docs){
-    var str='';
-    docs.forEach(function(x){ if(!x.exists) throw new Error('trozo-faltante'); str+=(x.data().p||''); });
-    var obj;
-    try{ obj=JSON.parse(str); }catch(e){ throw new Error('data-corrupta'); }
-    return {obj:obj, str:str, n:n};
+var _DIA_LISTAS=['ventas','gastos','pedidos','extra'];
+function _merge3Day(l,r,b){
+  l=l||{}; r=r||{};
+  var hasB=(b!==null && b!==undefined); b=b||{};
+  var out={}, keys={};
+  [l,r,b].forEach(function(o){ Object.keys(o).forEach(function(k){ keys[k]=1; }); });
+  Object.keys(keys).forEach(function(k){
+    if(_DIA_LISTAS.indexOf(k)!==-1 || Array.isArray(l[k]) || Array.isArray(r[k])){
+      out[k]=_merge3Arr(l[k], r[k], hasB?(b[k]||[]):null, {sort:true});
+    } else {
+      var v=!hasB ? (r[k]!==undefined?r[k]:l[k]) : (_jeq(l[k],b[k])?r[k]:l[k]);
+      if(v!==undefined) out[k]=v;
+    }
   });
+  _DIA_LISTAS.forEach(function(k){ if(!out[k]) out[k]=[]; });
+  return out;
 }
 
+function _merge3Data(L,R,B){
+  L=L||{}; R=R||{};
+  var out={}, keys={};
+  [L,R].forEach(function(o){ Object.keys(o).forEach(function(k){ keys[k]=1; }); });
+  Object.keys(keys).forEach(function(k){
+    out[k]=_merge3Day(L[k], R[k], (B && B[k]!==undefined)?B[k]:null);
+  });
+  return out;
+}
+
+// Objetos planos clave→valor (fondos por fecha)
+function _merge3Obj(L,R,B){
+  L=L||{}; R=R||{};
+  var hasB=(B!==null && B!==undefined); B=B||{};
+  var out={}, keys={};
+  [L,R,B].forEach(function(o){ Object.keys(o).forEach(function(k){ keys[k]=1; }); });
+  Object.keys(keys).forEach(function(k){
+    var l=L[k], r=R[k], b=B[k], v;
+    if(!hasB) v=(r!==undefined)?r:l;
+    else if(l===undefined && r===undefined) v=undefined;
+    else if(l===undefined) v=(b!==undefined && _jeq(r,b))?undefined:r;  // lo borré yo
+    else if(r===undefined) v=(b!==undefined && _jeq(l,b))?undefined:l;  // lo borró el otro
+    else v=_jeq(l,b)?r:l;
+    if(v!==undefined) out[k]=v;
+  });
+  return out;
+}
+
+function _mergeState(L,R,B){
+  var hasB=!!B; B=B||{};
+  return {
+    data:      _merge3Data(L.data, R.data, hasB?(B.data||{}):null),
+    productos: _merge3Arr(L.productos, R.productos, hasB?(B.productos||[]):null, {deltaKeys:['cantidad']}),
+    pedidos:   _merge3Arr(L.pedidos,   R.pedidos,   hasB?(B.pedidos||[]):null),
+    encargos:  _merge3Arr(L.encargos,  R.encargos,  hasB?(B.encargos||[]):null),
+    clientes:  _merge3Arr(L.clientes,  R.clientes,  hasB?(B.clientes||[]):null),
+    fondos:    _merge3Obj(L.fondos,    R.fondos,    hasB?(B.fondos||{}):null)
+  };
+}
+
+// ── ESCRITURA (transacción: lee lo último del servidor, fusiona y escribe atómicamente) ──
+var _fbWriting=false, _fbWriteQueued=false, _fbRetryTimer=null;
 function _fbWrite(){
-  if(!fbOnline){ _fbProgramarReintentoLoad(); return; }
-  if(_fbWriting){ _fbQueued=true; return; }   // ya hay una escritura en curso: esperar turno
-  _fbWriting = true;
-  clearTimeout(_fbRetryT);
-  var mainRef = db.doc(DB_DOC);
-  var R = null, ok = false;
-
+  if(!fbOnline) return;
+  if(_fbWriting){ _fbWriteQueued=true; return; }
+  _fbWriting=true; _fbWriteQueued=false;
+  var ref=db.doc(DB_DOC);
   db.runTransaction(function(tx){
-    // OJO: este callback puede ejecutarse varias veces. No debe tocar variables globales.
-    return tx.get(mainRef).then(function(doc){
-      var remote = doc.exists ? doc.data() : {};
-      var rp = _parseRemoto(remote);
-      return _txLeerData(tx, remote).then(function(rd){
-        var snap = {};
-        productos.forEach(function(p){ if(p&&p.id!=null&&typeof p.cantidad==='number') snap[p.id]=p.cantidad; });
-        var mElim = _mergeEliminados(eliminadosGlobal, rp.eliminados);
-        var m = {
-          data: _filtrarEliminadosDataObj(_mergeDataObj(data, rd.obj), mElim),
-          productos: _filtrarEliminadosArr(_mergeProductos(productos, rp.productos),'producto:',mElim),
-          pedidos: _filtrarEliminadosArr(_mergeArraysById(pedidosGlobal, rp.pedidos),'pedidoGlobal:',mElim),
-          encargos: _filtrarEliminadosArr(_mergeArraysById(encargos, rp.encargos),'encargo:',mElim),
-          clientes: _filtrarEliminadosArr(_mergeArraysById(clientes, rp.clientes),'cliente:',mElim),
-          fondos: _mergeFlatObj(fondos, rp.fondos),
-          eliminados: mElim
-        };
-        var dataStr = JSON.stringify(m.data);
-        var rev = Date.now()+'-'+Math.random().toString(36).slice(2);
-        var payload = {
-          productos: JSON.stringify(m.productos),
-          pedidos: JSON.stringify(m.pedidos),
-          encargos: JSON.stringify(m.encargos),
-          clientes: JSON.stringify(m.clientes),
-          fondos: JSON.stringify(m.fondos),
-          eliminados: JSON.stringify(m.eliminados),
-          rev: rev,
+    return tx.get(ref).then(function(doc){
+      var Lstr=JSON.stringify(_getLocalState());
+      var R=_parseRemote(doc.exists?doc.data():{});
+      var merged=_mergeState(JSON.parse(Lstr), R, _readBase());
+      var mStr=JSON.stringify(merged);
+      if(!doc.exists || mStr!==JSON.stringify(R)){
+        tx.set(ref,{
+          data: JSON.stringify(merged.data),
+          productos: JSON.stringify(merged.productos),
+          pedidos: JSON.stringify(merged.pedidos),
+          encargos: JSON.stringify(merged.encargos),
+          clientes: JSON.stringify(merged.clientes),
+          fondos: JSON.stringify(merged.fondos),
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        var tam = payload.productos.length+payload.pedidos.length+payload.encargos.length+payload.clientes.length+payload.fondos.length+payload.eliminados.length;
-        var n = rd.n;
-        if(dataStr!==rd.str){
-          var chunks=_trocear(dataStr);
-          chunks.forEach(function(c,i){ tx.set(db.doc('negocio/datos_'+i),{p:c}); });
-          for(var j=chunks.length;j<rd.n;j++) tx.delete(db.doc('negocio/datos_'+j));
-          n=chunks.length;
-        }
-        payload.dataChunks = n;
-        tx.set(mainRef, payload);
-        R = {m:m, snap:snap, rev:rev, tam:tam};
-      });
+        });
+      }
+      return {merged:merged, mStr:mStr, Lstr:Lstr};
     });
-  }).then(function(){
-    // Transacción confirmada. El estado local pudo cambiar mientras tanto (otra venta, etc.):
-    // se vuelve a fusionar el resultado confirmado con el estado ACTUAL, así no se pierde nada.
-    var m = R.m;
-    _revPropia = R.rev;
-    data = _mergeDataObj(data, m.data);
-    _setBaselineCantidades(R.snap);                       // referencia = cantidades usadas en la fusión
-    productos = _mergeProductos(productos, m.productos);  // resultado + cambios ocurridos durante la subida
-    _baselineDesdeLista(m.productos);                     // el servidor ahora tiene m.productos
-    pedidosGlobal = _mergeArraysById(pedidosGlobal, m.pedidos);
-    encargos = _mergeArraysById(encargos, m.encargos);
-    clientes = _mergeArraysById(clientes, m.clientes);
-    fondos = _mergeFlatObj(fondos, m.fondos);
-    eliminadosGlobal = _mergeEliminados(eliminadosGlobal, m.eliminados);
-    _aplicarEliminados();
-    _registrarSellos();
-    _persistirTodo();
-    ok = true;
-    fbErrorSync = null;
-    if(R.tam>800000) toast('⚠ Productos/pedidos/clientes se acercan al límite de 1 MB de Firebase.');
-    renderAll();
+  }).then(function(res){
+    var cur=JSON.stringify(_getLocalState());
+    var newLocal = (cur===res.Lstr)
+      ? res.merged
+      : _mergeState(JSON.parse(cur), JSON.parse(res.mStr), JSON.parse(res.Lstr)); // el usuario hizo cambios mientras se escribía
+    var nStr=JSON.stringify(newLocal);
+    _writeBase(res.mStr); // la base = lo que quedó en el servidor
+    if(nStr!==cur){ _setLocalState(newLocal); _persistLocalState(); _refreshViews(); }
+    _fbWriting=false;
+    if(nStr!==res.mStr){ _fbSync(); }
+    else { syncPending=false; updateSyncIndicator(); }
+    if(_fbWriteQueued) _fbWrite();
   }).catch(function(err){
     console.error('Firebase write error:', err);
-    var primera = !fbErrorSync;
-    fbErrorSync = (err && (err.code||err.message)) || 'error';
-    if(primera) toast('⚠ No se pudo sincronizar: '+fbErrorSync+' (se reintentará solo)');
-  }).then(function(){
-    _fbWriting = false;
-    if(ok) syncPending = _fbQueued;
+    _fbWriting=false;
+    syncPending=true;
     updateSyncIndicator();
-    if(_fbQueued){ _fbQueued=false; setTimeout(_fbWrite, 50); }
-    else if(!ok){ clearTimeout(_fbRetryT); _fbRetryT=setTimeout(_fbWrite, 20000); } // reintento automático
+    clearTimeout(_fbRetryTimer);
+    _fbRetryTimer=setTimeout(function(){ if(syncPending) _fbWrite(); }, 8000);
   });
 }
 
-// Reintentos de la carga inicial (antes, si fallaba la primera vez, la app se quedaba "Local" hasta recargar)
-var _fbLoadT = null, _fbLoadIntentos = 0;
-function _fbProgramarReintentoLoad(){
-  if(_fbLoadT) return;
-  var espera = Math.min(60000, 5000*Math.pow(2,_fbLoadIntentos++));
-  _fbLoadT = setTimeout(function(){ _fbLoadT=null; if(!fbOnline) _fbLoad(); }, espera);
-}
-
-// Carga inicial desde Firebase (fusiona, no sobrescribe) y activa escucha en tiempo real
+// ── CARGA INICIAL (fusiona con lo local, no sobrescribe) ──
 function _fbLoad(){
   db.doc(DB_DOC).get().then(function(doc){
     fbOnline = true;
-    _fbLoadIntentos = 0;
     if(doc.exists){
-      var d = doc.data();
-      var rp = _parseRemoto(d);
-      return _leerDataRemota(d).then(function(remoteData){
-        data = _mergeDataObj(data, remoteData);
-        productos = _mergeProductos(productos, rp.productos);
-        pedidosGlobal = _mergeArraysById(pedidosGlobal, rp.pedidos);
-        encargos = _mergeArraysById(encargos, rp.encargos);
-        clientes = _mergeArraysById(clientes, rp.clientes);
-        fondos = _mergeFlatObj(fondos, rp.fondos);
-        eliminadosGlobal = _mergeEliminados(eliminadosGlobal, rp.eliminados);
-        _aplicarEliminados();
-        _baselineDesdeLista(rp.productos); // el servidor ya está incorporado; el delta local sigue pendiente
-        _registrarSellos();
-        _persistirTodo();
-        renderAll();
-        updateSyncIndicator();
-        migrarDatos(true); // migrar silenciosamente y escribir de vuelta a Firebase (ya fusionado)
-        toast('☁ Sincronizado');
-      });
+      var R=_parseRemote(doc.data());
+      var cur=JSON.stringify(_getLocalState());
+      var merged=_mergeState(JSON.parse(cur), R, _readBase());
+      var mStr=JSON.stringify(merged), rStr=JSON.stringify(R);
+      _writeBase(rStr);
+      _setLocalState(merged); _persistLocalState();
+      _refreshViews();
+      updateSyncIndicator();
+      if(mStr!==rStr) _fbSync(); // hay datos locales pendientes de subir
+      migrarDatos(true);
+      toast('☁ Sincronizado');
     } else {
-      // Firebase vacío → subir los datos locales existentes
       _fbWrite();
       toast('☁ Datos locales migrados a la nube');
     }
-  }).then(function(){
     _fbAttachListener();
   }).catch(function(err){
     fbOnline = false;
-    fbErrorSync = (err && (err.code||err.message)) || 'error';
     console.warn('Firebase no disponible, usando datos locales:', err);
     updateSyncIndicator();
-    toast('⚠ Sin conexión a la nube ('+fbErrorSync+'). Los datos se guardan en este dispositivo y se reintentará solo.');
-    _fbProgramarReintentoLoad();
   });
 }
 
-// Fusiona en la copia local lo que trae el servidor (lo usan el listener en tiempo real y el refresco al volver a la app)
-function _fbAplicarRemoto(d){
-  var rp = _parseRemoto(d);
-  return _leerDataRemota(d).then(function(remoteData){
-    if(_fbWriting) return; // empezó una escritura propia mientras leíamos los trozos (ella ya trae lo remoto)
-
-    var mergedEliminados = _mergeEliminados(eliminadosGlobal, rp.eliminados);
-    var mergedData = _mergeDataObj(data, remoteData);
-    var mergedProductos = _mergeProductos(productos, rp.productos);
-    _baselineDesdeLista(rp.productos); // referencia = lo que tiene el servidor, no el resultado fusionado
-    var mergedPedidos = _mergeArraysById(pedidosGlobal, rp.pedidos);
-    var mergedEncargos = _mergeArraysById(encargos, rp.encargos);
-    var mergedClientes = _mergeArraysById(clientes, rp.clientes);
-    var mergedFondos = _mergeFlatObj(fondos, rp.fondos);
-
-    mergedData = _filtrarEliminadosDataObj(mergedData, mergedEliminados);
-    mergedProductos = _filtrarEliminadosArr(mergedProductos, 'producto:', mergedEliminados);
-    mergedPedidos = _filtrarEliminadosArr(mergedPedidos, 'pedidoGlobal:', mergedEliminados);
-    mergedEncargos = _filtrarEliminadosArr(mergedEncargos, 'encargo:', mergedEliminados);
-    mergedClientes = _filtrarEliminadosArr(mergedClientes, 'cliente:', mergedEliminados);
-
-    var cambio = JSON.stringify(mergedData)!==JSON.stringify(data) ||
-      JSON.stringify(mergedProductos)!==JSON.stringify(productos) ||
-      JSON.stringify(mergedPedidos)!==JSON.stringify(pedidosGlobal) ||
-      JSON.stringify(mergedEncargos)!==JSON.stringify(encargos) ||
-      JSON.stringify(mergedClientes)!==JSON.stringify(clientes) ||
-      JSON.stringify(mergedFondos)!==JSON.stringify(fondos) ||
-      JSON.stringify(mergedEliminados)!==JSON.stringify(eliminadosGlobal);
-    if(!cambio) return;
-
-    data=mergedData; productos=mergedProductos; pedidosGlobal=mergedPedidos;
-    encargos=mergedEncargos; clientes=mergedClientes; fondos=mergedFondos;
-    eliminadosGlobal=mergedEliminados;
-    _registrarSellos();
-    _persistirTodo();
-    renderAll();
-    toast('☁ Datos actualizados desde otro dispositivo');
-  });
-}
-
-// Escucha en tiempo real: si el otro dispositivo (admin/vendedor) escribe, este fusiona sus cambios.
-var _fbListenerAttached = false;
+// ── TIEMPO REAL: lo que guarda el otro dispositivo llega solo ──
+var _fbListenerAttached=false;
 function _fbAttachListener(){
   if(_fbListenerAttached) return;
-  _fbListenerAttached = true;
+  _fbListenerAttached=true;
   db.doc(DB_DOC).onSnapshot(function(doc){
-    if(doc.metadata.hasPendingWrites) return;
-    if(_fbWriting) return;
-    if(!doc.exists) return;
-    var d = doc.data();
-    if(d.rev && d.rev===_revPropia) return; // eco confirmado de nuestra propia escritura
-    _fbAplicarRemoto(d).catch(function(err){
-      console.warn('Error leyendo datos remotos:', err);
-    });
+    if(doc.metadata.hasPendingWrites || doc.metadata.fromCache) return;
+    if(_fbWriting || !doc.exists) return;
+    var R=_parseRemote(doc.data());
+    var cur=JSON.stringify(_getLocalState());
+    var merged=_mergeState(JSON.parse(cur), R, _readBase());
+    var mStr=JSON.stringify(merged), rStr=JSON.stringify(R);
+    _writeBase(rStr);
+    if(mStr!==cur){
+      _setLocalState(merged); _persistLocalState(); _refreshViews();
+      toast('☁ Datos actualizados desde otro dispositivo');
+    }
+    if(mStr!==rStr && !syncPending) _fbSync();
   }, function(err){
-    // Antes, si la escucha fallaba (red inestable) quedaba muerta hasta recargar la app. Ahora se vuelve a abrir.
     console.warn('Error en escucha en tiempo real:', err);
-    _fbListenerAttached = false;
-    setTimeout(_fbAttachListener, 10000);
   });
 }
 
-// Refresco manual: trae lo del servidor sin escribir (al volver a la app desde segundo plano)
-function _fbRefrescar(){
-  if(!fbOnline || _fbWriting) return;
-  db.doc(DB_DOC).get().then(function(doc){
-    if(doc.exists) return _fbAplicarRemoto(doc.data());
-  }).catch(function(err){ console.warn('Refresco falló:', err); });
-}
+// Al recuperar internet: reintentar carga o subir lo pendiente
 window.addEventListener('online', function(){
-  if(!fbOnline) _fbLoad(); else if(syncPending) _fbWrite();
-});
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState!=='visible') return;
-  if(!fbOnline){ _fbLoad(); return; }
-  if(syncPending) _fbWrite(); else _fbRefrescar();
+  if(!fbOnline) _fbLoad();
+  else if(syncPending) _fbWrite();
 });
 
 function updateSyncIndicator(){
   var el = document.getElementById('syncIndicator');
   if(!el) return;
   if(!fbOnline){
-    el.textContent = fbErrorSync ? '⚠ Local ('+fbErrorSync+')' : '⚡ Local';
-    el.style.color = fbErrorSync ? 'var(--red)' : 'var(--text3)';
-  } else if(fbErrorSync){
-    el.textContent = '⚠ Error sync';
-    el.style.color = 'var(--red)';
+    el.textContent = '⚡ Local';
+    el.style.color = 'var(--text3)';
   } else if(syncPending){
     el.textContent = '↑ Sync...';
     el.style.color = 'var(--orange)';
@@ -2920,19 +2631,9 @@ function getDayData(d){ var k=dateKey(d); if(!data[k])data[k]={ventas:[],gastos:
 // sin que el usuario tenga que volver a digitar nada cada día.
 function getCajaAcumulada(hastaFecha){
   var hastaKey=dateKey(hastaFecha);
-  // Buscar el cierre físico (conteo real en efectivo) más reciente ANTERIOR a la fecha pedida.
-  // Ese cierre se vuelve el nuevo punto de partida, en vez de seguir sumando desde el
-  // efectivoApertura original ignorando lo que realmente se contó en caja cada cierre.
-  var baseFecha=null;
-  Object.keys(fondos).forEach(function(k){
-    if(k.indexOf('cierre_')!==0) return;
-    var fecha=k.substring(7);
-    if(fecha<hastaKey && (baseFecha===null || fecha>baseFecha)) baseFecha=fecha;
-  });
-  var total = baseFecha ? fondos['cierre_'+baseFecha].efectivo : (fondos['efectivoApertura']||0);
+  var total=fondos['efectivoApertura']||0;
   Object.keys(data).forEach(function(k){
     if(k>hastaKey) return; // solo días hasta la fecha indicada (inclusive)
-    if(baseFecha && k<=baseFecha) return; // ya están incluidos en el cierre que se usó como base
     var d=data[k];
     var v=(d.ventas||[]).reduce(function(a,x){return a+x.monto;},0);
     var g=(d.gastos||[]).reduce(function(a,x){return a+x.monto;},0);
@@ -2941,31 +2642,6 @@ function getCajaAcumulada(hastaFecha){
   });
   return total;
 }
-
-// ══════════════════ GANANCIA POR LÍNEA DE VENTA (criterio único) ══════════════════
-// Antes había 5 copias de esta cuenta con criterios distintos (p. ej. un producto con costo 0 en una
-// venta múltiple no sumaba nada, pero en una venta simple sumaba el monto completo).
-// Criterio (el de la documentación): venta − costo si se conoce el costo; si no hay costo
-// (venta manual o producto con costo 0) suma el monto completo; producto ya eliminado → 0.
-// Las ventas nuevas guardan el costo del momento (costoUnit) para que cambiar el costo después
-// no altere la ganancia histórica.
-function _costoUnitLinea(it){
-  if(typeof it.costoUnit==='number' && it.costoUnit>0) return it.costoUnit;
-  var p=it.productoId?getProducto(it.productoId):null;
-  return (p && p.precioCosto>0) ? p.precioCosto : null;
-}
-function _gananciaItem(it){
-  var monto=parseFloat(it.monto)||0;
-  var c=_costoUnitLinea(it);
-  if(c!==null) return monto-c*(parseFloat(it.cant)||1);
-  if(it.productoId && !getProducto(it.productoId)) return 0; // costo desconocido (producto eliminado)
-  return monto;
-}
-function _gananciaVenta(v){
-  var items=(v.items&&v.items.length)?v.items:[v];
-  return items.reduce(function(a,it){return a+_gananciaItem(it);},0);
-}
-function _costoDe(prod){ return (prod&&prod.precioCosto>0)?prod.precioCosto:undefined; }
 function fmt(n){ return '$'+Number(n).toFixed(2); }
 function fmtShort(n){ return n>=1000?'$'+(n/1000).toFixed(1)+'k':fmt(n); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -3275,7 +2951,6 @@ function openAddModal(){
   var pedidoTipoSel=document.getElementById('pedidoTipo');
   if(pedidoTipoSel) pedidoTipoSel.selectedIndex=0;
   pedidoFiltroProveedorActual=pedidoTipoSel?pedidoTipoSel.value:null;
-  document.getElementById('pedidoProdSel').value=''; // evita que un pedido nuevo quede ligado al producto de un pedido anterior
   document.getElementById('pedidoProdBuscador').value='';
   document.getElementById('pedidoProdResultados').style.display='none';
   document.getElementById('pedidoProdTop').style.display='block';
@@ -3336,8 +3011,6 @@ function setTipo(t){
   // Unidad: solo en pedido
   var unidadWrap=document.getElementById('fUnidadWrap');
   if(unidadWrap) unidadWrap.style.display=(t==='pedido')?'block':'none';
-  var vencWrap=document.getElementById('fVencimientoWrap');
-  if(vencWrap) vencWrap.style.display=(t==='pedido')?'block':'none';
   if(t==='venta') renderVentaItems();
   if(t==='pedido') renderPedidoItems();
 }
@@ -3499,7 +3172,7 @@ function vrActualizar(){
   if(precioEl&&p){
     var esMayoreo=precioEfectivo!==p.precioVenta;
     precioEl.textContent='Precio: '+fmt(precioEfectivo)+(esMayoreo?' (mayoreo)':'')+' · Stock: '+p.cantidad+' '+p.unidad+(excedeStock?' ⚠ No hay suficiente':'');
-    precioEl.style.color=excedeStock?'var(--red)':(esMayoreo?'var(--purple)':'');
+    precioEl.style.color=excedeStock?'var(--red)':(esMayoreo?'#7c3aed':'');
   }
   var ok=vrProdId&&cant>0&&!excedeStock;
   document.getElementById('vrConfirmar').disabled=!ok;
@@ -3519,7 +3192,7 @@ function vrConfirmar(){
   var monto=cant*getPrecioEfectivo(p,cant);
   var hora=new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
   var day=getDayData(currentDate);
-  day.ventas.push({id:Date.now(),monto:monto,desc:p.nombre,cant:cant,hora:hora,productoId:p.id,productoNombre:p.nombre,costoUnit:_costoDe(p),items:[{productoId:p.id,productoNombre:p.nombre,desc:p.nombre,cant:cant,monto:monto,costoUnit:_costoDe(p)}]});
+  day.ventas.push({id:Date.now(),monto:monto,desc:p.nombre,cant:cant,hora:hora,productoId:p.id,productoNombre:p.nombre,items:[{productoId:p.id,productoNombre:p.nombre,desc:p.nombre,cant:cant,monto:monto}]});
   p.cantidad=Math.max(0,parseFloat((p.cantidad-cant).toFixed(4)));
   saveProductos(); saveData(); renderAll(); checkStockAlertas();
   closeModal('ventaRapidaModal');
@@ -3539,8 +3212,6 @@ function repetirUltimaVenta(){
   var hora=new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
   var nueva=JSON.parse(JSON.stringify(ultima));
   nueva.id=Date.now(); nueva.hora=hora;
-  delete nueva.costoUnit; (nueva.items||[]).forEach(function(it){ delete it.costoUnit; if(it.productoId) it.costoUnit=_costoDe(getProducto(it.productoId)); });
-  if(nueva.productoId) nueva.costoUnit=_costoDe(getProducto(nueva.productoId));
   day.ventas.push(nueva);
   // Descontar stock
   var prodsAfectados=nueva.items&&nueva.items.length?nueva.items:[{productoId:nueva.productoId,cant:nueva.cant||1}];
@@ -3555,7 +3226,7 @@ function repetirUltimaVenta(){
 //  📅 DÍA MÁS FUERTE / DÉBIL
 // ════════════════════════════════
 function getDiasAnalisis(){
-  var DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Ventas','Sábado'];
   var stats={};
   for(var i=0;i<7;i++) stats[i]={nombre:DIAS[i],total:0,cnt:0};
   Object.keys(data).forEach(function(k){
@@ -3636,7 +3307,7 @@ function buildAlertaRowHTML(a, fromModal){
 
 function getAlertasVisibles(){
   var claves=Object.keys(alertasActivas);
-  if(rolActual==='vendedor') claves=claves.filter(function(k){return k==='stock'||k==='vencimiento';}); // vendedor no tiene acceso a Órdenes/Ajustes
+  if(rolActual==='vendedor') claves=claves.filter(function(k){return k==='stock';}); // vendedor no tiene acceso a Órdenes/Ajustes
   return claves.map(function(k){return alertasActivas[k];}).filter(Boolean);
 }
 
@@ -3679,7 +3350,7 @@ function checkRespaldoAutomatico(){
   var diasDesde=Math.floor((new Date(hoy)-new Date(ultimoRespaldo))/86400000);
   alertasActivas.respaldo = diasDesde>=7 ? {
     icon:'💾', text:'Han pasado '+diasDesde+' días sin respaldo — toca para guardar ahora',
-    color:'var(--purple)', bg:'var(--purple-tint)', border:'var(--purple-tint-b)', onclick:'exportarDatosAuto()'
+    color:'#7c3aed', bg:'#f3e8ff', border:'#c4b5fd', onclick:'exportarDatosAuto()'
   } : null;
   renderCentroAtencion();
 }
@@ -3711,7 +3382,7 @@ function checkAdeudosVencidos(){
   });
   alertasActivas.adeudos = vencidos>0 ? {
     icon:'💳', text:vencidos+' adeudo'+(vencidos!==1?'s vencidos':' vencido')+' — '+fmt(montoVencido)+' por cobrar',
-    color:'var(--red)', bg:'var(--red-tint)', border:'var(--red-tint-b)',
+    color:'#993c1d', bg:'#fdeee9', border:'#f3c4b3',
     onclick:"showSection('ordenes',document.getElementById('navOrd'));setOrdMainTab('clientes')"
   } : null;
   renderCentroAtencion();
@@ -3780,7 +3451,7 @@ function onCantChange(){
     var infoV=document.getElementById('ventaStockInfo');
     if(infoV){
       var esMayoreo=precioAplicado!==pV.precioVenta;
-      infoV.innerHTML='Precio: <strong>'+fmt(precioAplicado)+(esMayoreo?' <span style="color:var(--purple)">(mayoreo)</span>':'')+'</strong> &nbsp;·&nbsp; Stock: <strong>'+pV.cantidad+' '+pV.unidad+'</strong>'+
+      infoV.innerHTML='Precio: <strong>'+fmt(precioAplicado)+(esMayoreo?' <span style="color:#7c3aed">(mayoreo)</span>':'')+'</strong> &nbsp;·&nbsp; Stock: <strong>'+pV.cantidad+' '+pV.unidad+'</strong>'+
         (!esMayoreo&&pV.precioMayoreo>0&&pV.cantidadMayoreo>0?' &nbsp;·&nbsp; <span style="color:var(--text3)">mayoreo desde '+pV.cantidadMayoreo+': '+fmt(pV.precioMayoreo)+'</span>':'');
     }
     return;
@@ -3900,8 +3571,6 @@ function editarPedidoGlobal(id){
       if(prodSelEl) prodSelEl.value=ped.productoId;
       onPedidoProdChange();
     }
-    var vencElE=document.getElementById('fVencimiento');
-    if(vencElE) vencElE.value=ped.vencimiento||'';
   }
   renderPedidoItems();
   document.getElementById('addModal').classList.add('open');
@@ -3925,7 +3594,7 @@ function saveRecord(){
       var rec={id:Date.now(),monto:0,desc:descVenta,cant:1,hora:hora,items:[]};
       ventaItems.forEach(function(it){
         if(it.productoId){var prod=getProducto(it.productoId);if(prod) prod.cantidad=Math.max(0,prod.cantidad-it.cant);}
-        rec.items.push({desc:it.desc,cant:it.cant,monto:it.monto,productoId:it.productoId,productoNombre:it.productoNombre,costoUnit:it.productoId?_costoDe(getProducto(it.productoId)):undefined});
+        rec.items.push({desc:it.desc,cant:it.cant,monto:it.monto,productoId:it.productoId,productoNombre:it.productoNombre});
         rec.monto+=it.monto;
       });
       day.ventas.push(rec);
@@ -3944,7 +3613,6 @@ function saveRecord(){
           prod.cantidad=Math.max(0, prod.cantidad-cant);
           record.productoId=pid;
           record.productoNombre=prod.nombre;
-          record.costoUnit=_costoDe(prod);
           saveProductos();
         }
       }
@@ -4003,12 +3671,7 @@ function saveRecord(){
       pedExist.monto=nuevoMonto;
       pedExist.cant=nuevoCant;
       if(nuevosItems){ pedExist.items=nuevosItems; delete pedExist.productoId; }
-      else {
-        delete pedExist.items;
-        pedExist.productoId=nuevoProductoId;
-        var vencElUp=document.getElementById('fVencimiento');
-        pedExist.vencimiento=(vencElUp&&vencElUp.value)?vencElUp.value:null;
-      }
+      else { delete pedExist.items; pedExist.productoId=nuevoProductoId; }
       if(nuevaUnidad) pedExist.unidad=nuevaUnidad;
 
       // Sincronizar el reflejo en day.pedidos del día original del pedido
@@ -4054,15 +3717,13 @@ function saveRecord(){
       var pedSelEl=document.getElementById('pedidoProdSel');
       var pidManual=pedSelEl?parseInt(pedSelEl.value)||null:null;
       var prodManual=pidManual?getProducto(pidManual):null;
-      var vencManualEl=document.getElementById('fVencimiento');
       var pedRec={
         id:Date.now(),
         tipo:tipo,
         desc:desc, cant:cant, monto:monto, hora:hora,
         fecha:dateKey(currentDate),
         estado:'pendiente',
-        productoId:prodManual?prodManual.id:null,
-        vencimiento:(vencManualEl&&vencManualEl.value)?vencManualEl.value:null
+        productoId:prodManual?prodManual.id:null
       };
       day.pedidos.push({id:pedRec.id,tipo:tipo,desc:desc,cant:cant,monto:monto,hora:hora});
       pedidosGlobal.push(pedRec);
@@ -4096,10 +3757,8 @@ function deleteRecord(tipo,id){
       }
     }
   }
-  marcarEliminado('dia:'+dateKey(currentDate)+':'+tipo+':'+id);
   day[tipo]=day[tipo].filter(function(x){return x.id!==id;});
   saveData();
-  saveEliminados();
   renderAll();
   toast('Registro eliminado');
 }
@@ -4113,16 +3772,6 @@ function setPedidoTab(tab){
   document.getElementById('tabDone').classList.toggle('active',tab==='completado');
   document.getElementById('tabCanc').classList.toggle('active',tab==='cancelado');
   renderPedidos();
-}
-
-// Devuelve la fecha de vencimiento más próxima entre la que ya tenía el producto y la nueva
-// que llega con este pedido. Como el inventario no maneja lotes por separado, esto asegura que
-// la alerta de "por vencer" siempre avise sobre el stock que se vence primero (FIFO conservador),
-// en vez de que un lote nuevo con fecha lejana oculte que queda stock viejo por vencer pronto.
-function _venMasProxima(actual, nueva){
-  if(!actual) return nueva;
-  if(!nueva) return actual;
-  return (new Date(actual+'T00:00:00') <= new Date(nueva+'T00:00:00')) ? actual : nueva;
 }
 
 function completarPedido(id){
@@ -4156,7 +3805,6 @@ function completarPedido(id){
         if(prod){
           prod.cantidad+=parseFloat(it.cant)||1;
           prod.fecha=fechaCompletado;
-          if(it.vencimiento) prod.vencimiento=_venMasProxima(prod.vencimiento,it.vencimiento);
           stockMsg+=' +'+it.cant+' '+prod.unidad+' '+prod.nombre+';';
         }
       }
@@ -4167,7 +3815,6 @@ function completarPedido(id){
     if(prod){
       prod.cantidad+=parseFloat(ped.cant)||1;
       prod.fecha=fechaCompletado;
-      if(ped.vencimiento) prod.vencimiento=_venMasProxima(prod.vencimiento,ped.vencimiento);
       saveProductos();
       stockMsg=' +'+ped.cant+' '+prod.unidad+' en stock de '+prod.nombre;
     }
@@ -4177,7 +3824,7 @@ function completarPedido(id){
   ped.fechaCompletado=fechaCompletado;
   savePedidos();
   renderAll();
-  toast('✓ Pedido completado — $'+ped.monto.toFixed(2)+' registrado en gastos'+(stockMsg?' · Stock:'+stockMsg:' · ⚠ Este pedido no tiene producto vinculado: el inventario NO se actualizó. Ajusta el stock a mano.'));
+  toast('✓ Pedido completado — $'+ped.monto.toFixed(2)+' registrado en gastos'+(stockMsg?' · Stock:'+stockMsg:' · ⚠ Sin producto vinculado, el stock no cambió'));
 }
 
 function cancelarPedido(id){
@@ -4193,9 +3840,7 @@ function cancelarPedido(id){
 function eliminarPedidoGlobal(id){
   if(!confirm('¿Eliminar este pedido del historial?'))return;
   pedidosGlobal=pedidosGlobal.filter(function(p){return p.id!==id;});
-  marcarEliminado('pedidoGlobal:'+id);
   savePedidos();
-  saveEliminados();
   renderPedidos();
   toast('Pedido eliminado');
 }
@@ -4332,9 +3977,7 @@ function saveProducto(){
 function eliminarProducto(id){
   if(!confirm('¿Eliminar este producto?'))return;
   productos=productos.filter(function(p){return p.id!==id;});
-  marcarEliminado('producto:'+id);
   saveProductos();
-  saveEliminados();
   renderInventario();
   toast('Producto eliminado');
 }
@@ -4343,11 +3986,11 @@ function eliminarProducto(id){
 // Mismo mecanismo (descuenta stock + registra costo como gasto), pero con categoría distinta
 // para no mezclar pérdidas reales (merma) con retiros de producto en buen estado (autoconsumo)
 var MERMA_TIPOS={
-  merma:{titulo:'🗑 Registrar merma',icon:'🗑',color:'var(--red)',bg:'var(--red-tint)',
+  merma:{titulo:'🗑 Registrar merma',icon:'🗑',color:'var(--red)',bg:'#fdeee9',
     aviso:'Se descontará del stock y el costo del producto se registrará como gasto del día (categoría Merma), afectando la ganancia neta.',
     labelCant:'Cantidad dañada',labelMotivo:'Motivo',placeholderMotivo:'Ej: Vencido, golpeado, humedad...',
     btnTexto:'🗑 Registrar merma y descontar stock',descPrefijo:'Merma',categoria:'merma',toastTexto:'Merma registrada'},
-  autoconsumo:{titulo:'🏠 Consumo personal',icon:'🏠',color:'var(--purple)',bg:'var(--purple-tint)',
+  autoconsumo:{titulo:'🏠 Consumo personal',icon:'🏠',color:'#7c3aed',bg:'#f1ecfc',
     aviso:'Producto en buen estado que no se venderá (ej. empaque dañado). Se descontará del stock y su costo se registrará como gasto del día (categoría Consumo personal), afectando la ganancia neta.',
     labelCant:'Cantidad a retirar',labelMotivo:'Motivo',placeholderMotivo:'Ej: Empaque roto, no vendible...',
     btnTexto:'🏠 Registrar consumo y descontar stock',descPrefijo:'Consumo personal',categoria:'autoconsumo',toastTexto:'Consumo personal registrado'}
@@ -4452,78 +4095,26 @@ function getProductosBajoStock(){
 
 function checkStockAlertas(){
   var bajos=getProductosBajoStock();
-  var porVencer=getProductosPorVencer(5);
-  var totalAlertas=bajos.length+porVencer.length;
-  // Actualizar badge en el nav de Inventario (combina stock bajo + vencimientos próximos)
+  // Actualizar badge en el nav de Inventario
   var navInv=document.getElementById('navInv');
   var badge=document.getElementById('invAlertaBadge');
-  if(!badge&&navInv&&totalAlertas>0){
+  if(!badge&&navInv&&bajos.length>0){
     badge=document.createElement('span');
     badge.id='invAlertaBadge';
-    badge.style.cssText='position:absolute;top:2px;right:2px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1';
+    badge.style.cssText='position:absolute;top:2px;right:2px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1';
     navInv.style.position='relative';
     navInv.appendChild(badge);
   }
   if(badge){
-    badge.textContent=totalAlertas>0?totalAlertas:'';
-    badge.style.display=totalAlertas>0?'flex':'none';
+    badge.textContent=bajos.length>0?bajos.length:'';
+    badge.style.display=bajos.length>0?'flex':'none';
   }
   // Centro de atención
   alertasActivas.stock = bajos.length>0 ? {
     icon:'⚠️', text:bajos.length+' producto'+(bajos.length!==1?'s tienen':' tiene')+' stock bajo — pedidos sugeridos',
-    color:'var(--red)', bg:'var(--red-tint)', border:'var(--red-tint-b)', onclick:'verAlertasStock()'
-  } : null;
-  var vencidos=porVencer.filter(function(p){return _diasParaVencer(p.vencimiento)<0;});
-  alertasActivas.vencimiento = porVencer.length>0 ? {
-    icon: vencidos.length>0?'⛔':'⏳',
-    text: (vencidos.length>0
-      ? vencidos.length+' producto'+(vencidos.length!==1?'s vencidos':' vencido')+(porVencer.length>vencidos.length?' y '+(porVencer.length-vencidos.length)+' por vencer':'')
-      : porVencer.length+' producto'+(porVencer.length!==1?'s vencen':' vence')+' en 5 días o menos'),
-    color: vencidos.length>0?'var(--red)':'var(--orange)',
-    bg: vencidos.length>0?'var(--red-tint)':'var(--orange-tint)',
-    border: vencidos.length>0?'var(--red-tint-b)':'var(--orange-tint-b)',
-    onclick:'verAlertasVencimiento()'
+    color:'var(--red)', bg:'#fdeee9', border:'#f3c4b3', onclick:'verAlertasStock()'
   } : null;
   renderCentroAtencion();
-}
-
-// ── ALERTAS DE FECHA DE VENCIMIENTO ──
-// Días que faltan para vencer (negativo = ya venció)
-function _diasParaVencer(vencimiento){
-  var hoy=new Date(); hoy.setHours(0,0,0,0);
-  var v=new Date(vencimiento+'T00:00:00');
-  return Math.round((v-hoy)/86400000);
-}
-
-function getProductosPorVencer(diasAlerta){
-  diasAlerta = diasAlerta==null?5:diasAlerta;
-  return productos.filter(function(p){
-    return p.vencimiento && p.cantidad>0 && _diasParaVencer(p.vencimiento)<=diasAlerta;
-  }).sort(function(a,b){ return new Date(a.vencimiento)-new Date(b.vencimiento); });
-}
-
-function verAlertasVencimiento(){
-  var lista=getProductosPorVencer(5);
-  if(!lista.length){ toast('✓ Ningún producto vence pronto'); return; }
-  var html='<div style="font-size:12px;color:var(--text3);padding:12px 0 8px">'+
-    'Estos productos vencen en 5 días o menos (o ya vencieron). Revisa el stock físico y da salida a estos primero.</div>';
-  lista.forEach(function(p){
-    var dias=_diasParaVencer(p.vencimiento);
-    var vencido=dias<0;
-    var color=vencido?'var(--red)':(dias<=2?'var(--red)':'var(--orange)');
-    var etiqueta=vencido?('Venció hace '+Math.abs(dias)+' día'+(Math.abs(dias)!==1?'s':'')):('Vence en '+dias+' día'+(dias!==1?'s':''));
-    html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-size:13px;font-weight:600">'+esc(p.nombre)+'</div>'+
-        '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+p.cantidad+' '+esc(p.unidad)+' en stock · '+esc(p.vencimiento)+'</div>'+
-      '</div>'+
-      '<div style="text-align:right;flex-shrink:0">'+
-        '<div style="font-family:\'Space Grotesk\',monospace;font-size:12px;font-weight:700;color:'+color+'">'+etiqueta+'</div>'+
-      '</div>'+
-    '</div>';
-  });
-  document.getElementById('vencimientoAlertaBody').innerHTML=html;
-  document.getElementById('vencimientoAlertaModal').classList.add('open');
 }
 
 function verAlertasStock(){
@@ -4538,7 +4129,7 @@ function verAlertasStock(){
     byProv[prov].push(p);
   });
 
-  var PROV_COLORS={'Pollo Rico':'#e8a020','Pollo Indio':'var(--red)','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'var(--primary)'};
+  var PROV_COLORS={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'};
   var html='<div style="font-size:12px;color:var(--text3);padding:12px 0 8px">'+
     'Estos productos están en o por debajo del mínimo definido. Toca <strong>Crear pedido</strong> para enviarlo directamente.</div>';
 
@@ -4679,16 +4270,6 @@ function renderAll(){
   var totalInv=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
   var invDash=document.getElementById('invTotalInvertidoDash'); if(invDash) invDash.textContent=fmt(totalInv);
   var invCntDash=document.getElementById('invProductosCntDash'); if(invCntDash) invCntDash.textContent=productos.length+' productos';
-
-  // Refrescar también la pestaña/sección visible en este momento. Antes renderAll() sólo
-  // actualizaba el resumen y los contadores del dashboard: al guardar una venta, gasto,
-  // pedido, encargo o adeudo sin cambiar de pestaña, la lista en pantalla NO se actualizaba
-  // hasta salir y volver a entrar a esa sección — dando la falsa impresión de que el
-  // registro no se había guardado (y llevando a registrarlo de nuevo por error).
-  if(currentPage==='operaciones'){ renderVentas(); renderGastos(); renderExtra(); }
-  else if(currentPage==='inventario'){ if(invMainTab==='pedidos') renderPedidos(); else renderInventario(); }
-  else if(currentPage==='ordenes'){ if(ordMainTab==='clientes') renderClientes(); else renderEncargos(); }
-  else if(currentPage==='mas'){ if(masTab==='historial') renderHistorial(); }
 }
 
 function renderPage(name){
@@ -4761,7 +4342,29 @@ function renderResumen(){
   // Calcula ganancia bruta y gastos operativos de UN día (objeto data[k])
   function calcularGananciaGastosDia(d){
     var ganancia=0, gastos=0;
-    (d.ventas||[]).forEach(function(v){ ganancia+=_gananciaVenta(v); });
+    (d.ventas||[]).forEach(function(v){
+      if(v.items&&v.items.length){
+        v.items.forEach(function(it){
+          var prod=it.productoId?getProducto(it.productoId):null;
+          if(prod&&prod.precioCosto>0){
+            ganancia+=it.monto-(prod.precioCosto*(parseFloat(it.cant)||1));
+          } else if(it.productoId&&!prod){
+            // Producto eliminado: costo desconocido, no sumar
+          } else if(!it.productoId){
+            ganancia+=it.monto;
+          }
+        });
+      } else {
+        var prod=v.productoId?getProducto(v.productoId):null;
+        if(prod&&prod.precioCosto>0){
+          ganancia+=v.monto-(prod.precioCosto*(parseFloat(v.cant)||1));
+        } else if(v.productoId&&!prod){
+          // costo desconocido
+        } else {
+          ganancia+=v.monto;
+        }
+      }
+    });
     (d.gastos||[]).forEach(function(g){
       var esDePedido=g.pedidoId||(g.desc&&g.desc.indexOf('Pedido:')===0);
       if(!esDePedido) gastos+=g.monto;
@@ -4772,7 +4375,7 @@ function renderResumen(){
   // Ganancia bruta y neta (mes actual + hoy)
   // Lógica: ganancia = ventas - costo de productos vendidos - gastos operativos
   // Solo se resta costo cuando el producto está vinculado y tiene precioCosto > 0
-  // Ventas manuales / productos sin costo registrado suman el monto completo (ver _gananciaItem)
+  // Ventas manuales (sin producto) NO suman a ganancia bruta (no sabemos su costo)
   // Encargos entregados sí suman con su costo real
   var mesActual=dateKey(currentDate).substring(0,7);
   var ganancia=0;
@@ -4833,7 +4436,7 @@ function renderResumen(){
     var rSd=data[keySd]?calcularGananciaGastosDia(data[keySd]):{ganancia:0,gastos:0};
     valoresSpark.push(rSd.ganancia-rSd.gastos);
   }
-  renderSparkline('sparkGananciaNeta', valoresSpark, gananciaNetaHoy>=0?'#1d9e75':'var(--red)');
+  renderSparkline('sparkGananciaNeta', valoresSpark, gananciaNetaHoy>=0?'#1d9e75':'#d44f2e');
 
   // Ganancia neta SEMANAL (semana actual, lunes a domingo, día real del sistema)
   var hoyReal=new Date();
@@ -5066,12 +4669,12 @@ function renderSemana(){
     var isToday=dateKey(d)===todayKey2;
     var hv=Math.max(3,Math.round((dayVals[i].v/maxDay)*32));
     var hg=Math.max(3,Math.round((dayVals[i].g/maxDay)*32));
-    var dotColor=dayVals[i].v>dayVals[i].g?'#1d9e75':dayVals[i].g>dayVals[i].v?'var(--red)':'#9a9a9a';
+    var dotColor=dayVals[i].v>dayVals[i].g?'#1d9e75':dayVals[i].g>dayVals[i].v?'#d44f2e':'#9a9a9a';
     html+='<div class="semana-day">'+
       '<div class="semana-day-label" style="color:'+(isToday?'var(--primary)':'var(--text3)')+'">'+DIAS[i]+'</div>'+
       '<div class="semana-day-bar-wrap" style="gap:2px;display:flex;align-items:flex-end">'+
         '<div class="semana-day-bar" style="background:#1d9e75;height:'+hv+'px"></div>'+
-        '<div class="semana-day-bar" style="background:var(--red);height:'+hg+'px"></div>'+
+        '<div class="semana-day-bar" style="background:#d44f2e;height:'+hg+'px"></div>'+
       '</div>'+
       '<div class="semana-day-dot" style="background:'+dotColor+'"></div>'+
     '</div>';
@@ -5104,26 +4707,6 @@ function setVentaFiltro(f){
   var el=document.getElementById('ventaFiltro'+f.charAt(0).toUpperCase()+f.slice(1)); if(el) el.classList.add('active');
   if(f==='lista'){var rt=document.getElementById('rankingSubTabs');if(rt)rt.remove();}
   renderList('ventas');
-}
-
-// Catálogo de categorías de gasto: ícono, etiqueta, color y RUBRO (operativo/personal).
-// El rubro se usa para separar "Gastos operativos" de "Gastos personales" en los reportes.
-// Nota: "Alimentación" y "Pasajes" se clasifican como operativo por defecto (gestión del
-// negocio); si en tu caso normalmente son gastos personales, dime y lo ajusto en un minuto.
-var GASTO_CATS={
-  pasaje:{label:'Transporte',icon:'🚌',color:'#2563eb',rubro:'operativo'},
-  alimentacion:{label:'Alimentación',icon:'🍽',color:'#c4860a',rubro:'operativo'},
-  alcaldia:{label:'Alcaldía',icon:'🏛',color:'var(--purple)',rubro:'operativo'},
-  electricidad:{label:'Electricidad',icon:'⚡',color:'var(--red)',rubro:'operativo'},
-  personal:{label:'Personal',icon:'👤',color:'var(--purple)',rubro:'personal'},
-  otro:{label:'Operativo',icon:'📋',color:'#666',rubro:'operativo'},
-  pedido:{label:'Pedido',icon:'📦',color:'#e8a020',rubro:'operativo'},
-  merma:{label:'Merma',icon:'🗑',color:'var(--red)',rubro:'operativo'},
-  autoconsumo:{label:'Consumo personal',icon:'🏠',color:'var(--purple)',rubro:'personal'}
-};
-function getGastoCategoria(it){
-  var key=it.pedidoId?'pedido':(it.categoria||'otro');
-  return GASTO_CATS[key]||GASTO_CATS.otro;
 }
 
 var gastoFiltroActual='todos';
@@ -5211,7 +4794,7 @@ function renderList(tipo){
   var el=document.getElementById('lista'+cap(tipo));
   var badge=document.getElementById('badge'+cap(tipo));
   if(badge) badge.textContent=items.length;
-  var CATS=GASTO_CATS;
+  var CATS={pasaje:{label:'Transporte',icon:'🚌',color:'#2563eb'},alimentacion:{label:'Alimentación',icon:'🍽',color:'#c4860a'},alcaldia:{label:'Alcaldía',icon:'🏛',color:'#7c3aed'},electricidad:{label:'Electricidad',icon:'⚡',color:'#d44f2e'},personal:{label:'Personal',icon:'👤',color:'#7c3aed'},otro:{label:'Operativo',icon:'📋',color:'#666'},pedido:{label:'Pedido',icon:'📦',color:'#e8a020'},merma:{label:'Merma',icon:'🗑',color:'#d44f2e'},autoconsumo:{label:'Consumo personal',icon:'🏠',color:'#7c3aed'}};
 
   // Resumen por categoría (solo gastos) — tarjetas clicables para filtrar
   if(tipo==='gastos'){
@@ -5259,7 +4842,7 @@ function renderList(tipo){
     var isV=tipo==='ventas';
     var isExtra=tipo==='extra';
     var isIngreso=isV||isExtra;
-    var bg=isIngreso?'var(--green-tint)':'var(--red-tint)';
+    var bg=isIngreso?'#e8f7f1':'#fdeee9';
     var color=isIngreso?'var(--green)':'var(--red)';
 
     // Smart description: derive from items[] if stored desc is legacy placeholder
@@ -5284,11 +4867,11 @@ function renderList(tipo){
     if(tipo==='gastos'){
       var cat=it.pedidoId?'pedido':(it.categoria||'otro');
       var ci=CATS[cat]||CATS.otro;
-      catBadge='<span style="font-size:10px;font-weight:600;color:'+ci.color+';background:'+ci.color+'18;border-radius:var(--radius-xs);padding:2px 5px;margin-left:4px">'+ci.icon+' '+ci.label+'</span>';
+      catBadge='<span style="font-size:9px;font-weight:600;color:'+ci.color+';background:'+ci.color+'18;border-radius:4px;padding:2px 5px;margin-left:4px">'+ci.icon+' '+ci.label+'</span>';
     } else if(isExtra&&it.categoria&&it.categoria!=='otro'){
-      catBadge='<span style="font-size:10px;font-weight:600;color:var(--green);background:var(--green-tint)18;border-radius:var(--radius-xs);padding:2px 5px;margin-left:4px">💵 '+esc(it.categoria)+'</span>';
+      catBadge='<span style="font-size:9px;font-weight:600;color:var(--green);background:#e8f7f118;border-radius:4px;padding:2px 5px;margin-left:4px">💵 '+esc(it.categoria)+'</span>';
     }
-    var verBtn='<button onclick="verDetalle(\''+tipo+'\','+it.id+')" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:3px 9px;font-size:11px;font-family:\'DM Sans\',sans-serif;cursor:pointer;color:var(--text2);margin-right:4px;flex-shrink:0">Ver</button>';
+    var verBtn='<button onclick="verDetalle(\''+tipo+'\','+it.id+')" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;font-family:\'DM Sans\',sans-serif;cursor:pointer;color:var(--text2);margin-right:4px;flex-shrink:0">Ver</button>';
     html+='<div class="tx-item">'+
       '<div class="tx-icon" style="background:'+bg+'">'+(isV?'💰':isExtra?'💵':(it.pedidoId?'📦':'📋'))+'</div>'+
       '<div class="tx-info"><div class="tx-name">'+esc(displayDesc)+catBadge+'</div><div class="tx-meta">'+meta+'</div></div>'+
@@ -5333,7 +4916,7 @@ function verDetalle(tipo, id){
   // ── GASTOS por pedido completado ──
   } else if(!isV&&it.pedidoId){
     var pedOrig=getPedido(it.pedidoId);
-    var provColor={'Pollo Rico':'#e8a020','Pollo Indio':'var(--red)','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'var(--primary)'};
+    var provColor={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'};
     if(pedOrig){
       var pcolor=provColor[pedOrig.tipo]||'var(--orange)';
       html+='<div style="background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:12px;border-left:3px solid '+pcolor+'">'+
@@ -5390,20 +4973,6 @@ function verDetalle(tipo, id){
   var color=isV?'var(--green)':'var(--red)';
   html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--border)">'+
     '<strong>Total</strong><span style="font-family:\'Space Grotesk\',monospace;font-size:18px;font-weight:700;color:'+color+'">'+fmt(it.monto)+'</span></div>';
-
-  // ── Ganancia neta de la venta (venta − costo del producto) ──
-  if(isV && !it.esCobroAdeudo){
-    var lineas=(it.items&&it.items.length)?it.items:[{productoId:it.productoId,cant:it.cant,monto:it.monto}];
-    var ganancia=0, sinCosto=false;
-    lineas.forEach(function(x){
-      ganancia += _gananciaItem(x);
-      if(_costoUnitLinea(x)===null) sinCosto=true;
-    });
-    var gColor = ganancia>=0 ? 'var(--primary)' : 'var(--red)';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">'+
-      '<strong style="font-size:12px;color:var(--text2)">Ganancia neta'+(sinCosto?' <span style="font-size:10px;color:var(--text3);font-weight:400">(costo no registrado en algún ítem)</span>':'')+'</strong>'+
-      '<span style="font-family:\'Space Grotesk\',monospace;font-size:15px;font-weight:700;color:'+gColor+'">'+fmt(ganancia)+'</span></div>';
-  }
   html+='</div>';
   document.getElementById('detalleVentaBody').innerHTML=html;
   document.getElementById('detalleVentaModal').classList.add('open');
@@ -5434,7 +5003,7 @@ function verPedidosPorProveedor(proveedor, color){
 
   lista.forEach(function(p){
     var fechaD=p.fecha?p.fecha.split('-').reverse().join('/'):'';
-    var sc=p.estado==='completado'?'var(--green-tint)':p.estado==='cancelado'?'var(--red-tint)':'var(--orange-tint)';
+    var sc=p.estado==='completado'?'#e8f7f1':p.estado==='cancelado'?'#fdeee9':'#fef9e7';
     var tc=p.estado==='completado'?'var(--green)':p.estado==='cancelado'?'var(--red)':'var(--orange)';
     var et=p.estado==='completado'?'✓ Completado':p.estado==='cancelado'?'✗ Cancelado':'⏳ Pendiente';
     var desc=p.desc||'';
@@ -5510,7 +5079,7 @@ function renderPedidos(){
     return;
   }
 
-  var colores={'Pollo Rico':'#e8a020','Pollo Indio':'var(--red)','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'var(--primary)'};
+  var colores={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'};
   var html='';
   items.forEach(function(it){
     var color=colores[it.tipo]||'#888';
@@ -5524,17 +5093,15 @@ function renderPedidos(){
     if(it.items&&it.items.length){
       prodLines='<div style="margin-top:6px;border-top:1px solid var(--border);padding-top:6px">';
       it.items.forEach(function(pr){
-        var vLbl=pr.vencimiento?' <span style="color:var(--orange)">· Vence '+fmtDate(pr.vencimiento)+'</span>':'';
         prodLines+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0">'+
-          '<span style="font-size:11px;color:var(--text2)">'+esc(pr.desc)+' × '+pr.cant+vLbl+'</span>'+
+          '<span style="font-size:11px;color:var(--text2)">'+esc(pr.desc)+' × '+pr.cant+'</span>'+
           '<span style="font-family:\'Space Grotesk\',monospace;font-size:11px;color:var(--orange)">'+fmt(pr.monto)+'</span>'+
         '</div>';
       });
       prodLines+='</div>';
     } else {
       var prod=it.productoId?getProducto(it.productoId):null;
-      var vLblManual=it.vencimiento?' · Vence '+fmtDate(it.vencimiento):'';
-      prodLines='<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(prod?'📦 '+esc(prod.nombre):esc(it.desc)+' · Cant: '+it.cant)+vLblManual+'</div>';
+      prodLines='<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(prod?'📦 '+esc(prod.nombre):esc(it.desc)+' · Cant: '+it.cant)+'</div>';
     }
 
     html+='<div class="ped-card">'+
@@ -5554,7 +5121,7 @@ function renderPedidos(){
       html+='<div class="ped-actions">'+
         '<button class="ped-btn ped-btn-del" onclick="eliminarPedidoGlobal('+it.id+')">Eliminar</button>'+
         '<button class="ped-btn ped-btn-cancel" onclick="cancelarPedido('+it.id+')">Cancelar</button>'+
-        '<button class="ped-btn" onclick="editarPedidoGlobal('+it.id+')" style="background:var(--blue-tint);border:1px solid var(--blue-tint-b);color:var(--blue)">✏ Editar</button>'+
+        '<button class="ped-btn" onclick="editarPedidoGlobal('+it.id+')" style="background:#e8f0fe;border:1px solid #93c5fd;color:#1e4fb7">✏ Editar</button>'+
         '<button class="ped-btn ped-btn-complete" onclick="completarPedido('+it.id+')">✓ Completar</button>'+
       '</div>';
     } else {
@@ -5571,7 +5138,7 @@ function renderPedidos(){
 function verDetallePedido(id){
   var ped=getPedido(id);
   if(!ped) return;
-  var color={'Pollo Rico':'#e8a020','Pollo Indio':'var(--red)','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'var(--primary)'}[ped.tipo]||'#888';
+  var color={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'}[ped.tipo]||'#888';
   var html='<div style="padding:4px 0">';
   html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Proveedor</span><strong style="color:'+color+'">'+esc(ped.tipo)+'</strong></div>';
   html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Fecha pedido</span><strong>'+(ped.fecha?ped.fecha.split('-').reverse().join('/'):'—')+'</strong></div>';
@@ -5583,19 +5150,16 @@ function verDetallePedido(id){
   if(ped.items&&ped.items.length){
     html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3)">Productos pedidos</div>';
     ped.items.forEach(function(it){
-      var vLine=it.vencimiento?'<div style="font-size:11px;color:var(--orange);margin-top:2px">⏳ Vence: '+fmtDate(it.vencimiento)+'</div>':'';
       html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'+
         '<div>'+
           '<div style="font-size:13px;font-weight:500">'+esc(it.desc)+'</div>'+
           '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+' '+esc(it.unidad||'')+(it.productoNombre?' · '+esc(it.productoNombre):'')+'</div>'+
-          vLine+
         '</div>'+
         '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;font-weight:600;color:var(--orange)">'+fmt(it.monto)+'</div>'+
       '</div>';
     });
   } else {
-    var vLineManual=ped.vencimiento?'<div style="font-size:11px;color:var(--orange);margin-top:4px">⏳ Vence: '+fmtDate(ped.vencimiento)+'</div>':'';
-    html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:12px;color:var(--text3)">'+esc(ped.desc)+' · Cant: '+ped.cant+vLineManual+'</div>';
+    html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:12px;color:var(--text3)">'+esc(ped.desc)+' · Cant: '+ped.cant+'</div>';
   }
   html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--border)">'+
     '<strong>Total</strong><span style="font-family:\'Space Grotesk\',monospace;font-size:18px;font-weight:700;color:var(--orange)">'+fmt(ped.monto)+'</span></div>';
@@ -5728,25 +5292,11 @@ function renderInventario(){
     var fd='';if(p.fecha){var fp=p.fecha.split('-');fd=fp[2]+'/'+fp[1]+'/'+fp[0];}
     var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0):'--';
     var alertaBadge=idsConAlertaReal[p.id]?
-      '<span onclick="event.stopPropagation();verAlertasStock()" style="cursor:pointer;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--red);background:var(--red-tint);border:1px solid var(--red-tint-b);border-radius:var(--radius-xs);padding:2px 7px;margin-left:5px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Pedir</span>':'';
-    var vencBadge='';
-    if(p.vencimiento && p.cantidad>0){
-      var diasVenc=_diasParaVencer(p.vencimiento);
-      if(diasVenc<=5){
-        var vencColor=diasVenc<0?'var(--red)':(diasVenc<=2?'var(--red)':'var(--orange)');
-        var vencBg=diasVenc<0?'var(--red-tint)':'var(--orange-tint)';
-        var vencBorder=diasVenc<0?'var(--red-tint-b)':'var(--orange-tint-b)';
-        var vencIcon=diasVenc<0?
-          '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>':
-          '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-        var vencTxt=diasVenc<0?'Vencido':'Vence '+diasVenc+'d';
-        vencBadge='<span onclick="event.stopPropagation();verAlertasVencimiento()" style="cursor:pointer;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:'+vencColor+';background:'+vencBg+';border:1px solid '+vencBorder+';border-radius:var(--radius-xs);padding:2px 7px;margin-left:5px">'+vencIcon+vencTxt+'</span>';
-      }
-    }
+      '<span onclick="event.stopPropagation();verAlertasStock()" style="cursor:pointer;font-size:9px;font-weight:700;color:var(--red);background:#fdeee9;border:1px solid #f3c4b3;border-radius:6px;padding:1px 5px;margin-left:5px">⚠ Pedir</span>':'';
     html+='<div class="inv-card" style="margin-bottom:8px">'+
       '<div class="inv-row-main" onclick="toggleInvCard('+p.id+')">'+
         '<div style="flex:1;min-width:0">'+
-          '<div style="font-size:13.5px;font-weight:600;display:flex;align-items:center;flex-wrap:wrap">'+esc(p.nombre)+alertaBadge+vencBadge+'</div>'+
+          '<div style="font-size:13.5px;font-weight:600;display:flex;align-items:center;flex-wrap:wrap">'+esc(p.nombre)+alertaBadge+'</div>'+
           '<div style="font-size:11.5px;color:var(--text3);margin-top:1px">'+p.cantidad+' '+esc(p.unidad)+' en stock</div>'+
         '</div>'+
         '<div style="text-align:right;flex-shrink:0">'+
@@ -5762,14 +5312,14 @@ function renderInventario(){
             (esVendedor?'':'<div class="inv-stat"><div class="inv-stat-label">Costo</div><div class="inv-stat-value" style="color:var(--red)">'+fmt(p.precioCosto)+'</div></div>')+
             '<div class="inv-stat"><div class="inv-stat-label">Venta</div><div class="inv-stat-value" style="color:var(--green)">'+fmt(p.precioVenta)+'</div></div>'+
           '</div>'+
-          '<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Ingreso: '+esc(fd)+(p.notas?' &middot; '+esc(p.notas):'')+(bajoPorMinimo&&p.cantidadReorden?' &middot; Pedir '+p.cantidadReorden+' '+esc(p.unidad):'')+(p.vencimiento?' &middot; Vence: '+esc(p.vencimiento):'')+'</div>'+
-          (p.precioMayoreo>0&&p.cantidadMayoreo>0?'<div style="font-size:11px;color:var(--purple);margin-bottom:8px">🏷 Mayoreo desde '+p.cantidadMayoreo+' '+esc(p.unidad)+': <strong>'+fmt(p.precioMayoreo)+'</strong> c/u</div>':'')+
+          '<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Ingreso: '+esc(fd)+(p.notas?' &middot; '+esc(p.notas):'')+(bajoPorMinimo&&p.cantidadReorden?' &middot; Pedir '+p.cantidadReorden+' '+esc(p.unidad):'')+'</div>'+
+          (p.precioMayoreo>0&&p.cantidadMayoreo>0?'<div style="font-size:11px;color:#7c3aed;margin-bottom:8px">🏷 Mayoreo desde '+p.cantidadMayoreo+' '+esc(p.unidad)+': <strong>'+fmt(p.precioMayoreo)+'</strong> c/u</div>':'')+
           (esVendedor?'':
           '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Margen: <strong style="color:var(--primary)">'+(margen!=='--'?margen+'%':'--')+'</strong> &nbsp;|&nbsp; Valor stock: <strong style="color:var(--text)">'+fmt(p.cantidad*p.precioCosto)+'</strong> &nbsp;|&nbsp; Ganancia esperada: <strong style="color:var(--green)">'+fmt((p.precioVenta-p.precioCosto)*p.cantidad)+'</strong></div>'+
           '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">'+
             '<button class="inv-btn inv-btn-danger" onclick="eliminarProducto('+p.id+')">Eliminar</button>'+
-            '<button class="inv-btn" style="background:var(--red-tint);color:var(--red);border-color:var(--red-tint-b)" onclick="openMermaModal('+p.id+',\'merma\')">🗑 Merma</button>'+
-            '<button class="inv-btn" style="background:var(--purple-tint);color:var(--purple);border-color:var(--purple-tint-b)" onclick="openMermaModal('+p.id+',\'autoconsumo\')">🏠 Consumo</button>'+
+            '<button class="inv-btn" style="background:#fdeee9;color:var(--red);border-color:#f3c4b3" onclick="openMermaModal('+p.id+',\'merma\')">🗑 Merma</button>'+
+            '<button class="inv-btn" style="background:#f1ecfc;color:#7c3aed;border-color:#dcc9f7" onclick="openMermaModal('+p.id+',\'autoconsumo\')">🏠 Consumo</button>'+
             '<button class="inv-btn" onclick="openStockModal('+p.id+')">Ajustar</button>'+
             '<button class="inv-btn inv-btn-primary" onclick="openProductoModal('+p.id+')">Editar</button>'+
           '</div>')+
@@ -5803,27 +5353,27 @@ function renderHistorial(){
     var p2=k.split('-');
     var fo=new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
     var fecha=fo.toLocaleDateString('es-SV',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-    var balColor=(tv-tg)>=0?'var(--primary)':'var(--red)';
-    var balBg=(tv-tg)>=0?'var(--green-tint)':'var(--red-tint)';
+    var balColor=(tv-tg)>=0?'#0f6e56':'#993c1d';
+    var balBg=(tv-tg)>=0?'#e8f7f1':'#fdeee9';
     html+='<div class="hist-day"><div class="hist-day-header">'+fecha+'</div><div class="tx-list">';
     d.ventas.forEach(function(it){
       var meta=it.hora+(it.productoNombre?' &middot; 📦 '+esc(it.productoNombre):'');
-      html+='<div class="tx-item"><div class="tx-icon" style="background:var(--green-tint)">💰</div><div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+meta+'</div></div><div class="tx-amount" style="color:var(--green)">+'+fmt(it.monto)+'</div></div>';
+      html+='<div class="tx-item"><div class="tx-icon" style="background:#e8f7f1">💰</div><div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+meta+'</div></div><div class="tx-amount" style="color:var(--green)">+'+fmt(it.monto)+'</div></div>';
     });
     d.gastos.forEach(function(it){
-      html+='<div class="tx-item"><div class="tx-icon" style="background:var(--red-tint)">📋</div><div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+esc(it.hora)+'</div></div><div class="tx-amount" style="color:var(--red)">-'+fmt(it.monto)+'</div></div>';
+      html+='<div class="tx-item"><div class="tx-icon" style="background:#fdeee9">📋</div><div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+esc(it.hora)+'</div></div><div class="tx-amount" style="color:var(--red)">-'+fmt(it.monto)+'</div></div>';
     });
     d.pedidos.forEach(function(it){
-      var c2={'Pollo Rico':'#e8a020','Pollo Indio':'var(--red)','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'var(--primary)'}[it.tipo]||'#888';
+      var c2={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a','Superior':'#6366f1','Abuela':'#0f6e56'}[it.tipo]||'#888';
       // buscar estado en pedidosGlobal
       var gped=getPedido(it.id);
       var estadoLabel=gped?(gped.estado==='completado'?' ✅':gped.estado==='cancelado'?' ❌':' ⏳'):'';
       html+='<div class="tx-item"><div class="tx-icon" style="background:#f5f0e0">📦</div><div class="tx-info"><div class="tx-name" style="color:'+c2+'">'+esc(it.tipo)+estadoLabel+'</div><div class="tx-meta">'+esc(it.desc)+' &middot; '+esc(it.hora)+'</div></div><div class="tx-amount" style="color:'+c2+'">'+fmt(it.monto)+'</div></div>';
     });
     html+='</div><div class="hist-summary">'+
-      '<span class="hist-chip" style="background:var(--green-tint);color:var(--primary)">Ventas: '+fmt(tv)+'</span>'+
-      '<span class="hist-chip" style="background:var(--red-tint);color:var(--red)">Gastos: '+fmt(tg)+'</span>'+
-      '<span class="hist-chip" style="background:var(--orange-tint);color:var(--orange)">Pedidos: '+fmt(tp)+'</span>'+
+      '<span class="hist-chip" style="background:#e8f7f1;color:#0f6e56">Ventas: '+fmt(tv)+'</span>'+
+      '<span class="hist-chip" style="background:#fdeee9;color:#993c1d">Gastos: '+fmt(tg)+'</span>'+
+      '<span class="hist-chip" style="background:#fef0d9;color:#854f0b">Pedidos: '+fmt(tp)+'</span>'+
       '<span class="hist-chip" style="background:'+balBg+';color:'+balColor+';margin-left:auto">Bal: '+fmt(tv-tg)+'</span>'+
     '</div></div>';
   });
@@ -5996,7 +5546,6 @@ function saveEncargo(){
   var productosDesc=encargoItemsBuffer.length===1?encargoItemsBuffer[0].productoNombre:encargoItemsBuffer[0].productoNombre+' + '+(encargoItemsBuffer.length-1)+' más';
 
   var estadoAnterior=null;
-  var encargoIdFinal=idExist?parseInt(idExist):null;
 
   if(idExist){
     var idx=encargos.findIndex(function(x){return x.id===parseInt(idExist);});
@@ -6006,14 +5555,11 @@ function saveEncargo(){
       encargos[idx]={id:encargos[idx].id,clienteId:clienteId,cliente:clienteNombre,items:encargoItemsBuffer.slice(),productos:productosDesc,fecha:fecha,costo:costo,anticipo:anticipo,estado:estado,notas:notas};
     }
   } else {
-    encargoIdFinal=Date.now();
-    encargos.push({id:encargoIdFinal,clienteId:clienteId,cliente:clienteNombre,items:encargoItemsBuffer.slice(),productos:productosDesc,fecha:fecha,costo:costo,anticipo:anticipo,estado:estado,notas:notas});
+    encargos.push({id:Date.now(),clienteId:clienteId,cliente:clienteNombre,items:encargoItemsBuffer.slice(),productos:productosDesc,fecha:fecha,costo:costo,anticipo:anticipo,estado:estado,notas:notas});
   }
 
-  // Si quedó en "entregado" → registrar venta + descontar inventario.
-  // Cubre tanto el cambio de estado de un encargo existente como un encargo NUEVO
-  // que se crea directamente como entregado (antes, estadoAnterior era null y no entraba aquí).
-  if(estado==='entregado' && estadoAnterior!=='entregado'){
+  // Si cambió a "entregado" → registrar venta + descontar inventario
+  if(estado==='entregado' && estadoAnterior && estadoAnterior!=='entregado'){
     var hoy=new Date();
     var hora=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
     var day=getDayData(hoy);
@@ -6023,8 +5569,8 @@ function saveEncargo(){
       desc:'Encargo: '+productosDesc+' — '+clienteNombre,
       cant:1,
       hora:hora,
-      items:encargoItemsBuffer.map(function(it){return {productoId:it.productoId,productoNombre:it.productoNombre,desc:it.productoNombre,cant:it.cant,monto:it.monto,costoUnit:it.productoId?_costoDe(getProducto(it.productoId)):undefined};}),
-      encargoId:encargoIdFinal,
+      items:encargoItemsBuffer.map(function(it){return {productoId:it.productoId,productoNombre:it.productoNombre,desc:it.productoNombre,cant:it.cant,monto:it.monto};}),
+      encargoId:parseInt(idExist)||null,
       notas:notas
     });
     saveData();
@@ -6051,7 +5597,6 @@ function saveEncargo(){
 
   saveEncargos();
   closeModal('encargoModal');
-  renderEncargos();
   renderAll();
 }
 
@@ -6063,9 +5608,7 @@ function eliminarEncargo(id){
     if(!confirm('¿Eliminar este encargo?'))return;
   }
   encargos=encargos.filter(function(e){return e.id!==id;});
-  marcarEliminado('encargo:'+id);
   saveEncargos();
-  saveEliminados();
   renderEncargos();
   toast('Encargo eliminado');
 }
@@ -6103,11 +5646,11 @@ function updateCierre(){
   if(document.getElementById('cierreEfectivo').value===''){el.style.display='none';return;}
   el.style.display='block';
   if(Math.abs(diff)<0.01){
-    el.style.background='var(--green-tint)';el.style.color='var(--green)';el.textContent='✓ Cuadra perfectamente';
+    el.style.background='#e8f7f1';el.style.color='var(--green)';el.textContent='✓ Cuadra perfectamente';
   } else if(diff>0){
-    el.style.background='var(--green-tint)';el.style.color='var(--green)';el.textContent='Sobran '+fmt(diff)+' (más de lo esperado)';
+    el.style.background='#e8f7f1';el.style.color='var(--green)';el.textContent='Sobran '+fmt(diff)+' (más de lo esperado)';
   } else {
-    el.style.background='var(--red-tint)';el.style.color='var(--red)';el.textContent='Faltan '+fmt(Math.abs(diff))+' (menos de lo esperado)';
+    el.style.background='#fdeee9';el.style.color='var(--red)';el.textContent='Faltan '+fmt(Math.abs(diff))+' (menos de lo esperado)';
   }
 }
 
@@ -6151,7 +5694,7 @@ function checkEncargosBanner(){
     if(hoyC) msg+='📦 '+hoyC+' encargo'+(hoyC>1?'s':'')+' para entregar HOY';
     if(manC) msg+=(msg?' · ':'')+manC+' para mañana';
     alertasActivas.encargos={
-      icon:'📦', text:msg, color:'var(--blue)', bg:'var(--blue-tint)', border:'var(--blue-tint-b)',
+      icon:'📦', text:msg, color:'#1e4fb7', bg:'#e8f0fe', border:'#93c5fd',
       onclick:"showSection('ordenes',document.getElementById('navOrd'));setOrdMainTab('encargos')"
     };
   } else {
@@ -6282,9 +5825,7 @@ function saveCliente(){
 function eliminarCliente(id){
   if(!confirm('¿Eliminar este cliente? Se perderá su historial de adeudos.'))return;
   clientes=clientes.filter(function(c){return c.id!==id;});
-  marcarEliminado('cliente:'+id);
   saveClientes();
-  saveEliminados();
   renderClientes();
   toast('Cliente eliminado');
 }
@@ -6500,33 +6041,18 @@ function saveAdeudo(){
 
   saveClientes();
   closeModal('adeudoModal');
-  renderClientes();
   renderAll();
   toast(saldo<=0?'✓ Adeudo saldado por completo'+(nuevoPago>0?' — '+fmt(nuevoPago)+' sumados a la caja':''):'✓ Adeudo guardado'+(nuevoPago>0?', abono de '+fmt(nuevoPago)+' en caja':''));
 }
 
 function eliminarAdeudo(clienteId, adeudoId){
+  if(!confirm('¿Eliminar este adeudo? Se perderá su historial de pagos.'))return;
   var c=getCliente(clienteId);
   if(!c) return;
-  var a=(c.adeudos||[]).find(function(x){return x.id===adeudoId;});
-  if(!a) return;
-  var tienePagos=(a.pagos&&a.pagos.length>0)||(a.abonado>0);
-  var msg='¿Eliminar este adeudo? Se perderá su historial de pagos.';
-  if(a.productoId) msg+=' El producto vinculado se devolverá al inventario.';
-  if(tienePagos) msg+=' Los abonos que ya sumaron a la caja NO se revierten.';
-  if(!confirm(msg))return;
-  // El producto se descontó del inventario al CREAR el adeudo (ver saveAdeudo) y no hay
-  // ningún otro registro (venta) ligado a esa salida — hay que devolverlo al borrar, o el
-  // stock queda descontado para siempre aunque el adeudo ya no exista.
-  if(a.productoId && a.cantidadTotal){
-    var prod=getProducto(a.productoId);
-    if(prod){ prod.cantidad=parseFloat((prod.cantidad+a.cantidadTotal).toFixed(4)); saveProductos(); }
-  }
-  c.adeudos=(c.adeudos||[]).filter(function(x){return x.id!==adeudoId;});
+  c.adeudos=(c.adeudos||[]).filter(function(a){return a.id!==adeudoId;});
   saveClientes();
   renderClientes();
-  renderAll();
-  toast('Adeudo eliminado'+(a.productoId?' — stock devuelto':''));
+  toast('Adeudo eliminado');
 }
 
 // Marcar adeudo como pagado por completo de un toque: registra el saldo restante
@@ -6568,9 +6094,8 @@ function marcarAdeudoPagado(clienteId, adeudoId){
   }
 
   saveClientes();
-  renderClientes();
   renderAll();
-  toast('✓ Adeudo saldado — '+fmt(saldoRestante)+' sumados a la caja');
+  toast('✓ Adeudo saldado — $'+fmt(saldoRestante)+' sumados a la caja');
 }
 
 function renderClientes(){
@@ -6628,13 +6153,13 @@ function renderClientes(){
           (c.telefono?'<div style="font-size:12px;color:var(--text3);margin-top:1px">📞 '+esc(c.telefono)+'</div>':'')+
         '</div>'+
         '<div style="display:flex;gap:6px;flex-shrink:0">'+
-          '<button onclick="openClienteModal('+c.id+')" title="Editar cliente" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--blue-tint);border:1px solid var(--blue-tint-b);color:var(--blue);border-radius:8px;font-size:14px;cursor:pointer">✏️</button>'+
-          '<button onclick="eliminarCliente('+c.id+')" title="Eliminar cliente" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--red-tint);border:1px solid var(--red-tint-b);color:var(--red);border-radius:8px;font-size:14px;cursor:pointer">🗑️</button>'+
+          '<button onclick="openClienteModal('+c.id+')" title="Editar cliente" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#e8f0fe;border:1px solid #93c5fd;color:#1e4fb7;border-radius:8px;font-size:14px;cursor:pointer">✏️</button>'+
+          '<button onclick="eliminarCliente('+c.id+')" title="Eliminar cliente" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#fdeee9;border:1px solid #f3c4b3;color:var(--red);border-radius:8px;font-size:14px;cursor:pointer">🗑️</button>'+
         '</div>'+
       '</div>'+
 
       // Estado de saldo (banda de color)
-      '<div style="padding:10px 16px;background:'+(saldo>0?'var(--red-tint)':'var(--green-tint)')+';display:flex;justify-content:space-between;align-items:center">'+
+      '<div style="padding:10px 16px;background:'+(saldo>0?'#fdeee9':'#e8f7f1')+';display:flex;justify-content:space-between;align-items:center">'+
         '<span style="font-size:12px;font-weight:700;color:'+(saldo>0?'var(--red)':'var(--green)')+'">'+(saldo>0?'⚠️ Tiene adeudo pendiente':'✅ Sin adeudos pendientes')+'</span>'+
         (saldo>0?'<span style="font-family:\'Space Grotesk\',monospace;font-size:15px;font-weight:700;color:var(--red)">'+fmt(saldo)+'</span>':'')+
       '</div>';
@@ -6679,9 +6204,9 @@ function renderClientes(){
             '</div>'+
           '</div>'+
           '<div style="display:flex;gap:6px">'+
-            (!pagado?'<button onclick="marcarAdeudoPagado('+c.id+','+a.id+')" style="flex:1;background:var(--green-tint);border:1px solid var(--green-tint-b);color:var(--primary);border-radius:7px;padding:6px;font-size:11px;font-weight:600;cursor:pointer">✓ Marcar pagado</button>':'')+
+            (!pagado?'<button onclick="marcarAdeudoPagado('+c.id+','+a.id+')" style="flex:1;background:#e8f7f1;border:1px solid #a7e3c8;color:#0f6e56;border-radius:7px;padding:6px;font-size:11px;font-weight:600;cursor:pointer">✓ Marcar pagado</button>':'')+
             '<button onclick="openAdeudoModal('+c.id+','+a.id+')" style="flex:'+(pagado?'1':'0')+';min-width:36px;background:var(--surface);border:1px solid var(--border);color:var(--text2);border-radius:7px;padding:6px;font-size:11px;cursor:pointer">✏️ '+(pagado?'Ver / Editar':'')+'</button>'+
-            '<button onclick="eliminarAdeudo('+c.id+','+a.id+')" style="min-width:36px;background:var(--red-tint);border:1px solid var(--red-tint-b);color:var(--red);border-radius:7px;padding:6px;font-size:11px;cursor:pointer">🗑️</button>'+
+            '<button onclick="eliminarAdeudo('+c.id+','+a.id+')" style="min-width:36px;background:#fdeee9;border:1px solid #f3c4b3;color:var(--red);border-radius:7px;padding:6px;font-size:11px;cursor:pointer">🗑️</button>'+
           '</div>'+
         '</div>';
       });
@@ -6816,7 +6341,6 @@ function exportarDatos(){
     cvd_encargos: localStorage.getItem('cvd_encargos'),
     cvd_clientes: localStorage.getItem('cvd_clientes'),
     cvd_fondos: localStorage.getItem('cvd_fondos'),
-    cvd_eliminados: localStorage.getItem('cvd_eliminados'),
     exportado: new Date().toISOString()
   };
   var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
@@ -6841,7 +6365,6 @@ function importarDatos(event){
       if(backup.cvd_encargos) localStorage.setItem('cvd_encargos',backup.cvd_encargos);
       if(backup.cvd_clientes) localStorage.setItem('cvd_clientes',backup.cvd_clientes);
       if(backup.cvd_fondos) localStorage.setItem('cvd_fondos',backup.cvd_fondos);
-      if(backup.cvd_eliminados) localStorage.setItem('cvd_eliminados',backup.cvd_eliminados);
       loadData();
       renderAll();
       _fbWrite(); // sincronizar datos restaurados a Firebase
@@ -6948,8 +6471,6 @@ function agregarItemPedido(){
   if(cant<=0){toast('⚠ Ingresa una cantidad válida');return;}
   if(monto<=0){toast('⚠ Ingresa un monto válido');return;}
   if(!desc){toast('⚠ Ingresa una descripción');return;}
-  var vencEl=document.getElementById('fVencimiento');
-  var vencimiento=vencEl?vencEl.value:'';
   var prod=pid?getProducto(pid):null;
   pedidoItems.push({
     productoId:prod?prod.id:null,
@@ -6957,8 +6478,7 @@ function agregarItemPedido(){
     desc:desc,
     cant:cant,
     monto:monto,
-    unidad:unidad,
-    vencimiento:vencimiento||null
+    unidad:unidad
   });
   // Reset campos
   document.getElementById('pedidoProdSel').value='';
@@ -6969,7 +6489,6 @@ function agregarItemPedido(){
   document.getElementById('fDesc').value='';
   document.getElementById('fCant').value='1';
   document.getElementById('fMonto').value='';
-  if(vencEl) vencEl.value='';
   if(uSel) uSel.selectedIndex=0;
   renderPedidoItems();
 }
@@ -6989,12 +6508,11 @@ function renderPedidoItems(){
   var total=pedidoItems.reduce(function(a,x){return a+x.monto;},0);
   var html='';
   pedidoItems.forEach(function(it,i){
-    var prodLabel=it.productoNombre?'<span style="font-size:10px;color:var(--orange);background:var(--orange-tint);padding:1px 5px;border-radius:var(--radius-xs);margin-left:4px">📦 '+esc(it.productoNombre)+'</span>':'';
-    var vencLabel=it.vencimiento?'<span style="font-size:10px;color:var(--red);margin-left:6px">⏳ Vence '+esc(it.vencimiento)+'</span>':'';
+    var prodLabel=it.productoNombre?'<span style="font-size:10px;color:var(--orange);background:#fef0d9;padding:1px 5px;border-radius:4px;margin-left:4px">📦 '+esc(it.productoNombre)+'</span>':'';
     html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">'+
       '<div style="flex:1;min-width:0">'+
         '<div style="font-size:13px;font-weight:500">'+esc(it.desc)+prodLabel+'</div>'+
-        '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+' '+esc(it.unidad)+vencLabel+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+' '+esc(it.unidad)+'</div>'+
       '</div>'+
       '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;color:var(--orange);font-weight:600;white-space:nowrap">'+fmt(it.monto)+'</div>'+
       '<button onclick="removePedidoItem('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0">×</button>'+
@@ -7125,7 +6643,7 @@ function buildReporteDiario(){
     var dd=data[dk];
     (dd.ventas||[]).forEach(function(v){
       var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant,monto:v.monto}];
-      items.forEach(function(it){ganMes+=_gananciaItem(it);});
+      items.forEach(function(it){var pp=it.productoId?getProducto(it.productoId):null;if(pp&&pp.precioCosto>0){ganMes+=it.monto-(pp.precioCosto*(parseFloat(it.cant)||1));}else if(!it.productoId){ganMes+=it.monto;}});
     });
     (dd.gastos||[]).forEach(function(g){if(!g.pedidoId&&!(g.desc&&g.desc.indexOf('Pedido:')===0)) gastosMes+=g.monto;});
   });
@@ -7331,7 +6849,7 @@ function buildReporteMensual(){
     // Ganancia
     (dayD.ventas||[]).forEach(function(vx){
       var items=vx.items&&vx.items.length?vx.items:[{productoId:vx.productoId,cant:vx.cant,monto:vx.monto}];
-      items.forEach(function(it){ganMesRpt+=_gananciaItem(it);});
+      items.forEach(function(it){var pr=it.productoId?getProducto(it.productoId):null;if(pr&&pr.precioCosto>0){ganMesRpt+=it.monto-(pr.precioCosto*(parseFloat(it.cant)||1));}else if(!it.productoId){ganMesRpt+=it.monto;}});
     });
     (dayD.gastos||[]).forEach(function(gx){if(!gx.pedidoId&&!(gx.desc&&gx.desc.indexOf("Pedido:")===0)) gastosMesRpt+=gx.monto;});
   }
@@ -7880,7 +7398,7 @@ function renderAnalisisProductos(){
         if(!prod) return;
         if(!stats[it.productoId]) stats[it.productoId]={nombre:prod.nombre,cant:0,ingreso:0,ganancia:0};
         var cant=parseFloat(it.cant)||1;
-        var ganancia=_gananciaItem(it);
+        var ganancia=prod.precioCosto>0?it.monto-(prod.precioCosto*cant):it.monto;
         stats[it.productoId].cant+=cant;
         stats[it.productoId].ingreso+=it.monto;
         stats[it.productoId].ganancia+=ganancia;
@@ -8087,65 +7605,6 @@ function buildReporteDeudaProveedores(){
   return html;
 }
 
-function buildReporteGastosRubro(){
-  var year = currentDate.getFullYear();
-  var month = currentDate.getMonth();
-  var mesNombre = currentDate.toLocaleDateString('es-SV',{month:'long',year:'numeric'});
-  var totalDias = new Date(year, month+1, 0).getDate();
-
-  var items=[]; // {fecha, hora, desc, monto, cat}
-  for(var d=1;d<=totalDias;d++){
-    var dd=new Date(year,month,d);
-    var k=dateKey(dd);
-    var dayD=data[k]||{gastos:[]};
-    (dayD.gastos||[]).forEach(function(g){
-      items.push({fecha:k, hora:g.hora||'', desc:g.desc||'', monto:g.monto||0, cat:getGastoCategoria(g)});
-    });
-  }
-
-  var html = rptHeader('Gastos Operativos y Personales', cap(mesNombre));
-
-  if(!items.length){
-    html+='<p style="text-align:center;color:#aaa;padding:24px">No hay gastos registrados este mes.</p>';
-    html+=rptFooter(); return html;
-  }
-
-  var operativos=items.filter(function(it){return it.cat.rubro==='operativo';});
-  var personales=items.filter(function(it){return it.cat.rubro==='personal';});
-  var totalOp=operativos.reduce(function(a,it){return a+it.monto;},0);
-  var totalPer=personales.reduce(function(a,it){return a+it.monto;},0);
-
-  html += rptStrip([
-    {label:'Gastos operativos',value:fmtPDF(totalOp),sub:operativos.length+' registros',color:'#0a3d2e'},
-    {label:'Gastos personales',value:fmtPDF(totalPer),sub:personales.length+' registros',color:'var(--purple)'},
-    {label:'Total del mes',value:fmtPDF(totalOp+totalPer),color:'#d44f2e'}
-  ]);
-
-  function tablaRubro(titulo, lista, colorTotal){
-    if(!lista.length) return '';
-    var h='<div class="rpt-section no-break">';
-    h+=rptSH(titulo, fmtPDF(lista.reduce(function(a,it){return a+it.monto;},0)));
-    h+='<table class="rpt-table" style="width:100%"><thead><tr>'+
-      '<th>Fecha</th><th>Descripción</th><th>Categoría</th><th class="r">Monto</th>'+
-    '</tr></thead><tbody>';
-    lista.sort(function(a,b){return a.fecha<b.fecha?1:-1;}).forEach(function(it){
-      h+='<tr><td>'+fmtDate(it.fecha)+'</td><td>'+esc(it.desc)+'</td>'+
-        '<td>'+it.cat.icon+' '+esc(it.cat.label)+'</td>'+
-        '<td class="num" style="color:'+colorTotal+'">'+fmtPDF(it.monto)+'</td></tr>';
-    });
-    h+='<tr class="tot"><td colspan="3" class="r">SUBTOTAL '+esc(titulo).toUpperCase()+'</td>'+
-      '<td class="num" style="color:'+colorTotal+'">'+fmtPDF(lista.reduce(function(a,it){return a+it.monto;},0))+'</td></tr>';
-    h+='</tbody></table></div>';
-    return h;
-  }
-
-  html += tablaRubro('Gastos operativos', operativos, '#0a3d2e');
-  html += tablaRubro('Gastos personales', personales, '#7c3aed');
-
-  html+=rptFooter();
-  return html;
-}
-
 function generarReporte(tipo){
   var html='';
   try{
@@ -8163,7 +7622,6 @@ function generarReporte(tipo){
     else if(tipo==='inventarioMensual') html=buildReporteInventarioMensual();
     else if(tipo==='clientesAdeudos') html=buildReporteClientesAdeudos();
     else if(tipo==='deudaProveedores') html=buildReporteDeudaProveedores();
-    else if(tipo==='gastosRubro') html=buildReporteGastosRubro();
   }catch(err){
     console.error('Error generando reporte', tipo, err);
     toast('⚠ No se pudo generar el reporte. Revisa que tengas datos registrados.');
@@ -8294,18 +7752,6 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 
-<!-- ═══ MODAL: ALERTAS DE VENCIMIENTO ═══ -->
-<div class="modal-overlay" id="vencimientoAlertaModal" onclick="overlayClose(event,'vencimientoAlertaModal')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-header"><button class="modal-back" onclick="closeModal('vencimientoAlertaModal')">‹</button><div class="modal-title" style="color:var(--orange)">⏳ Productos por vencer</div></div>
-    <div class="form-section" style="padding:0">
-      <div id="vencimientoAlertaBody" style="padding:0 16px 16px"></div>
-    </div>
-  </div>
-</div>
-
-
 <!-- ═══ MODAL: VENTA RÁPIDA ═══ -->
 <div class="modal-overlay" id="ventaRapidaModal" onclick="overlayClose(event,'ventaRapidaModal')">
   <div class="modal">
@@ -8388,7 +7834,7 @@ if('serviceWorker' in navigator){
       <input type="hidden" id="mermaProductoId">
       <input type="hidden" id="mermaTipo" value="merma">
       <div id="mermaProductoLabel" style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-weight:600;color:var(--text1)"></div>
-      <div id="mermaAviso" style="font-size:12px;color:var(--text3);background:var(--red-tint);border-radius:var(--radius-sm);padding:10px 14px;border-left:3px solid var(--red)">
+      <div id="mermaAviso" style="font-size:12px;color:var(--text3);background:#fdeee9;border-radius:var(--radius-sm);padding:10px 14px;border-left:3px solid var(--red)">
         Se descontará del stock y el costo del producto se registrará como gasto del día (categoría Merma), afectando la ganancia neta.
       </div>
       <div class="form-row">
