@@ -2233,8 +2233,34 @@ function _mergeState(L,R,B){
 
 // ── ESCRITURA (transacción: lee lo último del servidor, fusiona y escribe atómicamente) ──
 var _fbWriting=false, _fbWriteQueued=false, _fbRetryTimer=null;
+// Reemplazo total de la nube con el estado local (solo para restaurar un respaldo).
+// Si no hay internet, queda marcado y se aplica en cuanto haya conexión.
+function _fbReplaceAll(){
+  if(!fbOnline){ toast('⚠ Sin conexión: la restauración se subirá cuando vuelva internet'); return; }
+  clearTimeout(_fbTimer);
+  _fbWriting=true;
+  var st=_getLocalState(), str=JSON.stringify(st);
+  db.doc(DB_DOC).set({
+    data: JSON.stringify(st.data), productos: JSON.stringify(st.productos), pedidos: JSON.stringify(st.pedidos),
+    encargos: JSON.stringify(st.encargos), clientes: JSON.stringify(st.clientes), fondos: JSON.stringify(st.fondos),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(function(){
+    _writeBase(str);
+    localStorage.removeItem('cvd_pendingReplace');
+    _fbWriting=false; syncPending=false; updateSyncIndicator();
+    toast('☁ Respaldo restaurado en la nube');
+  }).catch(function(err){
+    console.error('Error al restaurar en la nube:', err);
+    _fbWriting=false; syncPending=true; updateSyncIndicator();
+    toast('⚠ No se pudo subir la restauración; se reintentará');
+    clearTimeout(_fbRetryTimer);
+    _fbRetryTimer=setTimeout(function(){ if(localStorage.getItem('cvd_pendingReplace')) _fbReplaceAll(); }, 8000);
+  });
+}
+
 function _fbWrite(){
   if(!fbOnline) return;
+  if(localStorage.getItem('cvd_pendingReplace')){ if(!_fbWriting) _fbReplaceAll(); return; }
   if(_fbWriting){ _fbWriteQueued=true; return; }
   _fbWriting=true; _fbWriteQueued=false;
   var ref=db.doc(DB_DOC);
@@ -2283,6 +2309,7 @@ function _fbWrite(){
 function _fbLoad(){
   db.doc(DB_DOC).get().then(function(doc){
     fbOnline = true;
+    if(localStorage.getItem('cvd_pendingReplace')){ _fbReplaceAll(); _fbAttachListener(); return; }
     if(doc.exists){
       var R=_parseRemote(doc.data());
       var cur=JSON.stringify(_getLocalState());
@@ -2315,6 +2342,7 @@ function _fbAttachListener(){
   db.doc(DB_DOC).onSnapshot(function(doc){
     if(doc.metadata.hasPendingWrites || doc.metadata.fromCache) return;
     if(_fbWriting || !doc.exists) return;
+    if(localStorage.getItem('cvd_pendingReplace')) return;
     var R=_parseRemote(doc.data());
     var cur=JSON.stringify(_getLocalState());
     var merged=_mergeState(JSON.parse(cur), R, _readBase());
@@ -2333,6 +2361,7 @@ function _fbAttachListener(){
 // Al recuperar internet: reintentar carga o subir lo pendiente
 window.addEventListener('online', function(){
   if(!fbOnline) _fbLoad();
+  else if(localStorage.getItem('cvd_pendingReplace')) _fbReplaceAll();
   else if(syncPending) _fbWrite();
 });
 
@@ -3309,9 +3338,19 @@ function repetirUltimaVenta(){
   var hora=new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
   var nueva=JSON.parse(JSON.stringify(ultima));
   nueva.id=Date.now(); nueva.hora=hora;
+  var prodsAfectados=nueva.items&&nueva.items.length?nueva.items:[{productoId:nueva.productoId,cant:nueva.cant||1}];
+  // Validar stock ANTES de registrar (suma lo pedido por producto)
+  var pedido={};
+  prodsAfectados.forEach(function(it){ if(it.productoId) pedido[it.productoId]=(pedido[it.productoId]||0)+(parseFloat(it.cant)||1); });
+  var faltantes=[];
+  Object.keys(pedido).forEach(function(pid){
+    var pr=getProducto(parseInt(pid));
+    if(!pr){ faltantes.push('un producto ya no existe en inventario'); }
+    else if(pedido[pid]>pr.cantidad){ faltantes.push(pr.nombre+' (hay '+pr.cantidad+' '+pr.unidad+', necesitas '+pedido[pid]+')'); }
+  });
+  if(faltantes.length){ toast('⚠ Stock insuficiente: '+faltantes.join('; ')); return; }
   day.ventas.push(nueva);
   // Descontar stock
-  var prodsAfectados=nueva.items&&nueva.items.length?nueva.items:[{productoId:nueva.productoId,cant:nueva.cant||1}];
   prodsAfectados.forEach(function(it){
     if(it.productoId){var p=getProducto(it.productoId);if(p) p.cantidad=Math.max(0,parseFloat((p.cantidad-(parseFloat(it.cant)||1)).toFixed(4)));}
   });
@@ -6473,7 +6512,8 @@ function importarDatos(event){
       if(backup.cvd_fondos) localStorage.setItem('cvd_fondos',backup.cvd_fondos);
       loadData();
       renderAll();
-      _fbWrite(); // sincronizar datos restaurados a Firebase
+      localStorage.setItem('cvd_pendingReplace','1'); // la restauración reemplaza la nube (no se fusiona)
+      _fbReplaceAll();
       toast('✓ Datos restaurados correctamente');
     } catch(err){
       toast('⚠ Archivo inválido, no se pudo importar');
