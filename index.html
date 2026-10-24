@@ -966,11 +966,15 @@ body{
 
       <!-- Panel Ventas -->
       <div id="opsPanelVentas">
-        <div class="section-title" style="margin-bottom:8px">Ventas del día <span class="badge" id="badgeVentas">0</span></div>
+        <div class="card" id="ventasResumenCard" style="padding:14px 16px;margin-bottom:10px"></div>
+        <div id="ventasTopWrap" style="margin-bottom:12px"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="section-title" style="margin:0">Ventas registradas <span class="badge" id="badgeVentas">0</span></div>
+          <button class="tab-btn" onclick="repetirUltimaVenta()" style="color:#7c3aed">🔁 Repetir última</button>
+        </div>
         <div class="tabs" style="margin-bottom:8px">
           <button class="tab-btn active" id="ventaFiltroLista" onclick="setVentaFiltro('lista')">📋 Lista</button>
-          <button class="tab-btn" id="ventaFiltroRanking" onclick="setVentaFiltro('ranking')">🏆 Más vendidos</button>
-          <button class="tab-btn" onclick="repetirUltimaVenta()" style="color:#7c3aed">🔁 Repetir</button>
+          <button class="tab-btn" id="ventaFiltroRanking" onclick="setVentaFiltro('ranking')">🏆 Ranking</button>
         </div>
         <div id="listaVentas"></div>
       </div>
@@ -1649,6 +1653,12 @@ body{
 
       <!-- VENTA: selector producto del inventario -->
       <div id="ventaProductoWrap">
+        <div id="ventaClienteWrap" style="margin-bottom:14px">
+          <label class="form-label">Cliente</label>
+          <select class="form-input" id="ventaClienteSel" onchange="onVentaClienteChange()"></select>
+          <input class="form-input" type="text" id="ventaClienteOtro" placeholder="Nombre del cliente" style="display:none;margin-top:6px">
+          <div id="ventaClienteInfo" style="display:none;font-size:11px;color:#7c3aed;background:#7c3aed12;border-radius:6px;padding:6px 10px;margin-top:6px"></div>
+        </div>
         <label class="form-label">Producto del inventario <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
         <!-- Chips de línea de negocio -->
         <div id="ventaLineaChips" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch">
@@ -2934,6 +2944,7 @@ function openAddModal(){
   if(currentPage==='inventario'&&invMainTab==='pedidos') defaultTipo='pedido';
   setTipo(defaultTipo);
   setVentaLinea('todos');
+  poblarClientesVenta();
   document.getElementById('fDesc').value='';
   document.getElementById('fCant').value='1';
   document.getElementById('fMonto').value='';
@@ -3066,21 +3077,107 @@ function contarVentasPorProducto(dias){
 // Si hoy aún no hay ventas suficientes, se completa con el top histórico y luego con el inventario
 function getTop10Vendidos(){
   var hoyKey=dateKey(new Date());
-  var dataHoy=data[hoyKey]?[data[hoyKey]]:[];
-  var topHoy=contarVentasPorProducto(dataHoy);
-  if(topHoy.length>=10) return topHoy;
+  var top=contarVentasPorProducto(data[hoyKey]?[data[hoyKey]]:[]);
+  var usados={}; top.forEach(function(p){usados[p.id]=true;});
+  function agregar(lista){ lista.forEach(function(p){ if(top.length<10 && !usados[p.id]){ top.push(p); usados[p.id]=true; } }); }
+  if(top.length<10){ var prev=_diaPrevioConVentas(hoyKey); if(prev) agregar(contarVentasPorProducto([data[prev]])); }
+  if(top.length<10) agregar(contarVentasPorProducto(Object.values(data)));
+  if(top.length<10) agregar(productos);
+  return top;
+}
 
-  var topHistorico=contarVentasPorProducto(Object.values(data));
-  var idsUsados={}; topHoy.forEach(function(p){idsUsados[p.id]=true;});
-  topHistorico.forEach(function(p){
-    if(topHoy.length<10 && !idsUsados[p.id]){ topHoy.push(p); idsUsados[p.id]=true; }
-  });
-  if(topHoy.length<10){
-    productos.forEach(function(p){
-      if(topHoy.length<10 && !idsUsados[p.id]){ topHoy.push(p); idsUsados[p.id]=true; }
+// Último día anterior a "key" que tenga ventas
+function _diaPrevioConVentas(key){
+  var ks=Object.keys(data).filter(function(k){ return k<key && data[k] && (data[k].ventas||[]).length; }).sort();
+  return ks.length?ks[ks.length-1]:null;
+}
+function _topProductosDeDia(key){
+  var d=data[key]; if(!d) return [];
+  var m={};
+  (d.ventas||[]).forEach(function(v){
+    var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant||1}];
+    items.forEach(function(it){
+      if(!it.productoId||!getProducto(it.productoId)) return;
+      m[it.productoId]=(m[it.productoId]||0)+(parseFloat(it.cant)||1);
     });
+  });
+  return Object.keys(m).map(function(id){return {id:parseInt(id),cant:m[id]};})
+    .sort(function(a,b){return b.cant-a.cant;}).slice(0,8);
+}
+
+// Cabecera de la pantalla de ventas: total del día + más vendidos (hoy, o el día anterior si hoy aún no hay)
+function renderVentasHeader(){
+  var card=document.getElementById('ventasResumenCard'), topEl=document.getElementById('ventasTopWrap');
+  if(!card||!topEl) return;
+  var day=getDayData(currentDate), key=dateKey(currentDate);
+  var esHoy=key===dateKey(new Date());
+  var total=day.ventas.reduce(function(a,v){return a+(parseFloat(v.monto)||0);},0);
+  card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'+
+    '<div><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3)">Ventas '+(esHoy?'de hoy':'del día')+'</div>'+
+    '<div style="font-family:\'Space Grotesk\',monospace;font-size:26px;font-weight:700;color:var(--green);line-height:1.2">'+fmt(total)+'</div>'+
+    '<div style="font-size:11px;color:var(--text3)">'+day.ventas.length+' venta'+(day.ventas.length!==1?'s':'')+'</div></div>'+
+    '<button onclick="openAddModal()" style="background:var(--primary);color:#fff;border:none;border-radius:12px;padding:12px 16px;font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap">＋ Nueva venta</button></div>';
+
+  var lista=_topProductosDeDia(key), etiqueta=esHoy?'Más vendidos hoy':'Más vendidos del día';
+  if(!lista.length){
+    var prev=_diaPrevioConVentas(key);
+    if(prev){
+      lista=_topProductosDeDia(prev);
+      var ayer=dateKey(new Date(new Date(key+'T12:00:00').getTime()-86400000));
+      etiqueta='Más vendidos '+(prev===ayer?'ayer':'el '+prev.split('-').reverse().join('/'));
+    }
   }
-  return topHoy;
+  if(!lista.length){ topEl.innerHTML=''; return; }
+  topEl.innerHTML='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:6px">🏆 '+etiqueta+' <span style="text-transform:none;font-weight:400">· toca para vender</span></div>'+
+    '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch">'+
+    lista.map(function(t){
+      var p=getProducto(t.id);
+      return '<button type="button" onclick="ventaDesdeTop('+t.id+')" style="flex:0 0 auto;display:flex;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:7px 12px;font-family:\'DM Sans\',sans-serif;font-size:12.5px;font-weight:500;color:var(--text);cursor:pointer;white-space:nowrap">'+
+        esc(p.nombre)+'<span style="font-size:10px;font-weight:700;color:var(--primary);background:var(--surface2);border-radius:10px;padding:1px 6px">×'+(t.cant%1===0?t.cant:t.cant.toFixed(1))+'</span></button>';
+    }).join('')+'</div>';
+}
+function ventaDesdeTop(pid){ openAddModal(); setTipo('venta'); seleccionarProductoVenta(pid); }
+
+// ── Cliente en la venta (Cliente varios por defecto + precio cliente) ──
+function poblarClientesVenta(){
+  var sel=document.getElementById('ventaClienteSel'); if(!sel) return;
+  var h='<option value="">👤 Cliente varios</option>';
+  clientes.slice().sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');}).forEach(function(c){
+    h+='<option value="'+c.id+'">'+esc(c.nombre)+((c.precios&&c.precios.length)?' · 💲':'')+'</option>';
+  });
+  h+='<option value="__otro">✏ Otro cliente (escribir nombre)</option>';
+  sel.innerHTML=h; sel.value='';
+  var o=document.getElementById('ventaClienteOtro'); if(o){o.value='';o.style.display='none';}
+  var i=document.getElementById('ventaClienteInfo'); if(i) i.style.display='none';
+}
+function getClienteVentaActual(){
+  var sel=document.getElementById('ventaClienteSel'); var v=sel?sel.value:'';
+  if(v==='__otro'){ var n=(document.getElementById('ventaClienteOtro').value||'').trim(); return {id:null,nombre:n||'Cliente varios'}; }
+  if(v){ var c=getCliente(parseInt(v)); if(c) return {id:c.id,nombre:c.nombre}; }
+  return {id:null,nombre:'Cliente varios'};
+}
+function getPrecioClienteProducto(pid){
+  var sel=document.getElementById('ventaClienteSel'); if(!sel||!sel.value||sel.value==='__otro') return null;
+  var c=getCliente(parseInt(sel.value)); if(!c||!c.precios) return null;
+  var e=c.precios.find(function(x){return x.productoId===pid;});
+  return e&&e.precio>0?e.precio:null;
+}
+function onVentaClienteChange(){
+  var sel=document.getElementById('ventaClienteSel'), o=document.getElementById('ventaClienteOtro'), info=document.getElementById('ventaClienteInfo');
+  o.style.display=sel.value==='__otro'?'block':'none';
+  var c=(sel.value&&sel.value!=='__otro')?getCliente(parseInt(sel.value)):null;
+  if(c&&c.precios&&c.precios.length){
+    info.style.display='block';
+    info.innerHTML='💲 Precio cliente: '+c.precios.map(function(p){return esc(p.productoNombre)+' → '+fmt(p.precio);}).join(' · ');
+  } else if(c){ info.style.display='block'; info.innerHTML='Este cliente no tiene precios especiales; se usa el precio normal (puedes editar el monto para dar un descuento).'; }
+  else info.style.display='none';
+  onCantChange();
+}
+function ventaBadges(it){
+  var h='', st='font-size:9px;font-weight:600;color:#7c3aed;background:#7c3aed18;border-radius:4px;padding:2px 5px;margin-left:4px';
+  if(it.clienteNombre && it.clienteNombre!=='Cliente varios') h+='<span style="'+st+'">👤 '+esc(it.clienteNombre)+'</span>';
+  if((it.items||[]).some(function(x){return x.precioCliente;})) h+='<span style="'+st+'">💲 Precio cliente</span>';
+  return h;
 }
 
 // Render top 10 botones
@@ -3192,7 +3289,7 @@ function vrConfirmar(){
   var monto=cant*getPrecioEfectivo(p,cant);
   var hora=new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
   var day=getDayData(currentDate);
-  day.ventas.push({id:Date.now(),monto:monto,desc:p.nombre,cant:cant,hora:hora,productoId:p.id,productoNombre:p.nombre,items:[{productoId:p.id,productoNombre:p.nombre,desc:p.nombre,cant:cant,monto:monto}]});
+  day.ventas.push({id:Date.now(),monto:monto,desc:p.nombre,cant:cant,hora:hora,clienteId:null,clienteNombre:'Cliente varios',productoId:p.id,productoNombre:p.nombre,items:[{productoId:p.id,productoNombre:p.nombre,desc:p.nombre,cant:cant,monto:monto}]});
   p.cantidad=Math.max(0,parseFloat((p.cantidad-cant).toFixed(4)));
   saveProductos(); saveData(); renderAll(); checkStockAlertas();
   closeModal('ventaRapidaModal');
@@ -3446,12 +3543,13 @@ function onCantChange(){
   // Venta: usa precioVenta
   var pidV=parseInt(document.getElementById('ventaProductoSel').value);
   if(pidV){ var pV=getProducto(pidV); if(pV){
-    var precioAplicado=getPrecioEfectivo(pV,cant);
+    var pcli=getPrecioClienteProducto(pV.id);
+    var precioAplicado=pcli!=null?pcli:getPrecioEfectivo(pV,cant);
     document.getElementById('fMonto').value=(precioAplicado*cant).toFixed(2);
     var infoV=document.getElementById('ventaStockInfo');
     if(infoV){
-      var esMayoreo=precioAplicado!==pV.precioVenta;
-      infoV.innerHTML='Precio: <strong>'+fmt(precioAplicado)+(esMayoreo?' <span style="color:#7c3aed">(mayoreo)</span>':'')+'</strong> &nbsp;·&nbsp; Stock: <strong>'+pV.cantidad+' '+pV.unidad+'</strong>'+
+      var esMayoreo=pcli==null&&precioAplicado!==pV.precioVenta;
+      infoV.innerHTML='Precio: <strong>'+fmt(precioAplicado)+(esMayoreo?' <span style="color:#7c3aed">(mayoreo)</span>':'')+(pcli!=null?' <span style="color:#7c3aed">(precio cliente · lista '+fmt(pV.precioVenta)+')</span>':'')+'</strong> &nbsp;·&nbsp; Stock: <strong>'+pV.cantidad+' '+pV.unidad+'</strong>'+
         (!esMayoreo&&pV.precioMayoreo>0&&pV.cantidadMayoreo>0?' &nbsp;·&nbsp; <span style="color:var(--text3)">mayoreo desde '+pV.cantidadMayoreo+': '+fmt(pV.precioMayoreo)+'</span>':'');
     }
     return;
@@ -3483,7 +3581,9 @@ function agregarItemVenta(){
       return;
     }
   }
-  ventaItems.push({productoId:prod?prod.id:null,productoNombre:prod?prod.nombre:null,desc:desc,cant:cant,monto:monto});
+  var pcliI=prod?getPrecioClienteProducto(prod.id):null;
+  var listaI=prod?prod.precioVenta*cant:0;
+  ventaItems.push({productoId:prod?prod.id:null,productoNombre:prod?prod.nombre:null,desc:desc,cant:cant,monto:monto,precioCliente:(pcliI!=null&&Math.abs(monto/cant-pcliI)<0.005),descuento:(prod&&listaI>monto)?parseFloat((listaI-monto).toFixed(2)):0});
   // reset campos
   document.getElementById('ventaProductoSel').value='';
   document.getElementById('ventaStockInfo').style.display='none';
@@ -3591,10 +3691,11 @@ function saveRecord(){
       // Descripción representativa: primero producto, + N más si hay varios
       var firstItem=ventaItems[0].productoNombre||ventaItems[0].desc||'Producto';
       var descVenta=ventaItems.length===1?firstItem:firstItem+' + '+(ventaItems.length-1)+' más';
-      var rec={id:Date.now(),monto:0,desc:descVenta,cant:1,hora:hora,items:[]};
+      var cliV=getClienteVentaActual();
+      var rec={id:Date.now(),monto:0,desc:descVenta,cant:1,hora:hora,items:[],clienteId:cliV.id,clienteNombre:cliV.nombre};
       ventaItems.forEach(function(it){
         if(it.productoId){var prod=getProducto(it.productoId);if(prod) prod.cantidad=Math.max(0,prod.cantidad-it.cant);}
-        rec.items.push({desc:it.desc,cant:it.cant,monto:it.monto,productoId:it.productoId,productoNombre:it.productoNombre});
+        rec.items.push({desc:it.desc,cant:it.cant,monto:it.monto,productoId:it.productoId,productoNombre:it.productoNombre,precioCliente:!!it.precioCliente,descuento:it.descuento||0});
         rec.monto+=it.monto;
       });
       day.ventas.push(rec);
@@ -3604,7 +3705,8 @@ function saveRecord(){
       // Venta manual simple (sin item list o con datos directos)
       if(!monto||monto<=0){toast('⚠ Ingresa un monto válido');document.getElementById('fMonto').focus();return;}
       if(!desc) desc='Venta';
-      var record={id:Date.now(),monto:monto,desc:desc,cant:cant,hora:hora};
+      var cliV2=getClienteVentaActual();
+      var record={id:Date.now(),monto:monto,desc:desc,cant:cant,hora:hora,clienteId:cliV2.id,clienteNombre:cliV2.nombre};
       var pid=parseInt(document.getElementById('ventaProductoSel').value);
       if(pid){
         var prod=getProducto(pid);
@@ -4788,6 +4890,7 @@ function renderRankingVentas(){
 }
 
 function renderList(tipo){
+  if(tipo==='ventas') renderVentasHeader();
   if(tipo==='ventas'&&ventaFiltroActual==='ranking'){ renderRankingVentas(); return; }
   var day=getDayData(currentDate);
   var items=day[tipo];
@@ -4861,9 +4964,11 @@ function renderList(tipo){
 
     var meta=esc(it.hora);
     if(isV&&it.productoNombre) meta+=' · 📦 '+esc(it.productoNombre);
-    if(isV&&it.items&&it.items.length) meta+=it.items.length+' producto'+(it.items.length>1?'s':'');
+    if(isV&&it.items&&it.items.length) meta+=' · '+it.items.length+' producto'+(it.items.length>1?'s':'');
+    if(isV&&it.clienteNombre) meta+=' · 👤 '+esc(it.clienteNombre);
     // Category badge for gastos / extra
     var catBadge='';
+    if(isV) catBadge=ventaBadges(it);
     if(tipo==='gastos'){
       var cat=it.pedidoId?'pedido':(it.categoria||'otro');
       var ci=CATS[cat]||CATS.otro;
@@ -4952,6 +5057,7 @@ function verDetalle(tipo, id){
 
   // ── VENTAS ──
   } else {
+    if(it.clienteNombre) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Cliente</span><strong>👤 '+esc(it.clienteNombre)+'</strong></div>';
     html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Hora</span><strong>'+esc(it.hora)+'</strong></div>';
     if(it.productoNombre) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Producto</span><strong>'+esc(it.productoNombre)+'</strong></div>';
     if(!it.items||!it.items.length){
@@ -4963,7 +5069,7 @@ function verDetalle(tipo, id){
       it.items.forEach(function(x){
         html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">'+
           '<div><div style="font-size:13px;font-weight:500">'+esc(x.desc)+'</div>'+
-          '<div style="font-size:11px;color:var(--text3)">Cant: '+x.cant+(x.productoNombre?' · 📦 '+esc(x.productoNombre):'')+'</div></div>'+
+          '<div style="font-size:11px;color:var(--text3)">Cant: '+x.cant+(x.productoNombre?' · 📦 '+esc(x.productoNombre):'')+(x.precioCliente?' · 💲 precio cliente':'')+(x.descuento>0?' · desc. '+fmt(x.descuento):'')+'</div></div>'+
           '<div style="font-family:\'Space Grotesk\',monospace;font-size:13px;font-weight:600;color:var(--green)">'+fmt(x.monto)+'</div>'+
         '</div>';
       });
