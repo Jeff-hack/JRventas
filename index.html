@@ -2060,10 +2060,8 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
-var DB_DOC = 'negocio/principal'; // formato 1 (antiguo): un solo documento con todo. Ya NO se escribe (se conserva como respaldo)
-var DB_DOC2 = 'negocio/v2';       // formato 2: manifiesto + partes comprimidas, sin límite de tamaño
-var DB_PART_PREFIX = 'negocio/v2_';
-var CHUNK_CHARS = 240000;         // cada parte < 1 MB (límite de Firestore por documento)
+var DB_DOC = 'negocio/principal'; // único documento con todos los datos (ahora comprimido: caben ~10 veces más datos)
+var CLOUD_MAX_CHARS = 950000;     // tope seguro del documento comprimido (Firestore permite 1 MiB)
 var fbOnline = false;
 var syncPending = false;
 
@@ -2102,7 +2100,7 @@ function _actualizarAvisoGuardado(){
   if(!document.body) return;
   var msg='';
   if(Object.keys(_lsFailKeys).length) msg='⚠ El teléfono NO está guardando tus datos (almacenamiento lleno). Descarga un respaldo ahora.';
-  else if(_cloudFails>=2) msg=(_cloudErr==='permission-denied')?'⚠ La nube rechazó guardar (permission-denied): hay que permitir la ruta "negocio" en las reglas de Firestore. Tus datos están solo en este teléfono.':'⚠ No se está subiendo a la nube ('+_cloudErr+'). Tus datos están solo en este teléfono.';
+  else if(_cloudFails>=2 || (_cloudFails>=1 && _cloudErr==='datos-demasiado-grandes')) msg=(_cloudErr==='datos-demasiado-grandes')?'⚠ Tus datos superan el límite de la nube aun comprimidos. Hay que archivar meses viejos. Descarga un respaldo.':'⚠ No hay conexión con la nube ('+_cloudErr+'). Tus datos están solo en este teléfono.';
   var bar=document.getElementById('saveWarnBar');
   if(!msg){ if(bar) bar.remove(); return; }
   if(!bar){
@@ -2133,21 +2131,19 @@ function revisarCopiasNube(){
   var box=document.getElementById('syncDiagCopias'); if(!box) return;
   box.innerHTML='<div style="font-size:12.5px;color:var(--text3)">Revisando copias…</div>';
   Promise.all([
-    db.doc(DB_DOC).get().then(function(d){ return d.exists?_parseRemote(d.data()):null; }),
-    _fbReadRemote(function(r){ return r.get(); }).then(function(i){ return i.fmt===2?i.R:null; })
+    _fbReadRemote(function(r){ return r.get(); }).then(function(i){ return i.exists?i.R:null; })
   ]).then(function(res){
     _copiaAntigua=res[0];
     box.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+
       _lineaCopia('📱 Este teléfono',_getLocalState())+
-      _lineaCopia('☁ Nube (nueva)',res[1])+
-      _lineaCopia('🗄 Nube (copia antigua)',res[0])+
-      (res[0]?'<button class="btn-primary" onclick="recuperarDeCopiaAntigua()" style="margin-top:2px">♻ Recuperar lo que falte de la copia antigua</button><div style="font-size:11px;color:var(--text3)">Solo agrega lo que no tengas (clientes, precios, productos, ventas…). No borra ni cambia lo que ya tienes.</div>':'')+
+      _lineaCopia('☁ Nube',res[0])+
+      (res[0]?'<button class="btn-primary" onclick="recuperarDeCopiaAntigua()" style="margin-top:2px">♻ Traer lo que falte de la nube</button><div style="font-size:11px;color:var(--text3)">Solo agrega lo que no tengas (clientes, precios, productos, ventas…). No borra ni cambia lo que ya tienes.</div>':'')+
     '</div>';
   }).catch(function(e){ box.innerHTML='<div style="font-size:12.5px;color:#ef4444">No se pudo revisar: '+esc((e&&(e.code||e.message))||'error')+'</div>'; });
 }
 function recuperarDeCopiaAntigua(){
   if(!_copiaAntigua){ toast('Primero revisa las copias'); return; }
-  if(!confirm('Se agregará lo que falte de la copia antigua (clientes, precios, productos, ventas…). No se borra nada de lo actual. ¿Continuar?')) return;
+  if(!confirm('Se agregará lo que falte de la nube (clientes, precios, productos, ventas…). No se borra nada de lo actual. ¿Continuar?')) return;
   var A=_copiaAntigua, add={clientes:0,precios:0,productos:0,mayoreo:0,registros:0};
   function porId(lista,id){ for(var i=0;i<lista.length;i++){ if(lista[i].id===id) return lista[i]; } return null; }
   (A.clientes||[]).forEach(function(c){
@@ -2176,6 +2172,20 @@ function recuperarDeCopiaAntigua(){
   toast('♻ Recuperado: '+add.clientes+' clientes, '+add.precios+' precios, '+add.productos+' productos, '+add.mayoreo+' mayoreos, '+add.registros+' registros');
   revisarCopiasNube();
 }
+// "Sincronizar ahora" con respuesta visible en la misma pantalla
+function syncAhora(){
+  var el=document.getElementById('syncDiagEstado');
+  function msg(t,c){ if(el) el.innerHTML='<div style="padding:10px 12px;border-radius:12px;background:var(--surface2);font-size:13px;font-weight:600;color:'+c+'">'+t+'</div>'; }
+  msg('Sincronizando…','var(--text2)');
+  Promise.resolve(fbOnline?null:_fbLoad()).then(function(){
+    if(!fbOnline) return false;
+    return _fbWrite();
+  }).then(function(ok){
+    if(ok||(fbOnline&&!syncPending&&!_cloudFails)){ msg('✓ Sincronizado a las '+new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'}),'var(--green)'); renderSyncDiag2(); }
+    else msg('⚠ No se pudo sincronizar: '+(_cloudErr||'sin conexión'),'#ef4444');
+  }).catch(function(e){ msg('⚠ No se pudo sincronizar: '+((e&&(e.code||e.message))||'error'),'#ef4444'); });
+}
+function renderSyncDiag2(){ var keep=document.getElementById('syncDiagEstado'); var html=keep?keep.innerHTML:''; renderSyncDiag(); var el=document.getElementById('syncDiagEstado'); if(el) el.innerHTML=html; }
 function openSyncDiag(){
   var ov=document.getElementById('syncDiagModal');
   if(!ov){
@@ -2202,15 +2212,21 @@ function renderSyncDiag(){
   var errores=Object.keys(_lsFailKeys).length?('Teléfono: '+Object.keys(_lsFailKeys).join(', ')):(_cloudFails?('Nube: '+_cloudErr+' ('+_cloudFails+' intentos)'):'Ninguno');
   el.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'+
     fila('📱 Datos en el teléfono', (lsChars/1e6).toFixed(2)+' M de ≈5 M caracteres', col(lsChars/5e6*100))+
-    fila('☁ Tus datos (nube)', Math.round(cloudB/1024)+' KB · formato nuevo, sin límite')+
+    '<div id="syncDiagNube">'+fila('☁ Tus datos en la nube (comprimidos)','calculando…')+'</div>'+
     fila('Lo más pesado', partes.slice(0,2).map(function(x){return x[0]+' '+Math.round(x[1]/1024)+' KB';}).join(' · '))+
     fila('Última subida correcta', ult)+
     fila('Errores de guardado', errores, errores==='Ninguno'?'var(--green)':'#ef4444')+
     '<div id="syncDiagPersist">'+fila('Protegido contra borrado automático','…')+'</div>'+
-    '<div id="syncDiagCopias"><button class="btn-primary" onclick="revisarCopiasNube()" style="background:var(--surface2);color:var(--text)">🔎 Revisar copias en la nube</button></div>'+
+    '<div id="syncDiagCopias"><button class="btn-primary" onclick="revisarCopiasNube()" style="background:var(--surface2);color:var(--text)">🔎 Comparar teléfono con la nube</button></div>'+
     '<button class="btn-primary" onclick="exportarDatos()" style="margin-top:6px">💾 Descargar respaldo ahora</button>'+
-    '<button class="btn-primary" onclick="_fbWrite();toast(\'Sincronizando…\')" style="background:var(--surface2);color:var(--text);margin-top:0">☁ Sincronizar ahora</button>'+
+    '<div id="syncDiagEstado"></div>'+
+    '<button class="btn-primary" onclick="syncAhora()" style="background:var(--surface2);color:var(--text);margin-top:0">☁ Sincronizar ahora</button>'+
   '</div>';
+  Promise.all(_PARTES.map(function(nm){ return _toStored(JSON.stringify(st[nm])); })).then(function(sts){
+    var tot=0; sts.forEach(function(x){ tot+=x.text.length; });
+    var pct=tot/CLOUD_MAX_CHARS*100, h=document.getElementById('syncDiagNube');
+    if(h) h.innerHTML=fila('☁ Tus datos en la nube (comprimidos)', Math.round(tot/1024)+' KB de ≈'+Math.round(CLOUD_MAX_CHARS/1024)+' KB', col(pct));
+  }).catch(function(){});
   try{
     if(navigator.storage&&navigator.storage.persisted){
       navigator.storage.persisted().then(function(ok){
@@ -2398,8 +2414,9 @@ function _mergeState(L,R,B){
 }
 
 
-// ── Formato 2 de la nube: cada dato se comprime (gzip) y se parte en trozos < 1 MB, cada uno en su documento ──
+// ── Nube comprimida: cada dato se guarda en gzip+base64 dentro del MISMO documento de siempre ──
 var _PARTES=['data','productos','pedidos','encargos','clientes','fondos'];
+var _Z_CAMPOS={data:'zdata',productos:'zproductos',pedidos:'zpedidos',encargos:'zencargos',clientes:'zclientes',fondos:'zfondos'};
 function _b64(u8){ var s='',i=0,n=0x8000; for(;i<u8.length;i+=n) s+=String.fromCharCode.apply(null,u8.subarray(i,i+n)); return btoa(s); }
 function _unb64(b){ var s=atob(b), u=new Uint8Array(s.length); for(var i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u; }
 function _toStored(str){
@@ -2415,48 +2432,30 @@ function _fromStored(text,z){
   var ds=new Blob([_unb64(text)]).stream().pipeThrough(new DecompressionStream('gzip'));
   return new Response(ds).text();
 }
-function _partRef(nm,i){ return db.doc(DB_PART_PREFIX+nm+'_'+i); }
-// Lee el estado remoto (con "get" normal o el de una transacción). Si aún no existe el formato 2, lee el documento antiguo.
+function _compresionDisponible(){ return typeof CompressionStream!=='undefined' && typeof DecompressionStream!=='undefined'; }
+// Lee el estado remoto (con "get" normal o el de una transacción). fmt: 0 = no existe, 1 = formato antiguo, 2 = comprimido
 function _fbReadRemote(get){
-  return get(db.doc(DB_DOC2)).then(function(m){
-    if(!m.exists){
-      return get(db.doc(DB_DOC)).then(function(old){
-        return {fmt:old.exists?1:0, exists:old.exists, R:_parseRemote(old.exists?old.data():{}), parts:{}, stored:{}};
-      });
-    }
-    var md=m.data(), parts=md.parts||{}, strs={}, stored={}, chain=Promise.resolve();
+  return get(db.doc(DB_DOC)).then(function(doc){
+    if(!doc.exists) return {fmt:0, exists:false, R:_parseRemote({})};
+    var d=doc.data();
+    if(d.fmt!=='z1') return {fmt:1, exists:true, R:_parseRemote(d)};
+    var strs={}, chain=Promise.resolve();
     _PARTES.forEach(function(nm){
-      var pi=parts[nm]; if(!pi){ return; }
-      chain=chain.then(function(){
-        var texts=[], i=0;
-        function next(){
-          if(i>=pi.n) return Promise.resolve();
-          return get(_partRef(nm,i)).then(function(sn){
-            if(!sn.exists || sn.data().rev!==pi.rev) throw new Error('parte-incompleta');
-            texts.push(sn.data().t); i++; return next();
-          });
-        }
-        return next().then(function(){ stored[nm]=texts; return _fromStored(texts.join(''),pi.z); }).then(function(str){ strs[nm]=str; });
-      });
+      var txt=d[_Z_CAMPOS[nm]]; if(!txt) return;
+      chain=chain.then(function(){ return _fromStored(txt,1).then(function(t){ strs[nm]=t; }); });
     });
-    return chain.then(function(){ return {fmt:2, exists:true, R:_parseRemote(strs), parts:parts, stored:stored}; });
+    return chain.then(function(){ return {fmt:2, exists:true, R:_parseRemote(strs)}; });
   });
 }
-// Escribe el estado completo en formato 2 dentro de una transacción (solo reescribe las partes que cambiaron)
-function _fbPlanAndWrite(tx,state,oldParts,oldStored){
-  var manifest={v:2, parts:{}, updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
-  return Promise.all(_PARTES.map(function(nm){
-    return _toStored(JSON.stringify(state[nm])).then(function(st){
-      var chunks=[]; for(var i=0;i<st.text.length;i+=CHUNK_CHARS) chunks.push(st.text.slice(i,i+CHUNK_CHARS));
-      if(!chunks.length) chunks=[''];
-      var op=oldParts[nm], os=oldStored&&oldStored[nm];
-      var same=!!(op && os && op.z===st.z && os.length===chunks.length && os.every(function(t,k){return t===chunks[k];}));
-      var rev=same?op.rev:(Date.now()+'-'+Math.random().toString(36).slice(2,8));
-      manifest.parts[nm]={n:chunks.length,z:st.z,rev:rev};
-      if(!same) chunks.forEach(function(t,k){ tx.set(_partRef(nm,k),{rev:rev,t:t}); });
-      if(op) for(var j=chunks.length;j<op.n;j++) tx.delete(_partRef(nm,j));
-    });
-  })).then(function(){ tx.set(db.doc(DB_DOC2),manifest); });
+// Escribe el estado completo comprimido (reemplaza el documento)
+function _fbPlanAndWrite(tx,state){
+  return Promise.all(_PARTES.map(function(nm){ return _toStored(JSON.stringify(state[nm])); })).then(function(sts){
+    var comp=sts.every(function(x){return x.z===1;}), doc={updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, total=0;
+    _PARTES.forEach(function(nm,i){ doc[comp?_Z_CAMPOS[nm]:nm]=sts[i].text; total+=sts[i].text.length; });
+    if(comp) doc.fmt='z1';
+    if(total>CLOUD_MAX_CHARS){ var e=new Error('Los datos superan el límite de la nube aun comprimidos'); e.code='datos-demasiado-grandes'; throw e; }
+    tx.set(db.doc(DB_DOC),doc);
+  });
 }
 
 // ── ESCRITURA (transacción: lee lo último del servidor, fusiona y escribe atómicamente) ──
@@ -2468,11 +2467,7 @@ function _fbReplaceAll(){
   clearTimeout(_fbTimer);
   _fbWriting=true;
   var st=_getLocalState(), str=JSON.stringify(st);
-  db.runTransaction(function(tx){
-    return tx.get(db.doc(DB_DOC2)).then(function(m){
-      return _fbPlanAndWrite(tx, st, m.exists?(m.data().parts||{}):{}, null);
-    });
-  }).then(function(){
+  db.runTransaction(function(tx){ return _fbPlanAndWrite(tx, st); }).then(function(){
     _writeBase(str);
     localStorage.removeItem('cvd_pendingReplace');
     _fbWriting=false; syncPending=false; updateSyncIndicator();
@@ -2480,6 +2475,7 @@ function _fbReplaceAll(){
   }).catch(function(err){
     console.error('Error al restaurar en la nube:', err);
     _fbWriting=false; syncPending=true; updateSyncIndicator();
+    _cloudFails++; _cloudErr=(err&&(err.code||err.message))||'error'; _actualizarAvisoGuardado();
     toast('⚠ No se pudo subir la restauración; se reintentará');
     clearTimeout(_fbRetryTimer);
     _fbRetryTimer=setTimeout(function(){ if(localStorage.getItem('cvd_pendingReplace')) _fbReplaceAll(); }, 8000);
@@ -2487,19 +2483,19 @@ function _fbReplaceAll(){
 }
 
 function _fbWrite(){
-  if(!fbOnline) return;
-  if(localStorage.getItem('cvd_pendingReplace')){ if(!_fbWriting) _fbReplaceAll(); return; }
-  if(_fbWriting){ _fbWriteQueued=true; return; }
+  if(!fbOnline) return Promise.resolve(false);
+  if(localStorage.getItem('cvd_pendingReplace')){ if(!_fbWriting) _fbReplaceAll(); return Promise.resolve(false); }
+  if(_fbWriting){ _fbWriteQueued=true; return Promise.resolve(false); }
   _fbWriting=true; _fbWriteQueued=false;
-  db.runTransaction(function(tx){
+  return db.runTransaction(function(tx){
     return _fbReadRemote(function(r){ return tx.get(r); }).then(function(info){
       var Lstr=JSON.stringify(_getLocalState());
       var R=info.R;
       var merged=_mergeState(JSON.parse(Lstr), R, _readBase());
       var mStr=JSON.stringify(merged);
       var out={merged:merged, mStr:mStr, Lstr:Lstr};
-      if(info.fmt!==2 || mStr!==JSON.stringify(R)){
-        return _fbPlanAndWrite(tx, merged, info.parts||{}, info.stored||{}).then(function(){ return out; });
+      if((info.fmt!==2 && _compresionDisponible()) || mStr!==JSON.stringify(R)){
+        return _fbPlanAndWrite(tx, merged).then(function(){ return out; });
       }
       return out;
     });
@@ -2510,12 +2506,13 @@ function _fbWrite(){
       : _mergeState(JSON.parse(cur), JSON.parse(res.mStr), JSON.parse(res.Lstr)); // el usuario hizo cambios mientras se escribía
     var nStr=JSON.stringify(newLocal);
     _writeBase(res.mStr); // la base = lo que quedó en el servidor
-    _cloudFails=0; _lastSyncOk=Date.now(); try{ localStorage.setItem('cvd_lastSyncOk',String(_lastSyncOk)); }catch(e){} _actualizarAvisoGuardado();
+    _cloudFails=0; _cloudErr=''; _lastSyncOk=Date.now(); try{ localStorage.setItem('cvd_lastSyncOk',String(_lastSyncOk)); }catch(e){} _actualizarAvisoGuardado();
     if(nStr!==cur){ _setLocalState(newLocal); _persistLocalState(); _refreshViews(); }
     _fbWriting=false;
     if(nStr!==res.mStr){ _fbSync(); }
     else { syncPending=false; updateSyncIndicator(); }
     if(_fbWriteQueued) _fbWrite();
+    return true;
   }).catch(function(err){
     console.error('Firebase write error:', err);
     _cloudFails++; _cloudErr=(err&&(err.code||err.message))||'error'; _actualizarAvisoGuardado();
@@ -2524,12 +2521,13 @@ function _fbWrite(){
     updateSyncIndicator();
     clearTimeout(_fbRetryTimer);
     _fbRetryTimer=setTimeout(function(){ if(syncPending) _fbWrite(); }, 8000);
+    return false;
   });
 }
 
 // ── CARGA INICIAL (fusiona con lo local, no sobrescribe) ──
 function _fbLoad(){
-  _baseReady.then(function(){ return _fbReadRemote(function(r){ return r.get(); }); }).then(function(info){
+  return _baseReady.then(function(){ return _fbReadRemote(function(r){ return r.get(); }); }).then(function(info){
     fbOnline = true;
     if(localStorage.getItem('cvd_pendingReplace')){ _fbReplaceAll(); _fbAttachListener(); return; }
     if(info.exists){
@@ -2542,7 +2540,7 @@ function _fbLoad(){
       _setLocalState(merged); _persistLocalState();
       _refreshViews();
       updateSyncIndicator();
-      if(mStr!==rStr || info.fmt!==2) _fbSync(); // hay datos locales pendientes de subir (o migrar al formato nuevo)
+      if(mStr!==rStr || (info.fmt!==2 && _compresionDisponible())) _fbSync(); // hay datos locales pendientes de subir (o pasar al formato comprimido)
       migrarDatos(true);
       toast('☁ Sincronizado');
     } else {
@@ -2553,6 +2551,9 @@ function _fbLoad(){
   }).catch(function(err){
     fbOnline = false;
     console.warn('Firebase no disponible, usando datos locales:', err);
+    _cloudErr=(err&&(err.code||err.message))||'error';
+    // Si no es simplemente falta de internet, avisar fuerte (antes quedaba en modo local sin avisar)
+    if(navigator.onLine!==false && (!err || err.code!=='unavailable')){ _cloudFails=2; _actualizarAvisoGuardado(); }
     updateSyncIndicator();
   });
 }
@@ -2562,7 +2563,7 @@ var _fbListenerAttached=false;
 function _fbAttachListener(){
   if(_fbListenerAttached) return;
   _fbListenerAttached=true;
-  db.doc(DB_DOC2).onSnapshot(function(doc){
+  db.doc(DB_DOC).onSnapshot(function(doc){
     if(doc.metadata.hasPendingWrites || doc.metadata.fromCache) return;
     if(_fbWriting || !doc.exists) return;
     if(localStorage.getItem('cvd_pendingReplace')) return;
